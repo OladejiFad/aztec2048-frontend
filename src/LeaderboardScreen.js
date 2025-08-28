@@ -1,3 +1,4 @@
+// frontend/src/LeaderboardScreen.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LeaderboardScreen.css';
@@ -8,12 +9,14 @@ function LeaderboardScreen() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
         const [lbRes, meRes] = await Promise.all([
-          fetch('http://localhost:5000/api/leaderboard?all=true', { credentials: 'include' }),
-          fetch('http://localhost:5000/api/me', { credentials: 'include' })
+          fetch(`${BACKEND_URL}/api/leaderboard?all=true`, { credentials: 'include' }),
+          fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' })
         ]);
 
         if (!lbRes.ok || !meRes.ok) throw new Error('Failed to fetch leaderboard or user data');
@@ -21,7 +24,6 @@ function LeaderboardScreen() {
         const lbData = await lbRes.json();
         const currentUser = await meRes.json();
 
-        // Unwrap if backend returns { leaderboard: [...] }
         const allUsers = lbData.leaderboard || lbData;
 
         setLeaderboard(allUsers.slice(0, 20));
@@ -44,7 +46,7 @@ function LeaderboardScreen() {
     };
 
     fetchLeaderboard();
-  }, []);
+  }, [BACKEND_URL]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -66,7 +68,6 @@ function LeaderboardScreen() {
 
       <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
 
-      {/* Sticky "Your Position" card */}
       {userPosition && (
         <div className="user-position-card">
           <div className="user-rank">
