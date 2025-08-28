@@ -12,6 +12,8 @@ const AZTEC_MILESTONES = [
   { score: 30000, letter: 'C' },
 ];
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/me', { credentials: 'include' });
+        const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
         if (!res.ok) throw new Error('Not authenticated');
         const data = await res.json();
         setUser(data);
@@ -52,7 +54,7 @@ function Dashboard() {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
       try {
-        const res = await fetch('http://localhost:5000/api/leaderboard', { credentials: 'include' });
+        const res = await fetch(`${BACKEND_URL}/api/leaderboard`, { credentials: 'include' });
         if (!res.ok) return;
         const lb = await res.json();
         const sorted = lb.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
@@ -67,11 +69,8 @@ function Dashboard() {
 
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
-
-    // Play sound only for newly reached letters
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
     newLetters.forEach(letter => playLetterSound(letter));
-
     setAztecLetters(letters);
   };
 
@@ -79,7 +78,7 @@ function Dashboard() {
     if (!user || gamesLeft <= 0) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/update-score/${user._id}`, {
+      const res = await fetch(`${BACKEND_URL}/api/update-score/${user._id}`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -102,7 +101,7 @@ function Dashboard() {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return <p>You are not logged in. <a href="http://localhost:5000/auth/twitter">login with Twitter</a>.</p>;
+  if (!user) return <p>You are not logged in. <a href={`${BACKEND_URL}/auth/twitter`}>login with Twitter</a>.</p>;
 
   return (
     <div className="dashboard-game-container">
@@ -123,7 +122,7 @@ function Dashboard() {
           </div>
 
           <div className="stat-card">
-            <button onClick={() => window.location.href = 'http://localhost:5000/auth/logout'}>Logout</button>
+            <button onClick={() => window.location.href = `${BACKEND_URL}/auth/logout`}>Logout</button>
           </div>
 
           <div className="stat-card">
@@ -150,7 +149,7 @@ function Dashboard() {
 
           {showDropdown && (
             <div className="dropdown">
-              <button onClick={() => window.location.href = 'http://localhost:5000/auth/logout'}>Logout</button>
+              <button onClick={() => window.location.href = `${BACKEND_URL}/auth/logout`}>Logout</button>
               <Link to="/leaderboard">View Full Leaderboard</Link>
             </div>
           )}
