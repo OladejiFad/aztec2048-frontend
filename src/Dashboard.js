@@ -26,12 +26,14 @@ function Dashboard() {
 
   const gameRef = useRef();
 
+  // Handle window resize for mobile view
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -50,6 +52,7 @@ function Dashboard() {
     fetchUser();
   }, []);
 
+  // Fetch leaderboard position
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
@@ -67,6 +70,7 @@ function Dashboard() {
     fetchLeaderboardPosition();
   }, [totalScore, user]);
 
+  // Track AZTEC letters for milestones
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
@@ -74,6 +78,7 @@ function Dashboard() {
     setAztecLetters(letters);
   };
 
+  // Submit score to backend
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
 
@@ -95,13 +100,14 @@ function Dashboard() {
     setAztecLetters([]);
   };
 
+  // Reset game
   const handleReset = () => {
     setAztecLetters([]);
     if (gameRef.current) gameRef.current.resetGame();
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return <p>You are not logged in. <a href={`${BACKEND_URL}/auth/twitter`}>login with Twitter</a>.</p>;
+  if (!user) return <p>You are not logged in. <a href={`${BACKEND_URL}/auth/twitter`}>Login with Twitter</a>.</p>;
 
   return (
     <div className="dashboard-game-container">
