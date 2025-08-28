@@ -1,0 +1,301 @@
+/* PreDashboardScreen.css - Responsive version */
+
+/* Base screen - dark night */
+.pre-dashboard {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #0b0b1a; /* dark night */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  font-family: 'Georgia', serif;
+  z-index: 0;
+}
+
+/* Moon - shaded crescent */
+.moon {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12vw;
+  max-width: 120px;
+  height: 12vw;
+  max-height: 120px;
+  background: radial-gradient(circle at 30% 30%, #fff 45%, rgba(255,255,255,0.1) 70%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 3vw rgba(255, 255, 255, 0.5);
+  animation: moonGlow 4s infinite alternate;
+  z-index: 3;
+}
+
+/* Moonlight overlay - soft shade around moon */
+.moon-light {
+  position: absolute;
+  top: 10vh;
+  left: 50%;
+  width: 40vw;
+  max-width: 400px;
+  height: 40vw;
+  max-height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.95) 80%);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Moonlight illumination for books and text */
+.moon-illumination {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes moonGlow {
+  0% { box-shadow: 0 0 2vw rgba(255, 255, 255, 0.3); }
+  100% { box-shadow: 0 0 3.5vw rgba(255, 255, 255, 0.7); }
+}
+
+/* Stars */
+.pre-dashboard::before {
+  content: '';
+  position: absolute;
+  width: 0.3vw;
+  height: 0.3vw;
+  max-width: 3px;
+  max-height: 3px;
+  background: white;
+  border-radius: 50%;
+  top: 20%;
+  left: 10%;
+  box-shadow:
+    5vw 10vh white,
+    15vw 20vh white,
+    30vw 5vh white,
+    40vw 15vh white,
+    60vw 8vh white,
+    70vw 25vh white,
+    80vw 12vh white,
+    90vw 30vh white;
+  animation: twinkle 3s infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Books container */
+.books-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5vw;
+  margin-bottom: 5vh;
+  z-index: 3;
+  filter: drop-shadow(0 0 1vw rgba(255,255,255,0.1));
+}
+
+/* Books */
+.book {
+  width: 15vw;
+  max-width: 150px;
+  height: 18vw;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 0.5vw;
+  transform-origin: bottom center;
+  box-shadow: 0 0.8vw 2vw rgba(0,0,0,0.5);
+  animation: sway 3s infinite alternate ease-in-out;
+}
+
+.book2 {
+  transform: scale(1.05);
+}
+
+@keyframes sway {
+  0% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  100% { transform: rotate(-2deg); }
+}
+
+/* Glowing orb */
+.glowing-orb {
+  position: absolute;
+  width: 3vw;
+  max-width: 30px;
+  height: 3vw;
+  max-height: 30px;
+  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbGlow 2s infinite alternate;
+}
+
+@keyframes orbGlow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+}
+
+/* Privacy text */
+.privacy-text {
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-weight: bold;
+  text-align: center;
+  color: #f8f8ff;
+  text-shadow: 0 0 1vw rgba(255,255,255,0.6);
+  margin-top: 2vh;
+  z-index: 3;
+  filter: drop-shadow(0 0 1vw rgba(255,255,255,0.1));
+}
+
+.bird-icon {
+  position: absolute;
+  color: #fff;
+  font-size: clamp(16px, 2.5vw, 24px);
+  animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite;
+  z-index: 2;
+}
+
+.bird-icon:nth-child(1) { animation-delay: 0s; top: 20vh; }
+.bird-icon:nth-child(2) { animation-delay: 3s; top: 22vh; }
+.bird-icon:nth-child(3) { animation-delay: 6s; top: 24vh; }
+
+@keyframes flyIcon {
+  0% { left: -10vw; }
+  25% { left: 25%; }
+  50% { left: 50%; }
+  75% { left: 75%; }
+  100% { left: 110vw; }
+}
+
+@keyframes flap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.8); }
+}
+
+/* Sparkling dust */
+@keyframes dust {
+  0% { opacity: 0.2; transform: translate(0,0) scale(1); }
+  50% { opacity: 0.8; transform: translate(-0.5vw,-0.5vw) scale(1.2); }
+  100% { opacity: 0.2; transform: translate(0,0) scale(1); }
+}
+
+.book::after, .book2::after {
+  content: '';
+  position: absolute;
+  width: 0.5vw;
+  max-width: 5px;
+  height: 0.5vw;
+  max-height: 5px;
+  background: #fff;
+  border-radius: 50%;
+  top: 10%;
+  left: 10%;
+  opacity: 0.3;
+  animation: dust 2s infinite alternate;
+}
+
+/* Privacy message */
+.privacy-message {
+  text-align: center;
+  max-width: 90%;
+  margin-top: 3vh;
+  color: #f8f8ff;
+  text-shadow: 0 0 0.5vw rgba(255,255,255,0.5);
+  z-index: 3;
+  filter: drop-shadow(0 0 0.5vw rgba(255,255,255,0.05));
+}
+
+.privacy-message h1 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin-bottom: 1.5vh;
+}
+
+.privacy-message .highlight {
+  background: linear-gradient(90deg, #9b30ff, #8a2be2);
+  padding: 0 1vw;
+  border-radius: 0.5vw;
+  box-shadow: 0 0 1vw rgba(138,43,226,0.5);
+}
+
+.privacy-message p {
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+/* Next button */
+.next-btn {
+  margin-top: 3vh;
+  padding: 1vh 3vw;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: #fff;
+  background: linear-gradient(135deg, #9b30ff, #8a2be2);
+  border: none;
+  border-radius: 0.5vw;
+  cursor: pointer;
+  box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 3;
+}
+
+.next-btn:hover {
+  transform: translateY(-0.3vw);
+  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
+}
+
+/* Highlighted words with glow */
+.glow {
+  background: linear-gradient(90deg, #9b30ff, #8a2be2);
+  padding: 0 0.8vw;
+  border-radius: 0.4vw;
+  box-shadow: 0 0 2vw rgba(155,48,255,0.7), 0 0 3vw rgba(138,43,226,0.5);
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 1.5vw rgba(155,48,255,0.5), 0 0 2.5vw rgba(138,43,226,0.4); }
+  100% { box-shadow: 0 0 2.5vw rgba(155,48,255,0.8), 0 0 3.5vw rgba(138,43,226,0.6); }
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 768px) {
+  .books-container {
+    gap: 10vw;
+  }
+  .book, .book2 {
+    width: 25vw;
+    height: 30vw;
+  }
+  .privacy-text {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+  }
+  .privacy-message h1 {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+  .privacy-message p {
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+  }
+  .next-btn {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    padding: 2vw 5vw;
+  }
+  .bird-icon {
+    font-size: 5vw;
+  }
+}
