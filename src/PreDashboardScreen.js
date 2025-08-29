@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaDove } from 'react-icons/fa'; // bird icon
+import { FaDove } from 'react-icons/fa';
 import './PreDashboardScreen.css';
 import book from './assets/book.jpg';
 import box from './assets/box.jpeg';
@@ -8,11 +8,15 @@ import box from './assets/box.jpeg';
 function PreDashboardScreen() {
   const navigate = useNavigate();
 
+  const handleNextClick = () => {
+    // Directly navigate to dashboard
+    navigate('/dashboard');
+  };
+
   return (
     <div className="pre-dashboard">
       <div className="moon"></div>
 
-      {/* Animated birds with icons */}
       <FaDove className="bird-icon" style={{ top: '15%', left: '0%' }} />
       <FaDove className="bird-icon" style={{ top: '25%', left: '10%' }} />
       <FaDove className="bird-icon" style={{ top: '35%', left: '5%' }} />
@@ -34,8 +38,7 @@ function PreDashboardScreen() {
         </p>
       </div>
 
-
-      <button className="next-btn" onClick={() => navigate('/dashboard')}>
+      <button className="next-btn" onClick={handleNextClick}>
         Next
       </button>
     </div>
