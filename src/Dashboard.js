@@ -33,18 +33,25 @@ function Dashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch current user
+  // --- Fetch current user ---
   useEffect(() => {
     const fetchUser = async () => {
+      console.log('[DEBUG] Fetching user from:', `${BACKEND_URL}/api/me`);
       try {
         const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
-        if (!res.ok) throw new Error('Not authenticated');
+        console.log('[DEBUG] /api/me status:', res.status);
         const data = await res.json();
-        setUser(data);
-        setTotalScore(data.totalScore || 0);
-        setGamesLeft(data.gamesLeft ?? 7);
+        console.log('[DEBUG] /api/me response data:', data);
+
+        if (res.ok) {
+          setUser(data);
+          setTotalScore(data.totalScore || 0);
+          setGamesLeft(data.gamesLeft ?? 7);
+        } else {
+          console.error('[ERROR] /api/me:', data.error);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('[ERROR] /api/me fetch failed:', err);
       } finally {
         setLoading(false);
       }
@@ -52,19 +59,22 @@ function Dashboard() {
     fetchUser();
   }, []);
 
-  // Fetch leaderboard position
+  // --- Fetch leaderboard position ---
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
+      console.log('[DEBUG] Fetching leaderboard from:', `${BACKEND_URL}/api/leaderboard`);
       try {
         const res = await fetch(`${BACKEND_URL}/api/leaderboard`, { credentials: 'include' });
-        if (!res.ok) return;
-        const lb = await res.json();
-        const sorted = lb.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-        const pos = sorted.findIndex(u => u._id.toString() === user._id.toString()) + 1;
+        console.log('[DEBUG] /api/leaderboard status:', res.status);
+        const { leaderboard } = await res.json(); // ✅ unwrap leaderboard array
+        console.log('[DEBUG] /api/leaderboard response:', leaderboard);
+
+        const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+        const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1; // ✅ safer comparison
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
-        console.error(err);
+        console.error('[ERROR] /api/leaderboard fetch failed:', err);
       }
     };
     fetchLeaderboardPosition();
@@ -82,6 +92,7 @@ function Dashboard() {
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
 
+    console.log('[DEBUG] Submitting score:', finalScore, 'for user:', user._id);
     try {
       const res = await fetch(`${BACKEND_URL}/api/update-score/${user._id}`, {
         method: 'POST',
@@ -90,13 +101,18 @@ function Dashboard() {
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
-      if (res.ok) setTotalScore(updatedData.totalScore);
-      else console.error(updatedData.error || 'Failed to update score');
+      console.log('[DEBUG] /api/update-score response:', updatedData);
+
+      if (res.ok) {
+        setTotalScore(updatedData.totalScore);
+        setGamesLeft(updatedData.gamesLeft ?? 0);
+      } else {
+        console.error('[ERROR] /api/update-score:', updatedData.error);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('[ERROR] /api/update-score fetch failed:', err);
     }
 
-    setGamesLeft(prev => prev - 1);
     setAztecLetters([]);
   };
 

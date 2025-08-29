@@ -10,6 +10,7 @@ function LeaderboardScreen() {
   const navigate = useNavigate();
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  console.log('BACKEND_URL:', BACKEND_URL); // Debug log
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -23,6 +24,9 @@ function LeaderboardScreen() {
 
         const lbData = await lbRes.json();
         const currentUser = await meRes.json();
+
+        console.log('Leaderboard data:', lbData);
+        console.log('Current user data:', currentUser);
 
         const allUsers = lbData.leaderboard || lbData;
 
@@ -72,7 +76,9 @@ function LeaderboardScreen() {
         <div className="user-position-card">
           <div className="user-rank">
             {getRankDisplay(userPosition.rank)}
-            {userPosition.photo && <img src={userPosition.photo} alt="Profile" className="user-photo" />}
+            {userPosition.photo && (
+              <img src={userPosition.photo} alt="Profile" className="user-photo" />
+            )}
           </div>
           <div className="user-info">
             <span>{userPosition.displayName} (You)</span>
@@ -99,22 +105,31 @@ function LeaderboardScreen() {
                 <td className="rank-cell">
                   <div className="rank-info">
                     {getRankDisplay(idx + 1)}
-                    {player.photo && <img className="rank-photo" src={player.photo} alt="Profile" />}
+                    {player.photo && (
+                      <img className="rank-photo" src={player.photo} alt="Profile" />
+                    )}
                   </div>
                 </td>
-                <td>{player.displayName || player.username}{userPosition?._id === player._id ? ' (You)' : ''}</td>
+                <td>
+                  {player.displayName || player.username}
+                  {userPosition?._id === player._id ? ' (You)' : ''}
+                </td>
                 <td>{player.totalScore}</td>
               </tr>
             ))}
 
             {userPosition && !leaderboard.some(u => u._id === userPosition._id) && (
               <>
-                <tr><td colSpan="3" style={{ textAlign: 'center' }}>…</td></tr>
+                <tr>
+                  <td colSpan="3" style={{ textAlign: 'center' }}>…</td>
+                </tr>
                 <tr key={userPosition.rank} className="current-user-row">
                   <td className="rank-cell">
                     <div className="rank-info">
                       {getRankDisplay(userPosition.rank)}
-                      {userPosition.photo && <img className="rank-photo" src={userPosition.photo} alt="Profile" />}
+                      {userPosition.photo && (
+                        <img className="rank-photo" src={userPosition.photo} alt="Profile" />
+                      )}
                     </div>
                   </td>
                   <td>{userPosition.displayName || userPosition.username} (You)</td>
