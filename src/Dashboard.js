@@ -34,28 +34,31 @@ function Dashboard() {
   }, []);
 
   // --- Fetch current user ---
-  useEffect(() => {
-    const fetchUser = async () => {
-      console.log('[DEBUG] Fetching user from:', `${BACKEND_URL}/api/me`);
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
-        console.log('[DEBUG] /api/me status:', res.status);
-        const data = await res.json();
-        console.log('[DEBUG] /api/me response data:', data);
+  const fetchUser = async () => {
+    console.log('[DEBUG] Fetching user from:', `${BACKEND_URL}/api/me`);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
+      console.log('[DEBUG] /api/me status:', res.status);
+      const data = await res.json();
+      console.log('[DEBUG] /api/me response data:', data);
 
-        if (res.ok) {
-          setUser(data);
-          setTotalScore(data.totalScore || 0);
-          setGamesLeft(data.gamesLeft ?? 7);
-        } else {
-          console.error('[ERROR] /api/me:', data.error);
-        }
-      } catch (err) {
-        console.error('[ERROR] /api/me fetch failed:', err);
-      } finally {
-        setLoading(false);
+      if (res.ok) {
+        setUser(data);
+        setTotalScore(data.totalScore || 0);
+        setGamesLeft(data.gamesLeft ?? 7);
+      } else {
+        setUser(null);
+        console.error('[ERROR] /api/me:', data.error);
       }
-    };
+    } catch (err) {
+      setUser(null);
+      console.error('[ERROR] /api/me fetch failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -67,11 +70,12 @@ function Dashboard() {
       try {
         const res = await fetch(`${BACKEND_URL}/api/leaderboard`, { credentials: 'include' });
         console.log('[DEBUG] /api/leaderboard status:', res.status);
-        const { leaderboard } = await res.json(); // ✅ unwrap leaderboard array
+        const data = await res.json();
+        const leaderboard = Array.isArray(data) ? data : [];
         console.log('[DEBUG] /api/leaderboard response:', leaderboard);
 
         const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-        const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1; // ✅ safer comparison
+        const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
         console.error('[ERROR] /api/leaderboard fetch failed:', err);
@@ -122,8 +126,31 @@ function Dashboard() {
     if (gameRef.current) gameRef.current.resetGame();
   };
 
+  // --- Popup-based Twitter login ---
+  const loginWithTwitter = () => {
+    const popup = window.open(
+      `${BACKEND_URL}/auth/twitter`,
+      'Twitter Login',
+      'width=600,height=600'
+    );
+
+    const interval = setInterval(() => {
+      try {
+        if (popup.closed) {
+          clearInterval(interval);
+          fetchUser(); // Refresh user after login
+        }
+      } catch { }
+    }, 500);
+  };
+
   if (loading) return <p>Loading...</p>;
-  if (!user) return <p>You are not logged in. <a href={`${BACKEND_URL}/auth/twitter`}>Login with Twitter</a>.</p>;
+  if (!user) return (
+    <p>
+      You are not logged in.{' '}
+      <button onClick={loginWithTwitter}>Login with Twitter</button>
+    </p>
+  );
 
   return (
     <div className="dashboard-game-container">
