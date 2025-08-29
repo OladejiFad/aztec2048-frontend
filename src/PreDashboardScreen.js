@@ -1,18 +1,44 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaDove } from 'react-icons/fa'; // bird icon
+import { FaDove } from 'react-icons/fa';
 import './PreDashboardScreen.css';
 import book from './assets/book.jpg';
 import box from './assets/box.jpeg';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
 function PreDashboardScreen() {
   const navigate = useNavigate();
+
+  const loginWithTwitter = () => {
+    const popup = window.open(
+      `${BACKEND_URL}/auth/twitter`,
+      'Twitter Login',
+      'width=600,height=600'
+    );
+
+    const interval = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(interval);
+        const token = localStorage.getItem('jwtToken');
+        if (token) navigate('/dashboard');
+      }
+    }, 500);
+  };
+
+  const handleNextClick = () => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      navigate('/dashboard');
+    } else {
+      loginWithTwitter();
+    }
+  };
 
   return (
     <div className="pre-dashboard">
       <div className="moon"></div>
 
-      {/* Animated birds with icons */}
       <FaDove className="bird-icon" style={{ top: '15%', left: '0%' }} />
       <FaDove className="bird-icon" style={{ top: '25%', left: '10%' }} />
       <FaDove className="bird-icon" style={{ top: '35%', left: '5%' }} />
@@ -34,8 +60,7 @@ function PreDashboardScreen() {
         </p>
       </div>
 
-
-      <button className="next-btn" onClick={() => navigate('/dashboard')}>
+      <button className="next-btn" onClick={handleNextClick}>
         Next
       </button>
     </div>

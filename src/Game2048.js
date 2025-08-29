@@ -1,4 +1,3 @@
-// frontend/src/Game2048.js
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import './Game2048.css';
 
@@ -30,7 +29,6 @@ const addRandomTile = (grid) => {
   return { grid: newGrid, newTile: pos };
 };
 
-// Slide and merge a row, returns new row and points (no sound here)
 const slideAndMerge = (row) => {
   const nonZero = row.filter(num => num !== 0);
   const newRow = [];
@@ -142,7 +140,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
       const newScore = currentScore + points;
       setCurrentScore(newScore);
-      if (onScoreChange) onScoreChange(newScore); // dashboard handles sounds
+      if (onScoreChange) onScoreChange(newScore);
 
       if (!hasMovesLeft(result.grid)) {
         setGameOver(true);
@@ -151,7 +149,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     }
   }, [grid, gameOver, currentScore, onScoreChange, onGameOver]);
 
-  // Keyboard + touch controls
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
     window.addEventListener('keydown', handleKeyDown);

@@ -1,4 +1,3 @@
-// frontend/src/LeaderboardScreen.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LeaderboardScreen.css';
@@ -10,23 +9,29 @@ function LeaderboardScreen() {
   const navigate = useNavigate();
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-  console.log('BACKEND_URL:', BACKEND_URL); // Debug log
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+          navigate('/'); // redirect to login if no token
+          return;
+        }
+
         const [lbRes, meRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/api/leaderboard?all=true`, { credentials: 'include' }),
-          fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' })
+          fetch(`${BACKEND_URL}/auth/api/leaderboard?all=true`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${BACKEND_URL}/auth/api/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
 
         if (!lbRes.ok || !meRes.ok) throw new Error('Failed to fetch leaderboard or user data');
 
         const lbData = await lbRes.json();
         const currentUser = await meRes.json();
-
-        console.log('Leaderboard data:', lbData);
-        console.log('Current user data:', currentUser);
 
         const allUsers = lbData.leaderboard || lbData;
 
@@ -44,13 +49,14 @@ function LeaderboardScreen() {
         }
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
+        setLoading(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchLeaderboard();
-  }, [BACKEND_URL]);
+  }, [BACKEND_URL, navigate]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {

@@ -28,18 +28,25 @@ function Dashboard() {
   const popupRef = useRef(null);
   const popupIntervalRef = useRef(null);
 
-  // Handle window resize for mobile view
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- Fetch current user ---
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
+      const token = localStorage.getItem('jwtToken');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       if (res.ok) {
         setUser(data);
@@ -61,12 +68,14 @@ function Dashboard() {
     fetchUser();
   }, []);
 
-  // --- Fetch leaderboard position ---
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
       try {
-        const res = await fetch(`${BACKEND_URL}/api/leaderboard`, { credentials: 'include' });
+        const token = localStorage.getItem('jwtToken');
+        const res = await fetch(`${BACKEND_URL}/auth/api/leaderboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await res.json();
         const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
         const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
@@ -79,7 +88,6 @@ function Dashboard() {
     fetchLeaderboardPosition();
   }, [totalScore, user]);
 
-  // Track AZTEC letters for milestones
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
@@ -87,14 +95,16 @@ function Dashboard() {
     setAztecLetters(letters);
   };
 
-  // Submit score to backend
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/api/update-score/${user._id}`, {
+      const token = localStorage.getItem('jwtToken');
+      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
@@ -110,13 +120,11 @@ function Dashboard() {
     setAztecLetters([]);
   };
 
-  // Reset game
   const handleReset = () => {
     setAztecLetters([]);
     if (gameRef.current) gameRef.current.resetGame();
   };
 
-  // --- Popup-based Twitter login ---
   const loginWithTwitter = () => {
     popupRef.current = window.open(
       `${BACKEND_URL}/auth/twitter`,
@@ -128,7 +136,7 @@ function Dashboard() {
       if (!popupRef.current || popupRef.current.closed) {
         clearInterval(popupIntervalRef.current);
         popupIntervalRef.current = null;
-        fetchUser(); // Refresh user after login
+        fetchUser();
       }
     }, 500);
   };
@@ -160,7 +168,10 @@ function Dashboard() {
           </div>
 
           <div className="stat-card">
-            <button onClick={() => window.location.href = `${BACKEND_URL}/auth/logout`}>Logout</button>
+            <button onClick={() => {
+              localStorage.removeItem('jwtToken');
+              setUser(null);
+            }}>Logout</button>
           </div>
 
           <div className="stat-card">
@@ -187,7 +198,10 @@ function Dashboard() {
 
           {showDropdown && (
             <div className="dropdown">
-              <button onClick={() => window.location.href = `${BACKEND_URL}/auth/logout`}>Logout</button>
+              <button onClick={() => {
+                localStorage.removeItem('jwtToken');
+                setUser(null);
+              }}>Logout</button>
               <Link to="/leaderboard">View Full Leaderboard</Link>
             </div>
           )}
