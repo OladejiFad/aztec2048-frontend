@@ -25,6 +25,8 @@ function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const gameRef = useRef();
+  const popupRef = useRef(null);
+  const popupIntervalRef = useRef(null);
 
   // Handle window resize for mobile view
   useEffect(() => {
@@ -35,13 +37,10 @@ function Dashboard() {
 
   // --- Fetch current user ---
   const fetchUser = async () => {
-    console.log('[DEBUG] Fetching user from:', `${BACKEND_URL}/api/me`);
+    setLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/api/me`, { credentials: 'include' });
-      console.log('[DEBUG] /api/me status:', res.status);
       const data = await res.json();
-      console.log('[DEBUG] /api/me response data:', data);
-
       if (res.ok) {
         setUser(data);
         setTotalScore(data.totalScore || 0);
@@ -66,14 +65,10 @@ function Dashboard() {
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
-      console.log('[DEBUG] Fetching leaderboard from:', `${BACKEND_URL}/api/leaderboard`);
       try {
         const res = await fetch(`${BACKEND_URL}/api/leaderboard`, { credentials: 'include' });
-        console.log('[DEBUG] /api/leaderboard status:', res.status);
         const data = await res.json();
-        const leaderboard = Array.isArray(data) ? data : [];
-        console.log('[DEBUG] /api/leaderboard response:', leaderboard);
-
+        const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
         const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
         const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
@@ -95,8 +90,6 @@ function Dashboard() {
   // Submit score to backend
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
-
-    console.log('[DEBUG] Submitting score:', finalScore, 'for user:', user._id);
     try {
       const res = await fetch(`${BACKEND_URL}/api/update-score/${user._id}`, {
         method: 'POST',
@@ -105,8 +98,6 @@ function Dashboard() {
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
-      console.log('[DEBUG] /api/update-score response:', updatedData);
-
       if (res.ok) {
         setTotalScore(updatedData.totalScore);
         setGamesLeft(updatedData.gamesLeft ?? 0);
@@ -116,7 +107,6 @@ function Dashboard() {
     } catch (err) {
       console.error('[ERROR] /api/update-score fetch failed:', err);
     }
-
     setAztecLetters([]);
   };
 
@@ -128,19 +118,18 @@ function Dashboard() {
 
   // --- Popup-based Twitter login ---
   const loginWithTwitter = () => {
-    const popup = window.open(
+    popupRef.current = window.open(
       `${BACKEND_URL}/auth/twitter`,
       'Twitter Login',
       'width=600,height=600'
     );
 
-    const interval = setInterval(() => {
-      try {
-        if (popup.closed) {
-          clearInterval(interval);
-          fetchUser(); // Refresh user after login
-        }
-      } catch { }
+    popupIntervalRef.current = setInterval(() => {
+      if (!popupRef.current || popupRef.current.closed) {
+        clearInterval(popupIntervalRef.current);
+        popupIntervalRef.current = null;
+        fetchUser(); // Refresh user after login
+      }
     }, 500);
   };
 
