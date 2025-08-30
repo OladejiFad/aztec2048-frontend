@@ -28,24 +28,24 @@ function Dashboard() {
   const popupRef = useRef(null);
   const popupIntervalRef = useRef(null);
 
+  // --- Responsive ---
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // --- Fetch user info ---
   const fetchUser = async () => {
     setLoading(true);
     try {
+      // Optional: JWT fallback
       const token = localStorage.getItem('jwtToken');
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include', // cookie-based auth
+        headers,
       });
       const data = await res.json();
       if (res.ok) {
@@ -65,16 +65,26 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    // Parse JWT token from URL if present
+    const hash = window.location.hash;
+    if (hash.includes('token=')) {
+      const token = hash.split('token=')[1];
+      localStorage.setItem('jwtToken', token);
+      window.history.replaceState(null, null, '/dashboard');
+    }
     fetchUser();
   }, []);
 
+  // --- Leaderboard position ---
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
       try {
         const token = localStorage.getItem('jwtToken');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${BACKEND_URL}/auth/api/leaderboard`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+          headers,
         });
         const data = await res.json();
         const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
@@ -88,6 +98,7 @@ function Dashboard() {
     fetchLeaderboardPosition();
   }, [totalScore, user]);
 
+  // --- AZTEC letters ---
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
@@ -95,16 +106,19 @@ function Dashboard() {
     setAztecLetters(letters);
   };
 
+  // --- Game over ---
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
     try {
       const token = localStorage.getItem('jwtToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        credentials: 'include',
+        headers,
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
@@ -125,6 +139,7 @@ function Dashboard() {
     if (gameRef.current) gameRef.current.resetGame();
   };
 
+  // --- Twitter login popup ---
   const loginWithTwitter = () => {
     popupRef.current = window.open(
       `${BACKEND_URL}/auth/twitter`,
