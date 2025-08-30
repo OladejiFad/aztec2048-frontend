@@ -13,26 +13,23 @@ function LeaderboardScreen() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-          navigate('/'); // redirect to login if no token
+        // Fetch user info (session-based)
+        const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
+          credentials: 'include', // include session cookies
+        });
+        if (!meRes.ok) {
+          navigate('/'); // not logged in
           return;
         }
-
-        const [lbRes, meRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/auth/api/leaderboard?all=true`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${BACKEND_URL}/auth/api/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        if (!lbRes.ok || !meRes.ok) throw new Error('Failed to fetch leaderboard or user data');
-
-        const lbData = await lbRes.json();
         const currentUser = await meRes.json();
 
+        // Fetch leaderboard (session-based)
+        const lbRes = await fetch(`${BACKEND_URL}/auth/api/leaderboard?all=true`, {
+          credentials: 'include',
+        });
+        if (!lbRes.ok) throw new Error('Failed to fetch leaderboard');
+
+        const lbData = await lbRes.json();
         const allUsers = lbData.leaderboard || lbData;
 
         setLeaderboard(allUsers.slice(0, 20));
@@ -49,7 +46,6 @@ function LeaderboardScreen() {
         }
       } catch (err) {
         console.error('Error fetching leaderboard:', err);
-        setLoading(false);
       } finally {
         setLoading(false);
       }

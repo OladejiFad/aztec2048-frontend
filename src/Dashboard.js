@@ -39,13 +39,8 @@ function Dashboard() {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      // Optional: JWT fallback
-      const token = localStorage.getItem('jwtToken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
         credentials: 'include', // cookie-based auth
-        headers,
       });
       const data = await res.json();
       if (res.ok) {
@@ -65,13 +60,6 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    // Parse JWT token from URL if present
-    const hash = window.location.hash;
-    if (hash.includes('token=')) {
-      const token = hash.split('token=')[1];
-      localStorage.setItem('jwtToken', token);
-      window.history.replaceState(null, null, '/dashboard');
-    }
     fetchUser();
   }, []);
 
@@ -80,11 +68,8 @@ function Dashboard() {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
       try {
-        const token = localStorage.getItem('jwtToken');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${BACKEND_URL}/auth/api/leaderboard`, {
           credentials: 'include',
-          headers,
         });
         const data = await res.json();
         const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
@@ -110,15 +95,10 @@ function Dashboard() {
   const handleGameOver = async (finalScore) => {
     if (!user || gamesLeft <= 0) return;
     try {
-      const token = localStorage.getItem('jwtToken');
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
         method: 'POST',
         credentials: 'include',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
@@ -156,6 +136,17 @@ function Dashboard() {
     }, 500);
   };
 
+  // --- Logout ---
+  const logout = async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setUser(null);
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (!user) return (
     <p>
@@ -183,10 +174,7 @@ function Dashboard() {
           </div>
 
           <div className="stat-card">
-            <button onClick={() => {
-              localStorage.removeItem('jwtToken');
-              setUser(null);
-            }}>Logout</button>
+            <button onClick={logout}>Logout</button>
           </div>
 
           <div className="stat-card">
@@ -213,10 +201,7 @@ function Dashboard() {
 
           {showDropdown && (
             <div className="dropdown">
-              <button onClick={() => {
-                localStorage.removeItem('jwtToken');
-                setUser(null);
-              }}>Logout</button>
+              <button onClick={logout}>Logout</button>
               <Link to="/leaderboard">View Full Leaderboard</Link>
             </div>
           )}

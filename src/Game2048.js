@@ -64,7 +64,7 @@ const hasMovesLeft = (grid) => {
   return false;
 };
 
-const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
+const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, ref) => {
   const [grid, setGrid] = useState(createEmptyGrid());
   const [newTilePos, setNewTilePos] = useState(null);
   const [currentScore, setCurrentScore] = useState(0);
@@ -144,10 +144,22 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
       if (!hasMovesLeft(result.grid)) {
         setGameOver(true);
-        if (onGameOver) onGameOver(newScore);
+        if (onGameOver && userId && backendUrl) {
+          fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
+            method: 'POST',
+            credentials: 'include', // session cookie
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: newScore }),
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (onGameOver) onGameOver(data.totalScore ?? newScore);
+            })
+            .catch(err => console.error('[ERROR] Updating score:', err));
+        }
       }
     }
-  }, [grid, gameOver, currentScore, onScoreChange, onGameOver]);
+  }, [grid, gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
 
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
