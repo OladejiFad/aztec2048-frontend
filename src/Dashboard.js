@@ -29,7 +29,11 @@ function Dashboard() {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
+      const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
+        credentials: 'include', // important for session cookie
+        headers: { 'Content-Type': 'application/json' },
+      });
+
       if (res.status === 401) {
         setUser(null);
         setErrorMsg('Session expired. Please log in.');
@@ -82,6 +86,7 @@ function Dashboard() {
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+    // Safari/iOS cannot handle popups reliably
     if (isSafari || isIOS) {
       window.location.href = `${BACKEND_URL}/auth/twitter?force_login=true`;
       return;
@@ -97,7 +102,7 @@ function Dashboard() {
       if (!popupRef.current || popupRef.current.closed) {
         clearInterval(popupIntervalRef.current);
         popupIntervalRef.current = null;
-        window.location.reload();
+        fetchUser(); // refresh user after popup login
       }
     }, 500);
   };
