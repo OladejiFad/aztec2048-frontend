@@ -144,18 +144,15 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
       if (!hasMovesLeft(result.grid)) {
         setGameOver(true);
-        if (onGameOver && userId && backendUrl) {
+        if (onGameOver) onGameOver(newScore);
+        // Update backend if userId & backendUrl provided
+        if (userId && backendUrl) {
           fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
             method: 'POST',
-            credentials: 'include', // session cookie
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ score: newScore }),
-          })
-            .then(res => res.json())
-            .then(data => {
-              if (onGameOver) onGameOver(data.totalScore ?? newScore);
-            })
-            .catch(err => console.error('[ERROR] Updating score:', err));
+          }).catch(err => console.error('[ERROR] Updating score:', err));
         }
       }
     }
