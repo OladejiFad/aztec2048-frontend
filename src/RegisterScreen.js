@@ -30,11 +30,11 @@ export default function RegisterScreen({ setUser }) {
         return;
       }
 
-      // Update user state in App.js
+      // Optional: temporarily set user (not strictly necessary)
       setUser(data.user);
 
-      // Navigate to Dashboard after registration
-      navigate('/dashboard');
+      // Navigate to Login after registration
+      navigate('/login');
     } catch (err) {
       console.error(err);
       setError('An error occurred. Please try again.');

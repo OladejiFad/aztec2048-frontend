@@ -39,13 +39,8 @@ function App() {
 
   return (
     <Routes>
-      {/* First screen: show PreDashboard if not logged in, else skip to Dashboard */}
-      <Route
-        path="/"
-        element={
-          user ? <Navigate to="/dashboard" replace /> : <PreDashboardScreen />
-        }
-      />
+      {/* Landing page: always show PreDashboardScreen */}
+      <Route path="/" element={<PreDashboardScreen />} />
 
       {/* Login & Register */}
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
@@ -71,7 +66,7 @@ function App() {
         }
       />
 
-      {/* Default fallback → if route not found */}
+      {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

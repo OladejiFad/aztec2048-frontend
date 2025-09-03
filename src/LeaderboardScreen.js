@@ -36,27 +36,17 @@ export default function LeaderboardScreen({ user }) {
       <h2>Leaderboard</h2>
       <button onClick={() => navigate('/dashboard')}>Back</button>
       <ol>
-        {users.map((u, idx) => {
-          // Generate avatar based on displayName or fallback to email
-          const avatarUrl = u.photo
-            ? u.photo
-            : `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(u.displayName || u.email)}.svg`;
-
-          return (
-            <li key={u._id} className="leaderboard-item">
-              <img
-                src={avatarUrl}
-                alt="Avatar"
-                width={40}
-                height={40}
-                style={{ borderRadius: '50%', marginRight: '8px' }}
-              />
-              <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
-              <span className="leaderboard-name">{u.displayName}</span>
-              <span className="leaderboard-score">Score: {u.totalScore}</span>
-            </li>
-          );
-        })}
+        {users.map((u, idx) => (
+          <li key={u._id} className={`leaderboard-item rank-${idx + 1}`}>
+            <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
+            <img
+              src={u.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(u.displayName)}.svg`}
+              alt="Avatar"
+            />
+            <span className="leaderboard-name">{u.displayName}</span>
+            <span className="leaderboard-score">{u.totalScore}</span>
+          </li>
+        ))}
       </ol>
     </div>
   );
