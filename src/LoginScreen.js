@@ -1,66 +1,53 @@
-import React, { useState } from 'react';
-import './Auth.css';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import './LeaderboardScreen.css';
+import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+export default function LeaderboardScreen({ user }) {
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/auth/login`, {
-        method: 'POST',
-        credentials: 'include', // keeps session cookie
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
-        return;
+  useEffect(() => {
+    if (!user) return; // just in case
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/leaderboard`, { credentials: 'include' });
+        const data = await res.json();
+        setUsers(data || []);
+      } catch (err) {
+        console.error(err);
       }
+    };
+    fetchLeaderboard();
+  }, [user]);
 
-      // Login successful, navigate to pre-dashboard
-      navigate('/pre-dashboard');
-    } catch (err) {
-      console.error(err);
-      setError('An error occurred. Please try again.');
+  const getRankDisplay = (rank) => {
+    switch (rank) {
+      case 1: return '👑🔥';
+      case 2: return '🥈';
+      case 3: return '🥉';
+      default: return rank;
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Login</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          required
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          required
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
-      <p>
-        Don't have an account? <Link to="/register">Register here</Link>
-      </p>
+    <div className="leaderboard-container">
+      <h2>Leaderboard</h2>
+      <button onClick={() => navigate('/dashboard')}>Back</button>
+      <ol>
+        {users.map((u, idx) => (
+          <li key={u._id} className={`leaderboard-item rank-${idx + 1}`}>
+            <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
+            <img
+              src={u.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(u.displayName)}.svg`}
+              alt="Avatar"
+            />
+            <span className="leaderboard-name">{u.displayName}</span>
+            <span className="leaderboard-score">{u.totalScore}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

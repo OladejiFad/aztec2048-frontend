@@ -1,5 +1,3 @@
-/* Leaderboard.css */
-
 .leaderboard-container {
   max-width: 600px;
   margin: 20px auto;
@@ -25,14 +23,66 @@
 }
 
 .leaderboard-container ol {
-  padding-left: 20px;
+  padding-left: 0;
+  list-style: none;
 }
 
-.leaderboard-container li {
+.leaderboard-item {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
+  align-items: center;
+  justify-content: flex-start; /* align items to left for spacing */
+  padding: 10px 8px; /* slightly more padding */
   border-bottom: 1px solid #ccc;
+  gap: 12px; /* spacing between avatar, name, and score */
+}
+
+.leaderboard-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.leaderboard-rank {
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.leaderboard-name {
+  flex-grow: 1;
+  margin-left: 10px;
+}
+
+.leaderboard-score {
+  font-weight: bold;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Top 3 colors & subtle background highlight */
+.leaderboard-item.rank-1 {
+  color: #ffbf00; /* gold */
+  background: rgba(255, 191, 0, 0.1);
+  border-radius: 6px;
+}
+
+.leaderboard-item.rank-2 {
+  color: #c0c0c0; /* silver */
+  background: rgba(192, 192, 192, 0.1);
+  border-radius: 6px;
+}
+
+.leaderboard-item.rank-3 {
+  color: #cd7f32; /* bronze */
+  background: rgba(205, 127, 50, 0.1);
+  border-radius: 6px;
+}
+
+/* Hover effect for all items */
+.leaderboard-item:hover {
+  background: rgba(39, 174, 96, 0.1);
+  transition: background 0.2s ease-in-out;
 }
 
 /* Responsive */
@@ -47,13 +97,20 @@
     font-size: 0.9rem;
   }
 
-  .leaderboard-container li {
+  .leaderboard-item {
     flex-direction: column;
     align-items: flex-start;
     padding: 5px 0;
+    gap: 4px; /* smaller gap on mobile */
   }
 
-  .leaderboard-container li span {
+  .leaderboard-item img {
     margin-bottom: 4px;
+  }
+
+  .leaderboard-rank,
+  .leaderboard-score {
+    margin-bottom: 4px;
+    text-align: left;
   }
 }

@@ -48,8 +48,8 @@ function App() {
       />
 
       {/* Login & Register */}
-      <Route path="/login" element={<LoginScreen />} />
-      <Route path="/register" element={<RegisterScreen />} />
+      <Route path="/login" element={<LoginScreen setUser={setUser} />} />
+      <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
       {/* Protected Dashboard */}
       <Route
