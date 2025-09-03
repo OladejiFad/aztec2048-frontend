@@ -134,21 +134,18 @@ export default function Dashboard() {
           <img src="https://via.placeholder.com/50" alt="Profile" />
           <p>{user.username}</p>
         </div>
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        <button className="sidebar-btn reset" onClick={handleReset}>Reset Game</button>
+        <button className="sidebar-btn leaderboard" onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+        <button className="sidebar-btn logout" onClick={handleLogout}>Logout</button>
       </div>
 
       {/* Main content */}
       <div className="main-content">
-        <section className="game-section">
-          <Game2048 ref={gameRef} onScoreChange={handleScoreChange} backendUrl={BACKEND_URL} userId={user._id} />
-          <button onClick={handleReset} className="reset-btn">Reset Game</button>
+        <div className="score-display">
+          <span>Score: {gameRef.current?.currentScore || 0}</span>
           <div className="aztec-letters">{aztecLetters.map(l => <span key={l}>{l}</span>)}</div>
-        </section>
-
-        <section className="leaderboard-section">
-          <h3>Leaderboard</h3>
-          <button className="full-leaderboard-btn" onClick={() => navigate('/leaderboard')}>View Full Leaderboard</button>
-        </section>
+        </div>
+        <Game2048 ref={gameRef} onScoreChange={handleScoreChange} backendUrl={BACKEND_URL} userId={user._id} />
       </div>
     </div>
   );
