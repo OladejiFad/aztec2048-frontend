@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
@@ -14,28 +14,12 @@ const AZTEC_MILESTONES = [
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [totalScore, setTotalScore] = useState(0);
+export default function Dashboard({ user }) {
+  const [totalScore, setTotalScore] = useState(user.totalScore || 0);
   const [aztecLetters, setAztecLetters] = useState([]);
   const gameRef = useRef();
   const lettersTimeoutRef = useRef();
   const navigate = useNavigate();
-
-  const fetchUser = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
-      if (!res.ok) { setUser(null); setLoading(false); return; }
-      const data = await res.json();
-      setUser(data);
-      setTotalScore(data.totalScore || 0);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { fetchUser(); }, []);
 
   const submitScore = async (score) => {
     try {
@@ -45,7 +29,9 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ score }),
       });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleScoreChange = (score) => {
@@ -66,13 +52,11 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { method: 'GET', credentials: 'include' });
-      setUser(null);
       navigate('/login');
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <p>You are not logged in.</p>;
 
   return (
     <div className="dashboard-game-container">

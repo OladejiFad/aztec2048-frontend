@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import './LeaderboardScreen.css';
 import { useNavigate } from 'react-router-dom';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-export default function Leaderboard() {
+export default function LeaderboardScreen({ user }) {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) return; // just in case
     const fetchLeaderboard = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/leaderboard`, { credentials: 'include' });
         const data = await res.json();
         setUsers(data || []);
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetchLeaderboard();
-  }, []);
+  }, [user]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
