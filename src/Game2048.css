@@ -16,67 +16,51 @@
 
 .cell {
   position: relative;
-  width: 80px;
-  height: 80px;
-  background: #eee;
   border-radius: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   font-weight: bold;
+  font-size: 24px;
   color: #333;
-  transition: all 0.2s;
-  overflow: hidden;
+  transition: all 0.3s;
+
 }
 
 .cell-number {
-  z-index: 2; /* number above the logo */
+  z-index: 2;
 }
 
+/* Empty tiles show small Aztec logo */
 .tile-logo {
   position: absolute;
-  width: 40px;       /* smaller than cell */
-  height: 40px;
-  bottom: 5px;
-  right: 5px;
-  opacity: 0.15;     /* subtle watermark */
+  width: 30px;
+  height: 30px;
+  opacity: 0.15;
   pointer-events: none;
   z-index: 1;
-  transition: opacity 0.3s ease;
 }
 
 .cell:hover .tile-logo {
-  opacity: 0.25;     /* slightly more visible on hover */
+  opacity: 0.3;
+  transform: scale(1.1);
+  transition: all 0.3s ease;
 }
 
-.new-tile {
-  animation: pop 0.3s ease-out;
-}
 
-.merged-tile {
-  animation: merge 0.3s ease-out;
-}
-
-@keyframes pop {
-  0% { transform: scale(0.5); }
-  100% { transform: scale(1); }
-}
-
-@keyframes merge {
-  0% { transform: scale(1); background: #f1c40f; }
-  100% { transform: scale(1); background: #eee; }
-}
-
-.earned-letters {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #f39c12;
-}
+/* Tile colors based on number */
+.cell-2 { background: #fcefe6; color: #776e65; }
+.cell-4 { background: #f2e8cb; color: #776e65; }
+.cell-8 { background: #f5b682; color: #fff; }
+.cell-16 { background: #f29446; color: #fff; }
+.cell-32 { background: #f27c5f; color: #fff; }
+.cell-64 { background: #f55d37; color: #fff; }
+.cell-128 { background: #ebcf74; color: #fff; font-size: 20px; }
+.cell-256 { background: #ebcc62; color: #fff; font-size: 20px; }
+.cell-512 { background: #e3c542; color: #fff; font-size: 18px; }
+.cell-1024 { background: #e0b02e; color: #fff; font-size: 16px; }
+.cell-2048 { background: #e0a21c; color: #fff; font-size: 16px; }
 
 .game-over {
   position: absolute;
@@ -109,23 +93,37 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-  .grid {
-    grid-template-columns: repeat(4, 60px);
-    grid-template-rows: repeat(4, 60px);
-    gap: 8px;
-  }
-
+  .grid { grid-template-columns: repeat(4, 60px); grid-template-rows: repeat(4, 60px); gap: 8px; }
   .cell-number { font-size: 1.2rem; }
-  .tile-logo { width: 30px; height: 30px; }
+  .tile-logo { width: 20px; height: 20px; }
 }
 
 @media (max-width: 500px) {
-  .grid {
-    grid-template-columns: repeat(4, 50px);
-    grid-template-rows: repeat(4, 50px);
-    gap: 6px;
-  }
-
+  .grid { grid-template-columns: repeat(4, 50px); grid-template-rows: repeat(4, 50px); gap: 6px; }
   .cell-number { font-size: 1rem; }
-  .tile-logo { width: 25px; height: 25px; }
+  .tile-logo { width: 15px; height: 15px; }
+}
+
+/* Pop animation for new tiles */
+.new-tile {
+  animation: pop 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+
+/* Merge animation for combined tiles */
+.merged-tile {
+  animation: merge 0.25s ease-out;
+  box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+@keyframes merge {
+  0% { transform: scale(1.2); }
+  50% { transform: scale(0.9); }
+  100% { transform: scale(1); }
 }

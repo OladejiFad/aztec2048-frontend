@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import './Game2048.css';
-import AztecLogo from './assets/azteclogo.jpg'; // Logo for tiles
+import AztecLogo from './assets/azteclogo.jpg';
 
 const GRID_SIZE = 4;
 
+// --- Grid helpers ---
 const createEmptyGrid = () => Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
 const getRandomEmptyCell = (grid) => {
@@ -30,10 +31,27 @@ const hasMovesLeft = (grid) => {
   return false;
 };
 
+// --- Tile colors ---
+const TILE_COLORS = {
+  2: '#fcefe6',
+  4: '#f2e8cb',
+  8: '#f5b682',
+  16: '#f29446',
+  32: '#f27c5f',
+  64: '#f55d37',
+  128: '#ebcf74',
+  256: '#ebcc62',
+  512: '#e3c542',
+  1024: '#e0b02e',
+  2048: '#e0a21c',
+};
+
 const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
   const [grid, setGrid] = useState(createEmptyGrid());
   const [currentScore, setCurrentScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [newTilePos, setNewTilePos] = useState(null);
+  const [mergedTiles, setMergedTiles] = useState([]);
 
   const initGame = useCallback(() => {
     let result = addRandomTile(createEmptyGrid());
@@ -41,6 +59,8 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
     setGrid(result.grid);
     setCurrentScore(0);
     setGameOver(false);
+    setNewTilePos(result.newTile);
+    setMergedTiles([]);
   }, []);
 
   useImperativeHandle(ref, () => ({ resetGame: initGame }));
@@ -52,8 +72,9 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
       let moved = false;
       let newGrid = prevGrid.map(r => [...r]);
       let points = 0;
+      let mergedPositions = [];
 
-      const processRow = (row, reverse = false) => {
+      const processRow = (row, rowIdx, reverse = false) => {
         const input = reverse ? [...row].reverse() : row;
         const newRow = [];
         let skip = false;
@@ -63,6 +84,9 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
             const merged = input[i] * 2;
             newRow.push(merged);
             points += merged;
+            // Save merged tile position
+            const colIdx = reverse ? row.length - 1 - i : i;
+            mergedPositions.push([rowIdx, colIdx]);
             skip = true;
           } else newRow.push(input[i]);
         }
@@ -72,15 +96,19 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
 
       switch (key) {
         case 'ArrowLeft':
-          newGrid = newGrid.map(row => processRow(row)); break;
+          newGrid = newGrid.map((row, idx) => processRow(row, idx));
+          break;
         case 'ArrowRight':
-          newGrid = newGrid.map(row => processRow(row, true)); break;
+          newGrid = newGrid.map((row, idx) => processRow(row, idx, true));
+          break;
         case 'ArrowUp':
-          newGrid = transpose(newGrid).map(row => processRow(row));
-          newGrid = transpose(newGrid); break;
+          newGrid = transpose(newGrid).map((row, idx) => processRow(row, idx));
+          newGrid = transpose(newGrid);
+          break;
         case 'ArrowDown':
-          newGrid = transpose(newGrid).map(row => processRow(row, true));
-          newGrid = transpose(newGrid); break;
+          newGrid = transpose(newGrid).map((row, idx) => processRow(row, idx, true));
+          newGrid = transpose(newGrid);
+          break;
         default: return prevGrid;
       }
 
@@ -90,7 +118,6 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
         const result = addRandomTile(newGrid);
         const newScore = currentScore + points;
         setCurrentScore(newScore);
-
         if (onScoreChange) onScoreChange(newScore);
 
         if (userId && backendUrl) {
@@ -103,6 +130,9 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
         }
 
         if (!hasMovesLeft(result.grid)) setGameOver(true);
+
+        setNewTilePos(result.newTile);
+        setMergedTiles(mergedPositions);
 
         return result.grid;
       }
@@ -145,17 +175,28 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
     <div className="game-container">
       <h3>Score: {currentScore}</h3>
       <div className="grid">
-        {grid.flat().map((cell, idx) => (
-          <div key={idx} className={`cell ${cell ? `cell-${cell}` : ''}`}>
-            {cell && (
-              <>
+        {grid.flat().map((cell, idx) => {
+          const row = Math.floor(idx / GRID_SIZE);
+          const col = idx % GRID_SIZE;
+          const isNew = newTilePos && newTilePos[0] === row && newTilePos[1] === col;
+          const isMerged = mergedTiles.some(([r, c]) => r === row && c === col);
+
+          return (
+            <div
+              key={idx}
+              className={`cell ${cell ? `cell-${cell}` : ''} ${isNew ? 'new-tile' : ''} ${isMerged ? 'merged-tile' : ''}`}
+              style={{ background: cell ? TILE_COLORS[cell] || '#eee' : '#f0f0f0' }}
+            >
+              {cell ? (
                 <span className="cell-number">{cell}</span>
-                <img src={AztecLogo} alt="Aztec Logo" className="tile-logo" />
-              </>
-            )}
-          </div>
-        ))}
+              ) : (
+                <img src={AztecLogo} alt="Aztec" className="tile-logo" />
+              )}
+            </div>
+          );
+        })}
       </div>
+
       {gameOver && (
         <div className="game-over">
           <h2>Game Over</h2>
