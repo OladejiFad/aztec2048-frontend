@@ -1,10 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import PreDashboardScreen from './PreDashboardScreen';
 import LoginScreen from './LoginScreen';
 import Dashboard from './Dashboard';
 import LeaderboardScreen from './LeaderboardScreen';
 import ProtectedRoute from './ProtectedRoute';
-import { useState, useEffect } from 'react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -15,7 +15,9 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
+        const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
+          credentials: 'include',
+        });
         if (!res.ok) {
           setUser(null);
           return;
@@ -36,8 +38,13 @@ function App() {
 
   return (
     <Routes>
-      {/* First screen */}
-      <Route path="/" element={<PreDashboardScreen />} />
+      {/* First screen: show PreDashboard if not logged in, else skip to Dashboard */}
+      <Route
+        path="/"
+        element={
+          user ? <Navigate to="/dashboard" replace /> : <PreDashboardScreen />
+        }
+      />
 
       {/* Login */}
       <Route path="/login" element={<LoginScreen />} />
@@ -62,8 +69,8 @@ function App() {
         }
       />
 
-      {/* Default fallback */}
-      <Route path="*" element={<PreDashboardScreen />} />
+      {/* Default fallback → if route not found */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
