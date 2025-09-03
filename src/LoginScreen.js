@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './Auth.css';
 import { useNavigate, Link } from 'react-router-dom';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LoginScreen() {
@@ -12,22 +13,27 @@ export default function LoginScreen() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     try {
       const res = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include', // keeps session cookie
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || 'Login failed');
+        setError(data.error || 'Login failed');
         return;
       }
+
+      // Login successful, navigate to pre-dashboard
       navigate('/pre-dashboard');
     } catch (err) {
       console.error(err);
-      setError('An error occurred. Try again.');
+      setError('An error occurred. Please try again.');
     }
   };
 
