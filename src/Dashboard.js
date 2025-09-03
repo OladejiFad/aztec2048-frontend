@@ -20,9 +20,9 @@ function Dashboard() {
   const [aztecLetters, setAztecLetters] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const [form, setForm] = useState({ username: '', email: '', password: '', mode: 'login' });
+
   const gameRef = useRef();
-  const popupRef = useRef(null);
-  const popupIntervalRef = useRef(null);
   const lettersTimeoutRef = useRef(null);
 
   // --- Fetch user info ---
@@ -30,13 +30,11 @@ function Dashboard() {
     setLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
-        credentials: 'include', // important for session cookie
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
 
       if (res.status === 401) {
         setUser(null);
-        setErrorMsg('Session expired. Please log in.');
         return;
       }
 
@@ -44,7 +42,6 @@ function Dashboard() {
       if (res.ok) {
         setUser(data);
         setTotalScore(data.totalScore || 0);
-        setErrorMsg('');
       } else {
         setUser(null);
         setErrorMsg(data.error || 'Failed to fetch user');
@@ -61,6 +58,50 @@ function Dashboard() {
   useEffect(() => {
     fetchUser();
   }, []);
+
+  // --- Handle login/register form ---
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    try {
+      const endpoint = form.mode === 'login' ? 'login' : 'register';
+      const res = await fetch(`${BACKEND_URL}/auth/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        fetchUser(); // refresh user session
+      } else {
+        setErrorMsg(data.error || 'Authentication failed');
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      setErrorMsg('Network error');
+    }
+  };
+
+  // --- Logout ---
+  const handleLogout = async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      setUser(null);
+      setTotalScore(0);
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
 
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
@@ -81,53 +122,58 @@ function Dashboard() {
     if (gameRef.current) gameRef.current.resetGame();
   };
 
-  // --- Twitter login ---
-  const loginWithTwitter = () => {
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    // Safari/iOS cannot handle popups reliably
-    if (isSafari || isIOS) {
-      window.location.href = `${BACKEND_URL}/auth/twitter?force_login=true`;
-      return;
-    }
-
-    popupRef.current = window.open(
-      `${BACKEND_URL}/auth/twitter?force_login=true`,
-      'Twitter Login',
-      'width=600,height=600'
-    );
-
-    popupIntervalRef.current = setInterval(() => {
-      if (!popupRef.current || popupRef.current.closed) {
-        clearInterval(popupIntervalRef.current);
-        popupIntervalRef.current = null;
-        fetchUser(); // refresh user after popup login
-      }
-    }, 500);
-  };
-
-  // --- Cleanup ---
-  useEffect(() => {
-    return () => {
-      if (popupIntervalRef.current) clearInterval(popupIntervalRef.current);
-      if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
-    };
-  }, []);
-
   if (loading) return <p>Loading...</p>;
 
-  if (!user)
+  if (!user) {
     return (
-      <p>
-        You are not logged in.{' '}
-        <button onClick={loginWithTwitter}>Login with Twitter</button>
-        {errorMsg && <span className="error-msg">{errorMsg}</span>}
-      </p>
+      <div className="auth-container">
+        <h3>{form.mode === 'login' ? 'Login' : 'Register'}</h3>
+        <form onSubmit={handleAuth}>
+          {form.mode === 'register' && (
+            <input
+              type="text"
+              placeholder="Username"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              required
+            />
+          )}
+          <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            required
+          />
+          <button type="submit">
+            {form.mode === 'login' ? 'Login' : 'Register'}
+          </button>
+        </form>
+        <button
+          onClick={() =>
+            setForm({ ...form, mode: form.mode === 'login' ? 'register' : 'login' })
+          }
+        >
+          Switch to {form.mode === 'login' ? 'Register' : 'Login'}
+        </button>
+        {errorMsg && <p className="error-msg">{errorMsg}</p>}
+      </div>
     );
+  }
 
   return (
     <div className="dashboard-game-container">
+      <div className="dashboard-header">
+        <p>Welcome, {user.displayName || user.username}!</p>
+        <button onClick={handleLogout}>Logout</button>
+      </div>
       <Game2048
         ref={gameRef}
         totalScore={totalScore}
