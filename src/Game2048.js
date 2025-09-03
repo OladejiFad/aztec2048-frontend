@@ -3,12 +3,6 @@ import './Game2048.css';
 
 const GRID_SIZE = 4;
 
-const numberToLetter = {
-  2: '2', 4: '4', 8: '8', 16: '16',
-  32: '32', 64: '64', 128: '128',
-  256: '256', 512: '512', 1024: '1024', 2048: '2048'
-};
-
 const createEmptyGrid = () =>
   Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 
@@ -142,18 +136,20 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
       setCurrentScore(newScore);
       if (onScoreChange) onScoreChange(newScore);
 
+      // ✅ Update backend score after every move
+      if (userId && backendUrl) {
+        fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score: newScore }),
+        }).catch(err => console.error('[ERROR] Updating score:', err));
+      }
+
+      // Check for game over
       if (!hasMovesLeft(result.grid)) {
         setGameOver(true);
         if (onGameOver) onGameOver(newScore);
-        // Update backend if userId & backendUrl provided
-        if (userId && backendUrl) {
-          fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score: newScore }),
-          }).catch(err => console.error('[ERROR] Updating score:', err));
-        }
       }
     }
   }, [grid, gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
@@ -201,7 +197,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
               key={idx}
               className={`cell ${cell !== 0 ? `cell-${cell}` : ''} ${newTilePos && newTilePos[0] === row && newTilePos[1] === col ? 'new-tile' : ''}`}
             >
-              {cell !== 0 ? numberToLetter[cell] || cell : ''}
+              {cell !== 0 ? cell : ''}
             </div>
           );
         })}
@@ -211,7 +207,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
         <div className="game-over">
           <h2>Game Over!</h2>
           <p>Your final score: {currentScore}</p>
-          <p>Use the Reset Game button on the sidebar to play again.</p>
+          <p>Press Reset Game to play again.</p>
         </div>
       )}
     </div>
