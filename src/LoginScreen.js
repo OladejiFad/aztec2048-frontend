@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './Auth.css';
 import { useNavigate, Link } from 'react-router-dom';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 

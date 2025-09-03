@@ -1,7 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
-import LoginScreen from './LoginScreen';
-import RegisterScreen from './RegisterScreen';
 import PreDashboardScreen from './PreDashboardScreen';
+import LoginScreen from './LoginScreen';
 import Dashboard from './Dashboard';
 import LeaderboardScreen from './LeaderboardScreen';
 import ProtectedRoute from './ProtectedRoute';
@@ -13,7 +12,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch logged-in user when app starts
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -38,9 +36,11 @@ function App() {
 
   return (
     <Routes>
+      {/* First screen */}
+      <Route path="/" element={<PreDashboardScreen />} />
+
+      {/* Login */}
       <Route path="/login" element={<LoginScreen />} />
-      <Route path="/register" element={<RegisterScreen />} />
-      <Route path="/pre-dashboard" element={<PreDashboardScreen />} />
 
       {/* Protected Dashboard */}
       <Route
@@ -62,8 +62,8 @@ function App() {
         }
       />
 
-      {/* Default route */}
-      <Route path="*" element={<LoginScreen />} />
+      {/* Default fallback */}
+      <Route path="*" element={<PreDashboardScreen />} />
     </Routes>
   );
 }
