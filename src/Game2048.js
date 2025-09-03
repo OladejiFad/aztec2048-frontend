@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import './Game2048.css';
+import AztecLogo from './assets/azteclogo.jpg'; // Logo for tiles
 
 const GRID_SIZE = 4;
 
 const createEmptyGrid = () => Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
-
 const getRandomEmptyCell = (grid) => {
   const empty = [];
   grid.forEach((row, i) => row.forEach((cell, j) => { if (cell === 0) empty.push([i, j]); }));
   if (!empty.length) return null;
   return empty[Math.floor(Math.random() * empty.length)];
 };
-
 const addRandomTile = (grid) => {
   const pos = getRandomEmptyCell(grid);
   if (!pos) return { grid, newTile: null };
@@ -20,7 +19,6 @@ const addRandomTile = (grid) => {
   newGrid[pos[0]][pos[1]] = Math.random() < 0.9 ? 2 : 4;
   return { grid: newGrid, newTile: pos };
 };
-
 const hasMovesLeft = (grid) => {
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
@@ -32,10 +30,8 @@ const hasMovesLeft = (grid) => {
   return false;
 };
 
-const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, ref) => {
+const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
   const [grid, setGrid] = useState(createEmptyGrid());
-  const [newTilePos, setNewTilePos] = useState(null);
-  const [mergedTiles, setMergedTiles] = useState([]);
   const [currentScore, setCurrentScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
@@ -43,8 +39,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
     let result = addRandomTile(createEmptyGrid());
     result = addRandomTile(result.grid);
     setGrid(result.grid);
-    setNewTilePos(null);
-    setMergedTiles([]);
     setCurrentScore(0);
     setGameOver(false);
   }, []);
@@ -58,9 +52,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
       let moved = false;
       let newGrid = prevGrid.map(r => [...r]);
       let points = 0;
-      let mergedPositions = [];
 
-      const processRow = (row, rowIndex, reverse = false) => {
+      const processRow = (row, reverse = false) => {
         const input = reverse ? [...row].reverse() : row;
         const newRow = [];
         let skip = false;
@@ -71,8 +64,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
             newRow.push(merged);
             points += merged;
             skip = true;
-            const colIndex = reverse ? input.length - 1 - i : i;
-            mergedPositions.push([rowIndex, colIndex]);
           } else newRow.push(input[i]);
         }
         while (newRow.length < GRID_SIZE) newRow.push(0);
@@ -81,27 +72,27 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
       switch (key) {
         case 'ArrowLeft':
-          newGrid = newGrid.map((row, i) => { const merged = processRow(row, i); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; }); break;
+          newGrid = newGrid.map(row => processRow(row)); break;
         case 'ArrowRight':
-          newGrid = newGrid.map((row, i) => { const merged = processRow(row, i, true); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; }); break;
+          newGrid = newGrid.map(row => processRow(row, true)); break;
         case 'ArrowUp':
-          newGrid = transpose(newGrid).map((row, i) => { const merged = processRow(row, i); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; });
+          newGrid = transpose(newGrid).map(row => processRow(row));
           newGrid = transpose(newGrid); break;
         case 'ArrowDown':
-          newGrid = transpose(newGrid).map((row, i) => { const merged = processRow(row, i, true); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; });
+          newGrid = transpose(newGrid).map(row => processRow(row, true));
           newGrid = transpose(newGrid); break;
         default: return prevGrid;
       }
 
+      if (JSON.stringify(newGrid) !== JSON.stringify(prevGrid)) moved = true;
+
       if (moved) {
         const result = addRandomTile(newGrid);
-        setNewTilePos(result.newTile);
-        setMergedTiles(mergedPositions);
         const newScore = currentScore + points;
         setCurrentScore(newScore);
+
         if (onScoreChange) onScoreChange(newScore);
 
-        // Submit live score to backend
         if (userId && backendUrl) {
           fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
             method: 'POST',
@@ -111,15 +102,14 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
           }).catch(err => console.error(err));
         }
 
-        if (!hasMovesLeft(result.grid)) {
-          setGameOver(true);
-          if (onGameOver) onGameOver(newScore);
-        }
+        if (!hasMovesLeft(result.grid)) setGameOver(true);
+
         return result.grid;
       }
+
       return prevGrid;
     });
-  }, [gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
+  }, [gameOver, currentScore, onScoreChange, userId, backendUrl]);
 
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
@@ -151,28 +141,27 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
     };
   }, [handleMove, initGame]);
 
-  useEffect(() => {
-    if (mergedTiles.length > 0) {
-      const timeout = setTimeout(() => setMergedTiles([]), 200);
-      return () => clearTimeout(timeout);
-    }
-  }, [mergedTiles]);
-
   return (
     <div className="game-container">
       <h3>Score: {currentScore}</h3>
       <div className="grid">
-        {grid.flat().map((cell, idx) => {
-          const row = Math.floor(idx / GRID_SIZE);
-          const col = idx % GRID_SIZE;
-          return (
-            <div key={idx} className={`cell ${cell ? `cell-${cell}` : ''} ${newTilePos?.[0] === row && newTilePos?.[1] === col ? 'new-tile' : ''} ${mergedTiles.some(p => p[0] === row && p[1] === col) ? 'merged-tile' : ''}`}>
-              {cell || ''}
-            </div>
-          );
-        })}
+        {grid.flat().map((cell, idx) => (
+          <div key={idx} className={`cell ${cell ? `cell-${cell}` : ''}`}>
+            {cell && (
+              <>
+                <span className="cell-number">{cell}</span>
+                <img src={AztecLogo} alt="Aztec Logo" className="tile-logo" />
+              </>
+            )}
+          </div>
+        ))}
       </div>
-      {gameOver && <div className="game-over"><h2>Game Over!</h2><p>Press Reset to play again.</p></div>}
+      {gameOver && (
+        <div className="game-over">
+          <h2>Game Over</h2>
+          <button onClick={initGame}>Play Again</button>
+        </div>
+      )}
     </div>
   );
 });
