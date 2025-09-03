@@ -24,7 +24,6 @@ const addRandomTile = (grid) => {
 };
 
 const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
-
 const hasMovesLeft = (grid) => {
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
@@ -44,8 +43,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
   const [gameOver, setGameOver] = useState(false);
 
   const initGame = useCallback(() => {
-    let freshGrid = createEmptyGrid();
-    let result = addRandomTile(freshGrid);
+    let result = addRandomTile(createEmptyGrid());
     result = addRandomTile(result.grid);
     setGrid(result.grid);
     setNewTilePos(null);
@@ -59,96 +57,88 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
   }));
 
   const handleMove = useCallback((key) => {
-    if (gameOver) return;
-    let moved = false;
-    let newGrid = grid.map(row => [...row]);
-    let points = 0;
-    let mergedPositions = [];
+    setGrid(prevGrid => {
+      if (gameOver) return prevGrid;
+      let moved = false;
+      let newGrid = prevGrid.map(row => [...row]);
+      let points = 0;
+      let mergedPositions = [];
 
-    const processRow = (row, rowIndex, reverse = false) => {
-      const input = reverse ? [...row].reverse() : row;
-      const newRow = [];
-      let skip = false;
-
-      for (let i = 0; i < input.length; i++) {
-        if (skip) { skip = false; continue; }
-        if (input[i] !== 0 && input[i] === input[i + 1]) {
-          const merged = input[i] * 2;
-          newRow.push(merged);
-          points += merged;
-          skip = true;
-          const colIndex = reverse ? input.length - 1 - i : i;
-          mergedPositions.push([rowIndex, colIndex]);
-        } else {
-          newRow.push(input[i]);
+      const processRow = (row, rowIndex, reverse = false) => {
+        const input = reverse ? [...row].reverse() : row;
+        const newRow = [];
+        let skip = false;
+        for (let i = 0; i < input.length; i++) {
+          if (skip) { skip = false; continue; }
+          if (input[i] !== 0 && input[i] === input[i + 1]) {
+            const merged = input[i] * 2;
+            newRow.push(merged);
+            points += merged;
+            skip = true;
+            const colIndex = reverse ? input.length - 1 - i : i;
+            mergedPositions.push([rowIndex, colIndex]);
+          } else newRow.push(input[i]);
         }
+        while (newRow.length < GRID_SIZE) newRow.push(0);
+        return reverse ? newRow.reverse() : newRow;
+      };
+
+      switch (key) {
+        case 'ArrowLeft':
+          newGrid = newGrid.map((row, rowIndex) => {
+            const merged = processRow(row, rowIndex);
+            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+            return merged;
+          }); break;
+        case 'ArrowRight':
+          newGrid = newGrid.map((row, rowIndex) => {
+            const merged = processRow(row, rowIndex, true);
+            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+            return merged;
+          }); break;
+        case 'ArrowUp':
+          newGrid = transpose(newGrid).map((row, rowIndex) => {
+            const merged = processRow(row, rowIndex);
+            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+            return merged;
+          });
+          newGrid = transpose(newGrid); break;
+        case 'ArrowDown':
+          newGrid = transpose(newGrid).map((row, rowIndex) => {
+            const merged = processRow(row, rowIndex, true);
+            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+            return merged;
+          });
+          newGrid = transpose(newGrid); break;
+        default: return prevGrid;
       }
 
-      while (newRow.length < GRID_SIZE) newRow.push(0);
-      return reverse ? newRow.reverse() : newRow;
-    };
+      if (moved) {
+        const result = addRandomTile(newGrid);
+        setNewTilePos(result.newTile);
+        setMergedTiles(mergedPositions);
+        const newScore = currentScore + points;
+        setCurrentScore(prevScore => prevScore + points);
+        if (onScoreChange) onScoreChange(newScore);
 
-    switch (key) {
-      case 'ArrowLeft':
-        newGrid = newGrid.map((row, rowIndex) => {
-          const merged = processRow(row, rowIndex);
-          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-          return merged;
-        });
-        break;
-      case 'ArrowRight':
-        newGrid = newGrid.map((row, rowIndex) => {
-          const merged = processRow(row, rowIndex, true);
-          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-          return merged;
-        });
-        break;
-      case 'ArrowUp':
-        newGrid = transpose(newGrid);
-        newGrid = newGrid.map((row, rowIndex) => {
-          const merged = processRow(row, rowIndex);
-          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-          return merged;
-        });
-        newGrid = transpose(newGrid);
-        break;
-      case 'ArrowDown':
-        newGrid = transpose(newGrid);
-        newGrid = newGrid.map((row, rowIndex) => {
-          const merged = processRow(row, rowIndex, true);
-          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-          return merged;
-        });
-        newGrid = transpose(newGrid);
-        break;
-      default: return;
-    }
+        if (userId && backendUrl) {
+          fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: newScore }),
+          }).catch(err => console.error(err));
+        }
 
-    if (moved) {
-      const result = addRandomTile(newGrid);
-      setGrid(result.grid);
-      setNewTilePos(result.newTile);
-      setMergedTiles(mergedPositions);
-
-      const newScore = currentScore + points;
-      setCurrentScore(newScore);
-      if (onScoreChange) onScoreChange(newScore);
-
-      if (userId && backendUrl) {
-        fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ score: newScore }),
-        }).catch(err => console.error('[ERROR] Updating score:', err));
+        if (!hasMovesLeft(result.grid)) {
+          setGameOver(true);
+          if (onGameOver) onGameOver(newScore);
+        }
+        return result.grid;
       }
-
-      if (!hasMovesLeft(result.grid)) {
-        setGameOver(true);
-        if (onGameOver) onGameOver(newScore);
-      }
-    }
-  }, [grid, gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
+      return prevGrid;
+    });
+  }, [gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
 
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
@@ -171,15 +161,14 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchend', handleTouchEnd);
+    initGame();
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [handleMove]);
-
-  useEffect(() => { initGame(); }, [initGame]);
+  }, [handleMove, initGame]);
 
   useEffect(() => {
     if (mergedTiles.length > 0) {
@@ -207,7 +196,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
           );
         })}
       </div>
-
       {gameOver && (
         <div className="game-over">
           <h2>Game Over!</h2>
