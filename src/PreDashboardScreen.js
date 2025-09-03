@@ -8,11 +8,6 @@ import box from './assets/box.jpeg';
 function PreDashboardScreen() {
   const navigate = useNavigate();
 
-  const handleNextClick = () => {
-    // Navigate to login first
-    navigate('/login');
-  };
-
   return (
     <div className="pre-dashboard">
       <div className="moon"></div>
@@ -41,10 +36,15 @@ function PreDashboardScreen() {
         </p>
       </div>
 
-      {/* Next button */}
-      <button className="next-btn" onClick={handleNextClick}>
-        Next
-      </button>
+      {/* Action buttons */}
+      <div className="action-buttons">
+        <button className="btn-login" onClick={() => navigate('/login')}>
+          Login
+        </button>
+        <button className="btn-register" onClick={() => navigate('/register')}>
+          Register
+        </button>
+      </div>
     </div>
   );
 }

@@ -239,25 +239,9 @@
   margin: 0 auto;
 }
 
-/* Next button */
-.next-btn {
-  margin-top: 3vh;
-  padding: 1vh 3vw;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  color: #fff;
-  background: linear-gradient(135deg, #9b30ff, #8a2be2);
-  border: none;
-  border-radius: 0.5vw;
-  cursor: pointer;
-  box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-  z-index: 3;
-}
 
-.next-btn:hover {
-  transform: translateY(-0.3vw);
-  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
-}
+
+
 
 /* Highlighted words with glow */
 .glow {
@@ -291,11 +275,69 @@
   .privacy-message p {
     font-size: clamp(0.9rem, 3.5vw, 1.1rem);
   }
-  .next-btn {
-    font-size: clamp(1rem, 4vw, 1.2rem);
-    padding: 2vw 5vw;
-  }
+  
   .bird-icon {
     font-size: 5vw;
+  }
+}
+
+/* Action buttons container */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2vw; /* space between buttons */
+  margin-top: 4vh;
+  flex-wrap: wrap; /* allows wrapping on small screens */
+}
+
+/* Shared button styles */
+.btn-login,
+.btn-register {
+  padding: 1vh 3vw;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: #fff;
+  border: none;
+  border-radius: 0.5vw;
+  cursor: pointer;
+  box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 120px; /* ensures buttons don’t shrink too small */
+  z-index: 3;
+}
+
+/* Purple gradient for Login */
+.btn-login {
+  background: linear-gradient(135deg, #9b30ff, #8a2be2);
+}
+.btn-login:hover {
+  transform: translateY(-0.3vw);
+  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
+}
+
+/* Green gradient for Register */
+.btn-register {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+.btn-register:hover {
+  transform: translateY(-0.3vw);
+  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
+}
+
+/* 📱 Mobile responsive */
+@media (max-width: 600px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 2vh; /* vertical spacing when stacked */
+    width: 90%; /* keep them inside safe area */
+    margin: 4vh auto 0; /* center container */
+  }
+
+  .btn-login,
+  .btn-register {
+    width: 100%; /* full width buttons */
+    font-size: 1rem;
+    padding: 2.5vh 0; /* taller buttons for touch devices */
+    border-radius: 8px; /* more rounded for mobile look */
   }
 }

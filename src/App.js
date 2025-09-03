@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PreDashboardScreen from './PreDashboardScreen';
 import LoginScreen from './LoginScreen';
+import RegisterScreen from './RegisterScreen';
 import Dashboard from './Dashboard';
 import LeaderboardScreen from './LeaderboardScreen';
 import ProtectedRoute from './ProtectedRoute';
@@ -46,8 +47,9 @@ function App() {
         }
       />
 
-      {/* Login */}
+      {/* Login & Register */}
       <Route path="/login" element={<LoginScreen />} />
+      <Route path="/register" element={<RegisterScreen />} />
 
       {/* Protected Dashboard */}
       <Route
