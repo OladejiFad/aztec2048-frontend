@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './Leaderboard.css'; // ✅ Leaderboard CSS
+import './LeaderboardScreen.css';
 import { useNavigate } from 'react-router-dom';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
