@@ -1,181 +1,103 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Dashboard.css */
 
-body {
-  font-family: 'Arial', sans-serif;
-  overflow-x: hidden;
-  background: #f5f0ff; /* Soft lavender background for dashboard */
-}
-
-/* Dashboard container */
 .dashboard-game-container {
   display: flex;
   min-height: 100vh;
-  flex-wrap: wrap;
+  background: #f5f5f5;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
-  padding: 15px;
-  background-color: purple;
+  width: 280px;
+  background: #2c3e50;
   color: #fff;
+  padding: 20px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  position: relative;
-  box-shadow: 0 0 20px rgba(123, 99, 255, 0.4);
-  border-right: 1px solid rgba(255,255,255,0.2);
-  transition: all 0.3s ease;
+  align-items: center;
 }
 
-/* Diamond logo */
-.sidebar::before {
-  content: '';
-  width: 40px;
-  height: 40px;
-  background: #fff;
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  display: block;
-  margin: 0 auto 6px;
-  transition: transform 0.4s ease;
-}
-.sidebar::before:hover { transform: rotate(20deg); }
-
-/* Sidebar title */
 .sidebar h2 {
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
-/* Profile section */
 .profile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-}
-.profile img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  object-fit: cover;
-}
-.profile p {
-  color: #fff;
-  font-weight: bold;
-  text-align: center;
-  font-size: 14px;
-  word-break: break-word;
+  margin-bottom: 20px;
 }
 
-/* Total score and AZTEC letters */
-.total-score {
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 6px;
+.profile img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  object-fit: cover;
 }
+
+.sidebar p {
+  margin: 5px 0;
+}
+
+.sidebar button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 10px;
+  border: none;
+  background: #27ae60;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sidebar button:hover {
+  background: #2ecc71;
+}
+
 .aztec-letters {
   display: flex;
   justify-content: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  color: gold;
-  font-weight: bold;
-  font-size: 18px;
+  margin-bottom: 15px;
 }
 
-/* Sidebar buttons */
-.sidebar-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
+.aztec-letters span {
+  font-size: 1.5rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  color: #f39c12;
+  margin: 0 3px;
 }
-.sidebar-btn.reset { background: #7b63ff; color: #fff; }
-.sidebar-btn.leaderboard { background: #fff; color: #7b63ff; }
-.sidebar-btn.logout { background: #ff4d4d; color: #fff; }
-
-.sidebar-btn.reset:hover { background: #6a52e6; transform: translateY(-2px); }
-.sidebar-btn.leaderboard:hover { background: #e0d6ff; transform: translateY(-2px); }
-.sidebar-btn.logout:hover { background: #e04343; transform: translateY(-2px); }
 
 /* Main content */
 .main-content {
   flex: 1;
+  padding: 20px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 15px;
-  min-height: calc(100vh - 40px);
-  max-width: 100%;
-}
-
-/* Topbar for mobile */
-.topbar-container {
-  width: 100%;
-  background-color: purple;
-  color: #fff;
-  box-shadow: 0 0 20px rgba(123, 99, 255,0.4);
-  padding: 10px 15px;
-  display: none;
   flex-direction: column;
-  gap: 10px;
-}
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.topbar-profile-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  object-fit: cover;
-}
-.topbar-name {
-  font-weight: bold;
-  font-size: 13px;
-}
-.hamburger-btn {
-  font-size: 20px;
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-}
-.dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
-/* Loading */
-.loading-msg {
-  text-align: center;
-  padding: 20px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #7b63ff;
-}
+/* Responsive */
+@media (max-width: 900px) {
+  .dashboard-game-container {
+    flex-direction: column;
+    align-items: center;
+  }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .sidebar { display: none; }
-  .topbar-container { display: flex; }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .main-content {
+    width: 100%;
+    padding: 10px;
+  }
 }

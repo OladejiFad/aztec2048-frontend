@@ -3,15 +3,13 @@ import './Game2048.css';
 
 const GRID_SIZE = 4;
 
-const createEmptyGrid = () =>
-  Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+const createEmptyGrid = () => Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
+const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
 
 const getRandomEmptyCell = (grid) => {
   const empty = [];
-  grid.forEach((row, i) =>
-    row.forEach((cell, j) => { if (cell === 0) empty.push([i, j]); })
-  );
-  if (empty.length === 0) return null;
+  grid.forEach((row, i) => row.forEach((cell, j) => { if (cell === 0) empty.push([i, j]); }));
+  if (!empty.length) return null;
   return empty[Math.floor(Math.random() * empty.length)];
 };
 
@@ -23,7 +21,6 @@ const addRandomTile = (grid) => {
   return { grid: newGrid, newTile: pos };
 };
 
-const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
 const hasMovesLeft = (grid) => {
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
@@ -52,15 +49,14 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
     setGameOver(false);
   }, []);
 
-  useImperativeHandle(ref, () => ({
-    resetGame: () => initGame()
-  }));
+  useImperativeHandle(ref, () => ({ resetGame: initGame }));
 
   const handleMove = useCallback((key) => {
     setGrid(prevGrid => {
       if (gameOver) return prevGrid;
+
       let moved = false;
-      let newGrid = prevGrid.map(row => [...row]);
+      let newGrid = prevGrid.map(r => [...r]);
       let points = 0;
       let mergedPositions = [];
 
@@ -85,30 +81,14 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
       switch (key) {
         case 'ArrowLeft':
-          newGrid = newGrid.map((row, rowIndex) => {
-            const merged = processRow(row, rowIndex);
-            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-            return merged;
-          }); break;
+          newGrid = newGrid.map((row, i) => { const merged = processRow(row, i); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; }); break;
         case 'ArrowRight':
-          newGrid = newGrid.map((row, rowIndex) => {
-            const merged = processRow(row, rowIndex, true);
-            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-            return merged;
-          }); break;
+          newGrid = newGrid.map((row, i) => { const merged = processRow(row, i, true); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; }); break;
         case 'ArrowUp':
-          newGrid = transpose(newGrid).map((row, rowIndex) => {
-            const merged = processRow(row, rowIndex);
-            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-            return merged;
-          });
+          newGrid = transpose(newGrid).map((row, i) => { const merged = processRow(row, i); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; });
           newGrid = transpose(newGrid); break;
         case 'ArrowDown':
-          newGrid = transpose(newGrid).map((row, rowIndex) => {
-            const merged = processRow(row, rowIndex, true);
-            if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-            return merged;
-          });
+          newGrid = transpose(newGrid).map((row, i) => { const merged = processRow(row, i, true); if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true; return merged; });
           newGrid = transpose(newGrid); break;
         default: return prevGrid;
       }
@@ -118,9 +98,10 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
         setNewTilePos(result.newTile);
         setMergedTiles(mergedPositions);
         const newScore = currentScore + points;
-        setCurrentScore(prevScore => prevScore + points);
+        setCurrentScore(newScore);
         if (onScoreChange) onScoreChange(newScore);
 
+        // Submit live score to backend
         if (userId && backendUrl) {
           fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
             method: 'POST',
@@ -161,8 +142,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchend', handleTouchEnd);
-    initGame();
 
+    initGame();
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('touchstart', handleTouchStart);
@@ -179,30 +160,19 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
   return (
     <div className="game-container">
-      <h3>Current Score: {currentScore}</h3>
+      <h3>Score: {currentScore}</h3>
       <div className="grid">
         {grid.flat().map((cell, idx) => {
           const row = Math.floor(idx / GRID_SIZE);
           const col = idx % GRID_SIZE;
           return (
-            <div
-              key={idx}
-              className={`cell ${cell !== 0 ? `cell-${cell}` : ''} 
-                ${newTilePos && newTilePos[0] === row && newTilePos[1] === col ? 'new-tile' : ''} 
-                ${mergedTiles.some(pos => pos[0] === row && pos[1] === col) ? 'merged-tile' : ''}`}
-            >
-              {cell !== 0 ? cell : ''}
+            <div key={idx} className={`cell ${cell ? `cell-${cell}` : ''} ${newTilePos?.[0] === row && newTilePos?.[1] === col ? 'new-tile' : ''} ${mergedTiles.some(p => p[0] === row && p[1] === col) ? 'merged-tile' : ''}`}>
+              {cell || ''}
             </div>
           );
         })}
       </div>
-      {gameOver && (
-        <div className="game-over">
-          <h2>Game Over!</h2>
-          <p>Your final score: {currentScore}</p>
-          <p>Press Reset Game to play again.</p>
-        </div>
-      )}
+      {gameOver && <div className="game-over"><h2>Game Over!</h2><p>Press Reset to play again.</p></div>}
     </div>
   );
 });
