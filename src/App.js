@@ -1,4 +1,3 @@
-// src/App.js
 import { Routes, Route } from 'react-router-dom';
 import PreDashboardScreen from './PreDashboardScreen';
 import Dashboard from './Dashboard';
