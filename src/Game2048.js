@@ -23,28 +23,6 @@ const addRandomTile = (grid) => {
   return { grid: newGrid, newTile: pos };
 };
 
-const slideAndMerge = (row) => {
-  const nonZero = row.filter(num => num !== 0);
-  const newRow = [];
-  let skip = false;
-  let points = 0;
-
-  for (let i = 0; i < nonZero.length; i++) {
-    if (skip) { skip = false; continue; }
-    if (nonZero[i] === nonZero[i + 1]) {
-      const merged = nonZero[i] * 2;
-      newRow.push(merged);
-      points += merged;
-      skip = true;
-    } else {
-      newRow.push(nonZero[i]);
-    }
-  }
-
-  while (newRow.length < GRID_SIZE) newRow.push(0);
-  return { newRow, points };
-};
-
 const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
 
 const hasMovesLeft = (grid) => {
@@ -61,6 +39,7 @@ const hasMovesLeft = (grid) => {
 const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, ref) => {
   const [grid, setGrid] = useState(createEmptyGrid());
   const [newTilePos, setNewTilePos] = useState(null);
+  const [mergedTiles, setMergedTiles] = useState([]);
   const [currentScore, setCurrentScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
@@ -70,6 +49,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
     result = addRandomTile(result.grid);
     setGrid(result.grid);
     setNewTilePos(null);
+    setMergedTiles([]);
     setCurrentScore(0);
     setGameOver(false);
   }, []);
@@ -83,33 +63,50 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
     let moved = false;
     let newGrid = grid.map(row => [...row]);
     let points = 0;
+    let mergedPositions = [];
 
-    const processRow = (row, reverse = false) => {
+    const processRow = (row, rowIndex, reverse = false) => {
       const input = reverse ? [...row].reverse() : row;
-      const { newRow, points: rowPoints } = slideAndMerge(input);
-      points += rowPoints;
+      const newRow = [];
+      let skip = false;
+
+      for (let i = 0; i < input.length; i++) {
+        if (skip) { skip = false; continue; }
+        if (input[i] !== 0 && input[i] === input[i + 1]) {
+          const merged = input[i] * 2;
+          newRow.push(merged);
+          points += merged;
+          skip = true;
+          const colIndex = reverse ? input.length - 1 - i : i;
+          mergedPositions.push([rowIndex, colIndex]);
+        } else {
+          newRow.push(input[i]);
+        }
+      }
+
+      while (newRow.length < GRID_SIZE) newRow.push(0);
       return reverse ? newRow.reverse() : newRow;
     };
 
     switch (key) {
       case 'ArrowLeft':
-        newGrid = newGrid.map(row => {
-          const merged = processRow(row);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex);
           if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
           return merged;
         });
         break;
       case 'ArrowRight':
-        newGrid = newGrid.map(row => {
-          const merged = processRow(row, true);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex, true);
           if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
           return merged;
         });
         break;
       case 'ArrowUp':
         newGrid = transpose(newGrid);
-        newGrid = newGrid.map(row => {
-          const merged = processRow(row);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex);
           if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
           return merged;
         });
@@ -117,8 +114,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
         break;
       case 'ArrowDown':
         newGrid = transpose(newGrid);
-        newGrid = newGrid.map(row => {
-          const merged = processRow(row, true);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex, true);
           if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
           return merged;
         });
@@ -131,12 +128,12 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
       const result = addRandomTile(newGrid);
       setGrid(result.grid);
       setNewTilePos(result.newTile);
+      setMergedTiles(mergedPositions);
 
       const newScore = currentScore + points;
       setCurrentScore(newScore);
       if (onScoreChange) onScoreChange(newScore);
 
-      // ✅ Update backend score after every move
       if (userId && backendUrl) {
         fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
           method: 'POST',
@@ -146,7 +143,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
         }).catch(err => console.error('[ERROR] Updating score:', err));
       }
 
-      // Check for game over
       if (!hasMovesLeft(result.grid)) {
         setGameOver(true);
         if (onGameOver) onGameOver(newScore);
@@ -185,6 +181,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
 
   useEffect(() => { initGame(); }, [initGame]);
 
+  useEffect(() => {
+    if (mergedTiles.length > 0) {
+      const timeout = setTimeout(() => setMergedTiles([]), 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [mergedTiles]);
+
   return (
     <div className="game-container">
       <h3>Current Score: {currentScore}</h3>
@@ -195,7 +198,9 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, 
           return (
             <div
               key={idx}
-              className={`cell ${cell !== 0 ? `cell-${cell}` : ''} ${newTilePos && newTilePos[0] === row && newTilePos[1] === col ? 'new-tile' : ''}`}
+              className={`cell ${cell !== 0 ? `cell-${cell}` : ''} 
+                ${newTilePos && newTilePos[0] === row && newTilePos[1] === col ? 'new-tile' : ''} 
+                ${mergedTiles.some(pos => pos[0] === row && pos[1] === col) ? 'merged-tile' : ''}`}
             >
               {cell !== 0 ? cell : ''}
             </div>

@@ -1,187 +1,222 @@
-import React, { useEffect, useState, useRef } from 'react';
-import './Dashboard.css';
-import Game2048 from './Game2048';
-import { playLetterSound } from './utils/letterSounds';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import './Game2048.css';
 
-const AZTEC_MILESTONES = [
-  { score: 6000, letter: 'A' },
-  { score: 12000, letter: 'Z' },
-  { score: 18000, letter: 'T' },
-  { score: 24000, letter: 'E' },
-  { score: 30000, letter: 'C' },
-];
+const GRID_SIZE = 4;
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const createEmptyGrid = () =>
+  Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 
-function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [totalScore, setTotalScore] = useState(0);
-  const [aztecLetters, setAztecLetters] = useState([]);
-  const [errorMsg, setErrorMsg] = useState('');
+const getRandomEmptyCell = (grid) => {
+  const empty = [];
+  grid.forEach((row, i) =>
+    row.forEach((cell, j) => { if (cell === 0) empty.push([i, j]); })
+  );
+  if (empty.length === 0) return null;
+  return empty[Math.floor(Math.random() * empty.length)];
+};
 
-  const [form, setForm] = useState({ username: '', email: '', password: '', mode: 'login' });
+const addRandomTile = (grid) => {
+  const pos = getRandomEmptyCell(grid);
+  if (!pos) return { grid, newTile: null };
+  const newGrid = grid.map(row => [...row]);
+  newGrid[pos[0]][pos[1]] = Math.random() < 0.9 ? 2 : 4;
+  return { grid: newGrid, newTile: pos };
+};
 
-  const gameRef = useRef();
-  const lettersTimeoutRef = useRef(null);
+const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
 
-  // --- Fetch user info ---
-  const fetchUser = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
-        credentials: 'include',
-      });
-
-      if (res.status === 401) {
-        setUser(null);
-        return;
-      }
-
-      const data = await res.json();
-      if (res.ok) {
-        setUser(data);
-        setTotalScore(data.totalScore || 0);
-      } else {
-        setUser(null);
-        setErrorMsg(data.error || 'Failed to fetch user');
-      }
-    } catch (err) {
-      setUser(null);
-      setErrorMsg('Network error fetching user');
-      console.error(err);
-    } finally {
-      setLoading(false);
+const hasMovesLeft = (grid) => {
+  for (let i = 0; i < GRID_SIZE; i++) {
+    for (let j = 0; j < GRID_SIZE; j++) {
+      if (grid[i][j] === 0) return true;
+      if (i < GRID_SIZE - 1 && grid[i][j] === grid[i + 1][j]) return true;
+      if (j < GRID_SIZE - 1 && grid[i][j] === grid[i][j + 1]) return true;
     }
-  };
+  }
+  return false;
+};
 
-  useEffect(() => {
-    fetchUser();
+const Game2048 = forwardRef(({ onScoreChange, onGameOver, userId, backendUrl }, ref) => {
+  const [grid, setGrid] = useState(createEmptyGrid());
+  const [newTilePos, setNewTilePos] = useState(null);
+  const [mergedTiles, setMergedTiles] = useState([]);
+  const [currentScore, setCurrentScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+
+  const initGame = useCallback(() => {
+    let freshGrid = createEmptyGrid();
+    let result = addRandomTile(freshGrid);
+    result = addRandomTile(result.grid);
+    setGrid(result.grid);
+    setNewTilePos(null);
+    setMergedTiles([]);
+    setCurrentScore(0);
+    setGameOver(false);
   }, []);
 
-  // --- Handle login/register form ---
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
+  useImperativeHandle(ref, () => ({
+    resetGame: () => initGame()
+  }));
 
-    try {
-      const endpoint = form.mode === 'login' ? 'login' : 'register';
-      const res = await fetch(`${BACKEND_URL}/auth/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          username: form.username,
-          email: form.email,
-          password: form.password,
-        }),
-      });
+  const handleMove = useCallback((key) => {
+    if (gameOver) return;
+    let moved = false;
+    let newGrid = grid.map(row => [...row]);
+    let points = 0;
+    let mergedPositions = [];
 
-      const data = await res.json();
-      if (res.ok) {
-        fetchUser(); // refresh user session
-      } else {
-        setErrorMsg(data.error || 'Authentication failed');
+    const processRow = (row, rowIndex, reverse = false) => {
+      const input = reverse ? [...row].reverse() : row;
+      const newRow = [];
+      let skip = false;
+
+      for (let i = 0; i < input.length; i++) {
+        if (skip) { skip = false; continue; }
+        if (input[i] !== 0 && input[i] === input[i + 1]) {
+          const merged = input[i] * 2;
+          newRow.push(merged);
+          points += merged;
+          skip = true;
+          const colIndex = reverse ? input.length - 1 - i : i;
+          mergedPositions.push([rowIndex, colIndex]);
+        } else {
+          newRow.push(input[i]);
+        }
       }
-    } catch (err) {
-      console.error('Auth error:', err);
-      setErrorMsg('Network error');
+
+      while (newRow.length < GRID_SIZE) newRow.push(0);
+      return reverse ? newRow.reverse() : newRow;
+    };
+
+    switch (key) {
+      case 'ArrowLeft':
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex);
+          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+          return merged;
+        });
+        break;
+      case 'ArrowRight':
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex, true);
+          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+          return merged;
+        });
+        break;
+      case 'ArrowUp':
+        newGrid = transpose(newGrid);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex);
+          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+          return merged;
+        });
+        newGrid = transpose(newGrid);
+        break;
+      case 'ArrowDown':
+        newGrid = transpose(newGrid);
+        newGrid = newGrid.map((row, rowIndex) => {
+          const merged = processRow(row, rowIndex, true);
+          if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+          return merged;
+        });
+        newGrid = transpose(newGrid);
+        break;
+      default: return;
     }
-  };
 
-  // --- Logout ---
-  const handleLogout = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/auth/logout`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      setUser(null);
-      setTotalScore(0);
-    } catch (err) {
-      console.error('Logout failed:', err);
+    if (moved) {
+      const result = addRandomTile(newGrid);
+      setGrid(result.grid);
+      setNewTilePos(result.newTile);
+      setMergedTiles(mergedPositions);
+
+      const newScore = currentScore + points;
+      setCurrentScore(newScore);
+      if (onScoreChange) onScoreChange(newScore);
+
+      if (userId && backendUrl) {
+        fetch(`${backendUrl}/auth/api/update-score/${userId}`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score: newScore }),
+        }).catch(err => console.error('[ERROR] Updating score:', err));
+      }
+
+      if (!hasMovesLeft(result.grid)) {
+        setGameOver(true);
+        if (onGameOver) onGameOver(newScore);
+      }
     }
-  };
+  }, [grid, gameOver, currentScore, onScoreChange, onGameOver, userId, backendUrl]);
 
-  // --- AZTEC letters ---
-  const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
-    const newLetters = letters.filter(l => !aztecLetters.includes(l));
+  useEffect(() => {
+    const handleKeyDown = e => handleMove(e.key);
+    window.addEventListener('keydown', handleKeyDown);
 
-    if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
-    lettersTimeoutRef.current = setTimeout(() => {
-      newLetters.forEach(letter => playLetterSound(letter));
-    }, 50);
+    let startX = 0, startY = 0;
+    const handleTouchStart = e => { const t = e.touches[0]; startX = t.clientX; startY = t.clientY; };
+    const handleTouchEnd = e => {
+      const t = e.changedTouches[0];
+      const diffX = t.clientX - startX;
+      const diffY = t.clientY - startY;
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 30) handleMove('ArrowRight');
+        else if (diffX < -30) handleMove('ArrowLeft');
+      } else {
+        if (diffY > 30) handleMove('ArrowDown');
+        else if (diffY < -30) handleMove('ArrowUp');
+      }
+    };
 
-    setAztecLetters(letters);
-  };
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
 
-  // --- Game reset ---
-  const handleReset = () => {
-    setAztecLetters([]);
-    if (gameRef.current) gameRef.current.resetGame();
-  };
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleMove]);
 
-  if (loading) return <p>Loading...</p>;
+  useEffect(() => { initGame(); }, [initGame]);
 
-  if (!user) {
-    return (
-      <div className="auth-container">
-        <h3>{form.mode === 'login' ? 'Login' : 'Register'}</h3>
-        <form onSubmit={handleAuth}>
-          {form.mode === 'register' && (
-            <input
-              type="text"
-              placeholder="Username"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              required
-            />
-          )}
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            required
-          />
-          <button type="submit">
-            {form.mode === 'login' ? 'Login' : 'Register'}
-          </button>
-        </form>
-        <button
-          onClick={() =>
-            setForm({ ...form, mode: form.mode === 'login' ? 'register' : 'login' })
-          }
-        >
-          Switch to {form.mode === 'login' ? 'Register' : 'Login'}
-        </button>
-        {errorMsg && <p className="error-msg">{errorMsg}</p>}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (mergedTiles.length > 0) {
+      const timeout = setTimeout(() => setMergedTiles([]), 200);
+      return () => clearTimeout(timeout);
+    }
+  }, [mergedTiles]);
 
   return (
-    <div className="dashboard-game-container">
-      <div className="dashboard-header">
-        <p>Welcome, {user.displayName || user.username}!</p>
-        <button onClick={handleLogout}>Logout</button>
+    <div className="game-container">
+      <h3>Current Score: {currentScore}</h3>
+      <div className="grid">
+        {grid.flat().map((cell, idx) => {
+          const row = Math.floor(idx / GRID_SIZE);
+          const col = idx % GRID_SIZE;
+          return (
+            <div
+              key={idx}
+              className={`cell ${cell !== 0 ? `cell-${cell}` : ''} 
+                ${newTilePos && newTilePos[0] === row && newTilePos[1] === col ? 'new-tile' : ''} 
+                ${mergedTiles.some(pos => pos[0] === row && pos[1] === col) ? 'merged-tile' : ''}`}
+            >
+              {cell !== 0 ? cell : ''}
+            </div>
+          );
+        })}
       </div>
-      <Game2048
-        ref={gameRef}
-        totalScore={totalScore}
-        onScoreChange={handleScoreChange}
-        onReset={handleReset}
-      />
+
+      {gameOver && (
+        <div className="game-over">
+          <h2>Game Over!</h2>
+          <p>Your final score: {currentScore}</p>
+          <p>Press Reset Game to play again.</p>
+        </div>
+      )}
     </div>
   );
-}
+});
 
-export default Dashboard;
+export default Game2048;
