@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
-import aztecLogo from '../assets/azteclogo.jpg';
+import aztecLogo from './assets/azteclogo.jpg';
 
 const AZTEC_MILESTONES = [
   { score: 6000, letter: 'A' },
