@@ -9,16 +9,31 @@ export default function LeaderboardScreen({ user }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return; // just in case
+    if (!user) return;
+
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/leaderboard`, { credentials: 'include' });
+        const token = localStorage.getItem('token'); // JWT auth
+        if (!token) return;
+
+        const res = await fetch(`${BACKEND_URL}/leaderboard`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          console.error('Failed to fetch leaderboard');
+          return;
+        }
+
         const data = await res.json();
         setUsers(data || []);
       } catch (err) {
         console.error(err);
       }
     };
+
     fetchLeaderboard();
   }, [user]);
 
@@ -45,15 +60,13 @@ export default function LeaderboardScreen({ user }) {
               <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
               <img
                 src={
-                  u.photo ||
-                  `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
-                    u.displayName || 'User'
-                  )}.svg`
+                  u.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(u.email)}.svg`
                 }
                 alt="Avatar"
+                className="leaderboard-avatar"
               />
               <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
-              <span className="leaderboard-score">{u.totalScore}</span>
+              <span className="leaderboard-score">{u.totalScore || 0}</span>
             </li>
           ))}
         </ol>

@@ -13,6 +13,15 @@ const AZTEC_MILESTONES = [
   { score: 30000, letter: 'C' },
 ];
 
+// Define colors for each letter
+const LETTER_COLORS = {
+  A: '#FF4C4C', // red
+  Z: '#4C9AFF', // blue
+  T: '#FFD700', // gold
+  E: '#32CD32', // lime green
+  C: '#FF69B4', // pink
+};
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Dashboard() {
@@ -21,12 +30,13 @@ function Dashboard() {
   const [totalScore, setTotalScore] = useState(0);
   const [gamesLeft, setGamesLeft] = useState(7);
   const [aztecLetters, setAztecLetters] = useState([]);
+  const [highlightLetters, setHighlightLetters] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const gameRef = useRef();
-  const lettersTimeoutRef = useRef(null);
+  const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
 
   // --- Responsive ---
@@ -91,11 +101,21 @@ function Dashboard() {
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
-    const newLetters = letters.filter(l => !aztecLetters.includes(l));
-    if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
-    lettersTimeoutRef.current = setTimeout(() => {
-      newLetters.forEach(letter => playLetterSound(letter));
-    }, 50);
+    const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
+
+    // Play sound for new letters
+    newLetters.forEach(letter => playLetterSound(letter));
+
+    // Highlight newly unlocked letters briefly
+    if (newLetters.length > 0) {
+      setHighlightLetters(newLetters);
+      setTimeout(() => setHighlightLetters([]), 800); // highlight duration
+    }
+
+    // Update triggered letters
+    triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
+
+    // Update displayed letters
     setAztecLetters(letters);
   };
 
@@ -120,6 +140,8 @@ function Dashboard() {
   // --- Game reset ---
   const handleReset = () => {
     setAztecLetters([]);
+    triggeredLettersRef.current = [];
+    setHighlightLetters([]);
     if (gameRef.current) gameRef.current.resetGame();
   };
 
@@ -135,15 +157,33 @@ function Dashboard() {
     }
   };
 
-  // --- Cleanup ---
-  useEffect(() => {
-    return () => {
-      if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
-    };
-  }, []);
-
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
+
+  // --- Render AZTEC letters as colored badges ---
+  const renderAztecLetters = () => (
+    <div style={{ display: 'flex', gap: '5px' }}>
+      {aztecLetters.map(letter => (
+        <span
+          key={letter}
+          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
+          style={{
+            backgroundColor: LETTER_COLORS[letter] || '#ccc',
+            color: '#fff',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            display: 'inline-block',
+            minWidth: '24px',
+            textAlign: 'center',
+          }}
+        >
+          {letter}
+        </span>
+      ))}
+      {aztecLetters.length === 0 && <span>-</span>}
+    </div>
+  );
 
   return (
     <div className="dashboard-game-container">
@@ -153,13 +193,23 @@ function Dashboard() {
             <img src={aztecLogo} alt="Aztec Logo" className="logo-img" />
           </div>
           <h2 className="sidebar-title">AZTEC 2048</h2>
-          <div className="profile">
-            {user.photo && <img src={user.photo} alt="Profile" />}
-            <p>{user.displayName || user.username}</p>
+          <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img
+              src={
+                user.photo ||
+                `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
+                  user.displayName || user.username || 'User'
+                )}.svg`
+              }
+              alt="Avatar"
+              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+            />
+            <span>{user.displayName || user.username}</span>
           </div>
+
           <div className="stat-card"><h4>Total Score</h4><p>{totalScore}</p></div>
           <div className="stat-card"><h4>Games Left</h4><p>{gamesLeft}</p></div>
-          <div className="stat-card"><h4>AZTEC Letters</h4><p>{aztecLetters.join(' ') || '-'}</p></div>
+          <div className="stat-card"><h4>AZTEC Letters</h4>{renderAztecLetters()}</div>
           <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
           <div className="stat-card">
             <button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button>
@@ -172,16 +222,27 @@ function Dashboard() {
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div className="topbar-left">
-              {user.photo && <img src={user.photo} alt="Profile" className="topbar-profile-img" />}
+            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img
+                src={
+                  user.photo ||
+                  `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
+                    user.displayName || user.username || 'User'
+                  )}.svg`
+                }
+                alt="Avatar"
+                className="topbar-profile-img"
+                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+              />
               <div className="topbar-name">{user.displayName || user.username}</div>
             </div>
+
             <button className="hamburger-btn" onClick={() => setShowDropdown(prev => !prev)}>☰</button>
           </div>
           <div className="mobile-stats">
             <div>Total Score: {totalScore}</div>
             <div>Games Left: {gamesLeft}</div>
-            <div>AZTEC Letters: {aztecLetters.join(' ') || '-'}</div>
+            <div>AZTEC Letters: {renderAztecLetters()}</div>
             <div>Your Position: {userPosition || '-'}</div>
             <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
           </div>

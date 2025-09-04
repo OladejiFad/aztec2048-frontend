@@ -12,15 +12,22 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check JWT on app load
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     const fetchUser = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
-          method: 'GET',
-          credentials: 'include', // always include cookies
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
+          localStorage.removeItem('token');
           setUser(null);
           return;
         }
@@ -28,7 +35,7 @@ function App() {
         const data = await res.json();
         setUser(data);
       } catch (err) {
-        console.error('❌ Failed to fetch user:', err);
+        console.error(err);
         setUser(null);
       } finally {
         setLoading(false);
@@ -42,26 +49,20 @@ function App() {
 
   return (
     <Routes>
-      {/* Landing page */}
       <Route path="/" element={<PreDashboardScreen />} />
-
-      {/* Login & Register */}
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-      {/* Dashboard (protected) */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
       />
 
-      {/* Leaderboard (protected) */}
       <Route
         path="/leaderboard"
         element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
       />
 
-      {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

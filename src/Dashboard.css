@@ -177,6 +177,45 @@ button:hover {
   padding: 20px;
 }
 
+/* Dashboard.css */
+
+.aztec-letter-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
+}
+
+.aztec-letter-badge.flash {
+  animation: flashBadge 0.8s ease-in-out forwards;
+}
+
+@keyframes flashBadge {
+  0% {
+    transform: scale(1);
+    background-color: #4caf50;
+    color: white;
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.5);
+    background-color: #ffeb3b;
+    color: #000;
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    background-color: #4caf50;
+    color: white;
+    opacity: 1;
+  }
+}
+
+
+
 /* --- No games left message --- */
 .no-games-left {
   font-size: 18px;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Auth.css';
 import { useNavigate, Link } from 'react-router-dom';
-import aztecLogo from './assets/azteclogo.jpg'; // adjust path if needed
+import aztecLogo from './assets/azteclogo.jpg';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,11 +13,8 @@ export default function RegisterScreen({ setUser }) {
   const [showInfo, setShowInfo] = useState(false);
   const navigate = useNavigate();
 
-  // Auto-expand guide on desktop
   useEffect(() => {
-    if (window.innerWidth >= 768) {
-      setShowInfo(true);
-    }
+    if (window.innerWidth >= 768) setShowInfo(true);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -27,19 +24,17 @@ export default function RegisterScreen({ setUser }) {
     try {
       const res = await fetch(`${BACKEND_URL}/auth/register`, {
         method: 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ displayName, email, password }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Registration failed');
-        return;
-      }
+      if (!res.ok) return setError(data.error || 'Registration failed');
 
+      // Store JWT
+      localStorage.setItem('token', data.token);
       setUser(data.user);
-      navigate('/login');
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError('An error occurred. Please try again.');
@@ -49,45 +44,20 @@ export default function RegisterScreen({ setUser }) {
   return (
     <div className="auth-page">
       <img src={aztecLogo} alt="Aztec Logo" className="auth-logo" />
-
       <div className="auth-card">
         <h2>Register</h2>
         {error && <p className="error">{error}</p>}
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Display Name"
-            value={displayName}
-            required
-            onChange={(e) => setDisplayName(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <input type="text" placeholder="Display Name" value={displayName} required onChange={e => setDisplayName(e.target.value)} />
+          <input type="email" placeholder="Email" value={email} required onChange={e => setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" value={password} required onChange={e => setPassword(e.target.value)} />
           <button type="submit">Register</button>
         </form>
-        <p>
-          Already have an account? <Link to="/login">Login here</Link>
-        </p>
+        <p>Already have an account? <Link to="/login">Login here</Link></p>
       </div>
 
-      {/* Collapsible Info Section */}
       <div className="auth-info">
-        <button
-          className="toggle-btn"
-          onClick={() => setShowInfo(!showInfo)}
-        >
+        <button className="toggle-btn" onClick={() => setShowInfo(!showInfo)}>
           {showInfo ? 'Hide Airdrop Guide ▲' : 'Show Airdrop Guide ▼'}
         </button>
 
@@ -101,9 +71,7 @@ export default function RegisterScreen({ setUser }) {
               <li>Join the community on Discord, share insights, and help others.</li>
               <li>Stay tuned to official channels for updates.</li>
             </ul>
-            <p className="note">
-              🟡 Note: No airdrop has been officially announced. Participation doesn’t guarantee rewards.
-            </p>
+            <p className="note">🟡 Note: No airdrop has been officially announced. Participation doesn’t guarantee rewards.</p>
           </div>
         )}
       </div>
