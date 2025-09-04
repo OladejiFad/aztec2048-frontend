@@ -45,7 +45,6 @@ export default function Dashboard({ user }) {
 
   // --- Handle score changes ---
   const handleScoreChange = (score) => {
-    // Update letters
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
 
@@ -54,9 +53,10 @@ export default function Dashboard({ user }) {
 
     setAztecLetters(letters);
 
-    // Submit score but don’t block the game
-    submitScore(score).catch(err => console.error(err));
+    // TEMP: comment out score submission to backend
+    // submitScore(score);
   };
+
 
   // --- Reset game ---
   const handleReset = () => {
