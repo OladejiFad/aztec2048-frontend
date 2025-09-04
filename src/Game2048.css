@@ -1,109 +1,64 @@
-.game-container {
-  background: #ecf0f1;
-  padding: 15px;
-  border-radius: 10px;
-  display: inline-block;
-  position: relative;
+.game-2048-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
 }
 
-.grid {
+.game-2048-container h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+/* Board */
+.board {
   display: grid;
-  grid-template-columns: repeat(4, 80px);
-  grid-template-rows: repeat(4, 80px);
-  gap: 10px;
-  margin-top: 15px;
+  grid-template-columns: repeat(4, 70px);
+  grid-template-rows: repeat(4, 70px);
+  gap: 5px;
+  background-color: #bbada0;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-.cell {
-  position: relative;
-  border-radius: 10px;
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  width: 70px;
+  height: 70px;
+  background-color: #cdc1b4;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
   font-weight: bold;
-  font-size: 24px;
-  color: #333;
-  transition: all 0.3s;
-  background: #f0f0f0; /* default empty cell color */
+  font-size: 20px;
+  color: #776e65;
 }
 
-.cell-number {
-  z-index: 2;
+/* Controls */
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* Tile colors based on number */
-.cell-2 { background: #fcefe6; color: #776e65; }
-.cell-4 { background: #f2e8cb; color: #776e65; }
-.cell-8 { background: #f5b682; color: #fff; }
-.cell-16 { background: #f29446; color: #fff; }
-.cell-32 { background: #f27c5f; color: #fff; }
-.cell-64 { background: #f55d37; color: #fff; }
-.cell-128 { background: #ebcf74; color: #fff; font-size: 20px; }
-.cell-256 { background: #ebcc62; color: #fff; font-size: 20px; }
-.cell-512 { background: #e3c542; color: #fff; font-size: 18px; }
-.cell-1024 { background: #e0b02e; color: #fff; font-size: 16px; }
-.cell-2048 { background: #e0a21c; color: #fff; font-size: 16px; }
+/* Responsive board */
+@media screen and (max-width: 768px) {
+  .board {
+    grid-template-columns: repeat(4, 60px);
+    grid-template-rows: repeat(4, 60px);
+  }
 
-.game-over {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #0b57d0;
-  color: #fff;
-  padding: 25px 35px;
-  border-radius: 12px;
-  text-align: center;
-  z-index: 100;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-.game-over button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  background: #27ae60;
-  color: #fff;
-  cursor: pointer;
-}
-
-.game-over button:hover {
-  background: #2ecc71;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .grid { grid-template-columns: repeat(4, 60px); grid-template-rows: repeat(4, 60px); gap: 8px; }
-  .cell-number { font-size: 1.2rem; }
-}
-
-@media (max-width: 500px) {
-  .grid { grid-template-columns: repeat(4, 50px); grid-template-rows: repeat(4, 50px); gap: 6px; }
-  .cell-number { font-size: 1rem; }
-}
-
-/* Pop animation for new tiles */
-.new-tile {
-  animation: pop 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes pop {
-  0% { transform: scale(0); opacity: 0; }
-  70% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-/* Merge animation for combined tiles */
-.merged-tile {
-  animation: merge 0.25s ease-out;
-  box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-
-@keyframes merge {
-  0% { transform: scale(1.2); }
-  50% { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  .board-cell {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+  }
 }

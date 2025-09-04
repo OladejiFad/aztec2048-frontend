@@ -1,9 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
-import { useNavigate } from 'react-router-dom';
-import AztecLogo from './assets/azteclogo.jpg';
 
 const AZTEC_MILESTONES = [
   { score: 6000, letter: 'A' },
@@ -13,72 +12,221 @@ const AZTEC_MILESTONES = [
   { score: 30000, letter: 'C' },
 ];
 
-export default function Dashboard({ user }) {
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+function Dashboard() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [totalScore, setTotalScore] = useState(0);
+  const [gamesLeft, setGamesLeft] = useState(7);
   const [aztecLetters, setAztecLetters] = useState([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userPosition, setUserPosition] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
   const gameRef = useRef();
-  const lettersTimeoutRef = useRef();
+  const popupRef = useRef(null);
+  const popupIntervalRef = useRef(null);
+  const lettersTimeoutRef = useRef(null);
+
   const navigate = useNavigate();
 
-  // --- Handle score changes ---
-  const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
-    const newLetters = letters.filter(l => !aztecLetters.includes(l));
+  // --- Responsive ---
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
-    lettersTimeoutRef.current = setTimeout(() => newLetters.forEach(playLetterSound), 50);
-
-    setAztecLetters(letters);
-  };
-
-  // --- Reset game ---
-  const handleReset = () => {
-    setAztecLetters([]);
-    gameRef.current?.resetGame();
-  };
-
-  // --- Logout ---
-  const handleLogout = async () => {
+  // --- Fetch user info ---
+  const fetchUser = async () => {
+    setLoading(true);
     try {
-      await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/logout`, { method: 'GET', credentials: 'include' });
-      navigate('/login');
+      const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
+      if (res.status === 401) {
+        setUser(null);
+        setErrorMsg('Session expired. Please log in.');
+        return;
+      }
+      const data = await res.json();
+      if (res.ok) {
+        setUser(data);
+        setTotalScore(data.totalScore || 0);
+        setGamesLeft(data.gamesLeft ?? 7);
+        setErrorMsg('');
+      } else {
+        setUser(null);
+        setErrorMsg(data.error || 'Failed to fetch user');
+      }
     } catch (err) {
+      setUser(null);
+      setErrorMsg('Network error fetching user');
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // --- Leaderboard position ---
+  useEffect(() => {
+    const fetchLeaderboardPosition = async () => {
+      if (!user) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/auth/api/leaderboard`, { credentials: 'include' });
+        const data = await res.json();
+        const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
+        const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+        const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
+        setUserPosition(pos > 0 ? pos : '-');
+      } catch (err) {
+        console.error('[ERROR] leaderboard fetch failed:', err);
+      }
+    };
+    fetchLeaderboardPosition();
+  }, [totalScore, user]);
+
+  // --- AZTEC letters ---
+  const handleScoreChange = (score) => {
+    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
+    const newLetters = letters.filter(l => !aztecLetters.includes(l));
+    if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
+    lettersTimeoutRef.current = setTimeout(() => {
+      newLetters.forEach(letter => playLetterSound(letter));
+    }, 50);
+    setAztecLetters(letters);
+  };
+
+  // --- Game reset ---
+  const handleReset = () => {
+    setAztecLetters([]);
+    if (gameRef.current) gameRef.current.resetGame();
+  };
+
+  // --- Twitter login popup ---
+  const loginWithTwitter = () => {
+    popupRef.current = window.open(
+      `${BACKEND_URL}/auth/twitter`,
+      'Twitter Login',
+      'width=600,height=600'
+    );
+    popupIntervalRef.current = setInterval(() => {
+      if (!popupRef.current || popupRef.current.closed) {
+        clearInterval(popupIntervalRef.current);
+        popupIntervalRef.current = null;
+        fetchUser();
+      }
+    }, 500);
+  };
+
+  // --- Logout ---
+  const logout = async () => {
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      setUser(null);
+    }
+  };
+
+  // --- Cleanup ---
+  useEffect(() => {
+    return () => {
+      if (popupIntervalRef.current) clearInterval(popupIntervalRef.current);
+      if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
+    };
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
+  if (!user)
+    return (
+      <p>
+        You are not logged in.{' '}
+        <button onClick={loginWithTwitter}>Login with Twitter</button>
+        {errorMsg && <span className="error-msg">{errorMsg}</span>}
+      </p>
+    );
+
   return (
     <div className="dashboard-game-container">
-      <div className="sidebar">
-        <img src={AztecLogo} alt="Aztec Logo" className="aztec-logo" />
-        <div className="profile">
-          <img src={user.photo || 'https://via.placeholder.com/50'} alt="Profile" />
-          <p>{user.displayName}</p>
+      {!isMobile ? (
+        <div className="sidebar">
+          <h2>AZTEC 2048</h2>
+          <div className="profile">
+            {user.photo && <img src={user.photo} alt="Profile" />}
+            <p>{user.displayName || user.username}</p>
+          </div>
+          <div className="stat-card"><h4>Total Score</h4><p>{totalScore}</p></div>
+          <div className="stat-card"><h4>Games Left</h4><p>{gamesLeft}</p></div>
+          <div className="stat-card"><h4>AZTEC Letters</h4><p>{aztecLetters.join(' ') || '-'}</p></div>
+          <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
+          <div className="stat-card">
+            <button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button>
+          </div>
+          <div className="stat-card">
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+          </div>
+          <div className="stat-card"><button onClick={logout}>Logout</button></div>
         </div>
-        <p>Total Score: {user.totalScore}</p>
-        <div className="aztec-letters">
-          {aztecLetters.map(l => <span key={l}>{l}</span>)}
-        </div>
-        <button onClick={handleReset}>Reset</button>
-        <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-
-      <div className="topbar">
-        <div className="dropdown">
-          <button onClick={() => setDropdownOpen(!dropdownOpen)}>☰</button>
-          {dropdownOpen && (
-            <div className="dropdown-menu">
-              <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-              <button onClick={handleLogout}>Logout</button>
+      ) : (
+        <div className="topbar-container">
+          <div className="topbar">
+            <div className="topbar-left">
+              {user.photo && <img src={user.photo} alt="Profile" className="topbar-profile-img" />}
+              <div className="topbar-name">{user.displayName || user.username}</div>
             </div>
-          )}
+            <button className="hamburger-btn" onClick={() => setShowDropdown(prev => !prev)}>☰</button>
+          </div>
+          <div className="mobile-stats">
+            <div>Total Score: {totalScore}</div>
+            <div>Games Left: {gamesLeft}</div>
+            <div>AZTEC Letters: {aztecLetters.join(' ') || '-'}</div>
+            <div>Your Position: {userPosition || '-'}</div>
+            <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
+          </div>
+          <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+            <button onClick={logout}>Logout</button>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="main-content">
-        <Game2048 ref={gameRef} onScoreChange={handleScoreChange} />
+        {gamesLeft > 0 ? (
+          <Game2048
+            ref={gameRef}
+            userId={user._id}
+            backendUrl={BACKEND_URL}
+            onScoreChange={handleScoreChange}
+            onGameOver={async (finalScore) => {
+              handleScoreChange(finalScore);
+              try {
+                const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+                  method: 'POST',
+                  credentials: 'include',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ score: finalScore }),
+                });
+                const updatedData = await res.json();
+                setTotalScore(updatedData.totalScore);
+                setGamesLeft(updatedData.gamesLeft ?? 0);
+              } catch (err) {
+                console.error('[ERROR] updating score:', err);
+              }
+            }}
+          />
+        ) : (
+          <p className="no-games-left">No games left this week.</p>
+        )}
       </div>
     </div>
   );
 }
+
+export default Dashboard;
