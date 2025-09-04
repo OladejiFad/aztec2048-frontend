@@ -29,17 +29,18 @@ button:hover {
 /* --- Sidebar (Desktop) --- */
 .sidebar {
   width: 260px;
-  background-color: #ffffff;
+  background-color: #6a0dad; /* Purple background */
   padding: 20px;
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  color: white; /* Text color */
 }
 
 .sidebar h2 {
   margin-top: 0;
-  color: #333;
+  color: #fff;
 }
 
 .profile {
@@ -55,30 +56,33 @@ button:hover {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
+  border: 2px solid #fff; /* Optional: white border */
 }
 
 .stat-card {
-  background-color: #f9f9f9;
+  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent card */
   padding: 12px;
   border-radius: 8px;
   text-align: center;
+  color: #fff;
 }
 
 .stat-card h4 {
   margin: 0;
   font-size: 14px;
-  color: #555;
+  color: #f0e6ff;
 }
 
 .stat-card p {
   margin: 5px 0 0 0;
   font-weight: bold;
   font-size: 16px;
+  color: #fff;
 }
 
 .stat-card button {
-  background-color: #4caf50; /* green */
-  color: white;
+  background-color: #b19cd9; /* lighter purple button */
+  color: #fff;
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
@@ -88,9 +92,8 @@ button:hover {
 }
 
 .stat-card button:hover {
-  background-color: #45a049;
+  background-color: #a17ac9;
 }
-
 
 /* --- Mobile Topbar --- */
 .topbar-container {
@@ -101,9 +104,10 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #6a0dad; /* Purple topbar */
   padding: 10px 15px;
   border-bottom: 1px solid #ddd;
+  color: #fff;
 }
 
 .topbar-left {
@@ -117,17 +121,19 @@ button:hover {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #fff;
 }
 
 .topbar-name {
   font-weight: bold;
   font-size: 16px;
+  color: #fff;
 }
 
 .hamburger-btn {
   font-size: 22px;
   background: none;
-  color: #333;
+  color: #fff;
 }
 
 .mobile-stats {
