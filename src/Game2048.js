@@ -7,6 +7,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
 
+  // Expose resetGame to parent
   useImperativeHandle(ref, () => ({
     resetGame() {
       setScore(0);
@@ -14,14 +15,17 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     },
   }));
 
+  // Initialize board with two tiles
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
 
+  // Notify parent on score change
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
+  // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -76,7 +80,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   function moveRight(b) {
     return b.map(row => {
-      const s = slide(row.reverse());
+      const s = slide(row.slice().reverse());
       while (s.length < SIZE) s.push(null);
       return s.reverse();
     });
@@ -138,16 +142,12 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     <div className="game-2048-container">
       <h3>Score: {score}</h3>
       <div className="board">
-        {board.map((row, i) => (
-          <div key={i} className="board-row">
-            {row.map((cell, j) => (
-              <div key={j} className={`board-cell tile-${cell || 0}`}>
-                {cell || ''}
-                {cell && <span className="tile-label">Aztec</span>}
-              </div>
-            ))}
+        {board.flatMap((row, i) => row.map((cell, j) => (
+          <div key={`${i}-${j}`} className={`board-cell tile-${cell || 0}`}>
+            {cell || ''}
+            {cell && <span className="tile-label">Aztec</span>}
           </div>
-        ))}
+        )))}
       </div>
       <div className="controls">
         <button onClick={() => handleMove('up')}>Up</button>

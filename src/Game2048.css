@@ -20,10 +20,12 @@
 /* Board */
 .board {
   display: grid;
-  grid-template-columns: repeat(4, 80px);
-  grid-template-rows: repeat(4, 80px);
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: 10px;
-  background-color: #bbada0; /* beige background */
+  width: 320px;
+  height: 320px;
+  background-color: #f5f2e7; /* beige */
   padding: 10px;
   border-radius: 12px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
@@ -31,10 +33,8 @@
 
 /* Tiles */
 .board-cell {
-  width: 80px;
-  height: 80px;
-  background-color: #cdc1b4; /* empty tile color */
-  border-radius: 6px;
+  background-color: #eee4da; /* default empty tile */
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -45,15 +45,14 @@
   transition: all 0.2s ease;
 }
 
-/* AZTEC label */
-.board-cell::after {
-  content: 'az';
+/* Aztec watermark */
+.tile-label {
   position: absolute;
-  bottom: 3px;
-  right: 5px;
+  bottom: 4px;
+  right: 4px;
   font-size: 10px;
-  color: rgba(0,0,0,0.3);
-  font-weight: normal;
+  color: rgba(0,0,0,0.2);
+  pointer-events: none;
 }
 
 /* Tile colors */
@@ -95,13 +94,12 @@
 /* Responsive */
 @media screen and (max-width: 768px) {
   .board {
-    grid-template-columns: repeat(4, 60px);
-    grid-template-rows: repeat(4, 60px);
+    width: 240px;
+    height: 240px;
+    gap: 6px;
   }
 
   .board-cell {
-    width: 60px;
-    height: 60px;
     font-size: 18px;
   }
 

@@ -1,116 +1,149 @@
+/* --- Page Wrapper --- */
+.leaderboard-page {
+  min-height: 100vh;
+  background: #f5f3f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+}
+
+/* --- Header --- */
+.leaderboard-header {
+  width: 100%;
+  background: #6a0dad; /* Purple theme */
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leaderboard-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.leaderboard-header button {
+  background: #fff;
+  color: #6a0dad;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.leaderboard-header button:hover {
+  background: #ddd;
+}
+
+/* --- Container --- */
 .leaderboard-container {
-  max-width: 600px;
+  width: 100%;
+  max-width: 700px;
   margin: 20px auto;
   background: #fff;
   padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.leaderboard-container h2 {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.leaderboard-container button {
-  background: #27ae60;
-  color: #fff;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .leaderboard-container ol {
   padding-left: 0;
   list-style: none;
+  margin: 0;
 }
 
+/* --- Items --- */
 .leaderboard-item {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* align items to left for spacing */
-  padding: 10px 8px; /* slightly more padding */
-  border-bottom: 1px solid #ccc;
-  gap: 12px; /* spacing between avatar, name, and score */
+  justify-content: flex-start;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  gap: 12px;
+  transition: background 0.2s ease-in-out;
 }
 
-.leaderboard-item img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-item:hover {
+  background: rgba(106, 13, 173, 0.08); /* purple hover */
 }
 
 .leaderboard-rank {
-  width: 40px;
+  width: 45px;
   text-align: center;
   font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.leaderboard-item img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .leaderboard-name {
   flex-grow: 1;
-  margin-left: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
 }
 
 .leaderboard-score {
   font-weight: bold;
-  min-width: 50px;
+  font-size: 1rem;
+  color: #6a0dad;
+  min-width: 60px;
   text-align: right;
 }
 
-/* Top 3 colors & subtle background highlight */
+/* --- Top 3 special highlight --- */
 .leaderboard-item.rank-1 {
-  color: #ffbf00; /* gold */
-  background: rgba(255, 191, 0, 0.1);
+  color: #ffbf00;
+  background: rgba(255, 191, 0, 0.12);
   border-radius: 6px;
 }
 
 .leaderboard-item.rank-2 {
-  color: #c0c0c0; /* silver */
-  background: rgba(192, 192, 192, 0.1);
+  color: #c0c0c0;
+  background: rgba(192, 192, 192, 0.12);
   border-radius: 6px;
 }
 
 .leaderboard-item.rank-3 {
-  color: #cd7f32; /* bronze */
-  background: rgba(205, 127, 50, 0.1);
+  color: #cd7f32;
+  background: rgba(205, 127, 50, 0.12);
   border-radius: 6px;
 }
 
-/* Hover effect for all items */
-.leaderboard-item:hover {
-  background: rgba(39, 174, 96, 0.1);
-  transition: background 0.2s ease-in-out;
-}
-
-/* Responsive */
-@media (max-width: 500px) {
-  .leaderboard-container {
-    width: 95%;
-    padding: 10px;
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .leaderboard-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
   }
 
-  .leaderboard-container button {
-    width: 100%;
-    font-size: 0.9rem;
+  .leaderboard-container {
+    width: 95%;
+    padding: 12px;
   }
 
   .leaderboard-item {
     flex-direction: column;
     align-items: flex-start;
-    padding: 5px 0;
-    gap: 4px; /* smaller gap on mobile */
-  }
-
-  .leaderboard-item img {
-    margin-bottom: 4px;
+    gap: 6px;
   }
 
   .leaderboard-rank,
   .leaderboard-score {
-    margin-bottom: 4px;
     text-align: left;
   }
 }

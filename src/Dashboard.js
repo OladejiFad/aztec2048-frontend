@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
+import aztecLogo from '../assets/azteclogo.jpg';
 
 const AZTEC_MILESTONES = [
   { score: 6000, letter: 'A' },
@@ -148,7 +149,10 @@ function Dashboard() {
     <div className="dashboard-game-container">
       {!isMobile ? (
         <div className="sidebar">
-          <h2>AZTEC 2048</h2>
+          <div className="logo-container">
+            <img src={aztecLogo} alt="Aztec Logo" className="logo-img" />
+          </div>
+          <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile">
             {user.photo && <img src={user.photo} alt="Profile" />}
             <p>{user.displayName || user.username}</p>

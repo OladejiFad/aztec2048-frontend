@@ -10,13 +10,13 @@ button {
   border: none;
   border-radius: 5px;
   padding: 8px 12px;
-  background-color: #4caf50;
+  background-color: #6a0dad; /* Purple theme */
   color: white;
   transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #580b99;
 }
 
 /* --- Dashboard Container --- */
@@ -30,18 +30,30 @@ button:hover {
 /* --- Sidebar (Desktop) --- */
 .sidebar {
   width: 260px;
-  background-color: #f9f6f2; /* light beige */
+  background-color: #6a0dad; /* Purple sidebar */
   padding: 20px;
-  border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  color: #333;
+  color: #fff;
 }
 
-.sidebar h2 {
-  margin-top: 0;
-  color: #776e65; /* classic 2048 text color */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.logo-img {
+  width: 100px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin: 0;
+  color: #fff;
 }
 
 .profile {
@@ -57,43 +69,40 @@ button:hover {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
-  border: 2px solid #ccc;
+  border: 2px solid #fff;
 }
 
 .stat-card {
-  background-color: #ede4da; /* light tile color */
+  background-color: rgba(255, 255, 255, 0.15);
   padding: 12px;
   border-radius: 8px;
   text-align: center;
-  color: #333;
+  color: #fff;
 }
 
 .stat-card h4 {
   margin: 0;
   font-size: 14px;
-  color: #776e65;
+  color: #e0d4f7;
 }
 
 .stat-card p {
   margin: 5px 0 0 0;
   font-weight: bold;
   font-size: 16px;
-  color: #333;
+  color: #fff;
 }
 
 .stat-card button {
-  background-color: #8f7a66;
-  color: #f9f6f2;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  background-color: #fff;
+  color: #6a0dad;
   font-weight: bold;
+  border-radius: 6px;
   transition: background-color 0.2s ease;
 }
 
 .stat-card button:hover {
-  background-color: #9f8b76;
+  background-color: #ddd;
 }
 
 /* --- Mobile Topbar --- */
@@ -105,10 +114,10 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f9f6f2;
+  background-color: #6a0dad;
   padding: 10px 15px;
   border-bottom: 1px solid #ddd;
-  color: #333;
+  color: #fff;
 }
 
 .topbar-left {
@@ -122,19 +131,19 @@ button:hover {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #ccc;
+  border: 2px solid #fff;
 }
 
 .topbar-name {
   font-weight: bold;
   font-size: 16px;
-  color: #333;
+  color: #fff;
 }
 
 .hamburger-btn {
   font-size: 22px;
   background: none;
-  color: #333;
+  color: #fff;
 }
 
 .mobile-stats {

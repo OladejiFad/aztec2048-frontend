@@ -32,22 +32,32 @@ export default function LeaderboardScreen({ user }) {
   };
 
   return (
-    <div className="leaderboard-container">
-      <h2>Leaderboard</h2>
-      <button onClick={() => navigate('/dashboard')}>Back</button>
-      <ol>
-        {users.map((u, idx) => (
-          <li key={u._id} className={`leaderboard-item rank-${idx + 1}`}>
-            <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
-            <img
-              src={u.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(u.displayName)}.svg`}
-              alt="Avatar"
-            />
-            <span className="leaderboard-name">{u.displayName}</span>
-            <span className="leaderboard-score">{u.totalScore}</span>
-          </li>
-        ))}
-      </ol>
+    <div className="leaderboard-page">
+      <div className="leaderboard-header">
+        <h2>Leaderboard</h2>
+        <button onClick={() => navigate('/dashboard')}>Back</button>
+      </div>
+
+      <div className="leaderboard-container">
+        <ol>
+          {users.map((u, idx) => (
+            <li key={u._id} className={`leaderboard-item rank-${idx + 1}`}>
+              <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
+              <img
+                src={
+                  u.photo ||
+                  `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
+                    u.displayName || 'User'
+                  )}.svg`
+                }
+                alt="Avatar"
+              />
+              <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
+              <span className="leaderboard-score">{u.totalScore}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
