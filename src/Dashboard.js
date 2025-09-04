@@ -44,7 +44,7 @@ function Dashboard() {
 
       if (res.status === 401) {
         setUser(null);
-        navigate('/login', { replace: true }); // Redirect to login if session expired
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -54,7 +54,7 @@ function Dashboard() {
         setGamesLeft(data.gamesLeft ?? 7);
       } else {
         setUser(null);
-        navigate('/login', { replace: true }); // Redirect on any other failure
+        navigate('/login', { replace: true });
       }
     } catch (err) {
       console.error('Network error fetching user', err);
@@ -98,6 +98,24 @@ function Dashboard() {
     setAztecLetters(letters);
   };
 
+  // --- Game over ---
+  const handleGameOver = async (finalScore) => {
+    handleScoreChange(finalScore);
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score: finalScore }),
+      });
+      const updatedData = await res.json();
+      setTotalScore(updatedData.totalScore);
+      setGamesLeft(updatedData.gamesLeft ?? 0);
+    } catch (err) {
+      console.error('[ERROR] updating score:', err);
+    }
+  };
+
   // --- Game reset ---
   const handleReset = () => {
     setAztecLetters([]);
@@ -112,7 +130,7 @@ function Dashboard() {
       console.error('Logout failed:', err);
     } finally {
       setUser(null);
-      navigate('/login', { replace: true }); // Redirect to login after logout
+      navigate('/login', { replace: true });
     }
   };
 
@@ -124,7 +142,7 @@ function Dashboard() {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return null; // Redirect handled in useEffect
+  if (!user) return null;
 
   return (
     <div className="dashboard-game-container">
@@ -174,25 +192,8 @@ function Dashboard() {
         {gamesLeft > 0 ? (
           <Game2048
             ref={gameRef}
-            userId={user._id}
-            backendUrl={BACKEND_URL}
             onScoreChange={handleScoreChange}
-            onGameOver={async (finalScore) => {
-              handleScoreChange(finalScore);
-              try {
-                const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
-                  method: 'POST',
-                  credentials: 'include',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ score: finalScore }),
-                });
-                const updatedData = await res.json();
-                setTotalScore(updatedData.totalScore);
-                setGamesLeft(updatedData.gamesLeft ?? 0);
-              } catch (err) {
-                console.error('[ERROR] updating score:', err);
-              }
-            }}
+            onGameOver={handleGameOver}
           />
         ) : (
           <p className="no-games-left">No games left this week.</p>

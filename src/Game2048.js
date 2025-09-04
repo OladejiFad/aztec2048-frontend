@@ -3,7 +3,7 @@ import './Game2048.css';
 
 const SIZE = 4; // 4x4 board
 
-const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, ref) => {
+const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
 
@@ -24,6 +24,21 @@ const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, 
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
+
+  // Keyboard support
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+        case 'ArrowUp': handleMove('up'); break;
+        case 'ArrowDown': handleMove('down'); break;
+        case 'ArrowLeft': handleMove('left'); break;
+        case 'ArrowRight': handleMove('right'); break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [board]);
 
   // --- Helper functions ---
   function generateEmptyBoard() {
@@ -60,21 +75,19 @@ const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, 
   }
 
   function moveLeft(b) {
-    const newBoard = b.map(row => {
+    return b.map(row => {
       const s = slide(row);
       while (s.length < SIZE) s.push(null);
       return s;
     });
-    return newBoard;
   }
 
   function moveRight(b) {
-    const newBoard = b.map(row => {
+    return b.map(row => {
       const s = slide(row.reverse());
       while (s.length < SIZE) s.push(null);
       return s.reverse();
     });
-    return newBoard;
   }
 
   function transpose(b) {
@@ -82,15 +95,11 @@ const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, 
   }
 
   function moveUp(b) {
-    const transposed = transpose(b);
-    const moved = moveLeft(transposed);
-    return transpose(moved);
+    return transpose(moveLeft(transpose(b)));
   }
 
   function moveDown(b) {
-    const transposed = transpose(b);
-    const moved = moveRight(transposed);
-    return transpose(moved);
+    return transpose(moveRight(transpose(b)));
   }
 
   function boardsEqual(a, b) {
@@ -103,20 +112,11 @@ const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, 
   function handleMove(direction) {
     let newBoard;
     switch (direction) {
-      case 'up':
-        newBoard = moveUp(board);
-        break;
-      case 'down':
-        newBoard = moveDown(board);
-        break;
-      case 'left':
-        newBoard = moveLeft(board);
-        break;
-      case 'right':
-        newBoard = moveRight(board);
-        break;
-      default:
-        return;
+      case 'up': newBoard = moveUp(board); break;
+      case 'down': newBoard = moveDown(board); break;
+      case 'left': newBoard = moveLeft(board); break;
+      case 'right': newBoard = moveRight(board); break;
+      default: return;
     }
 
     if (!boardsEqual(board, newBoard)) {
@@ -127,11 +127,9 @@ const Game2048 = forwardRef(({ userId, backendUrl, onScoreChange, onGameOver }, 
   }
 
   function checkGameOver(b) {
-    // Check for empty cells
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE; j++) if (!b[i][j]) return false;
 
-    // Check for possible merges
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE - 1; j++)
         if (b[i][j] === b[i][j + 1]) return false;

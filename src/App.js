@@ -5,7 +5,6 @@ import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import Dashboard from './Dashboard';
 import LeaderboardScreen from './LeaderboardScreen';
-import ProtectedRoute from './ProtectedRoute';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -39,32 +38,18 @@ function App() {
 
   return (
     <Routes>
-      {/* Landing page: always show PreDashboardScreen */}
+      {/* Landing page */}
       <Route path="/" element={<PreDashboardScreen />} />
 
       {/* Login & Register */}
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-      {/* Protected Dashboard */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute user={user}>
-            <Dashboard user={user} />
-          </ProtectedRoute>
-        }
-      />
+      {/* Dashboard */}
+      <Route path="/dashboard" element={<Dashboard user={user} />} />
 
-      {/* Protected Leaderboard */}
-      <Route
-        path="/leaderboard"
-        element={
-          <ProtectedRoute user={user}>
-            <LeaderboardScreen user={user} />
-          </ProtectedRoute>
-        }
-      />
+      {/* Leaderboard */}
+      <Route path="/leaderboard" element={<LeaderboardScreen user={user} />} />
 
       {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />

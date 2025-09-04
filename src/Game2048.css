@@ -23,7 +23,7 @@
   grid-template-columns: repeat(4, 70px);
   grid-template-rows: repeat(4, 70px);
   gap: 8px;
-  background-color: #bbada0;
+  background-color: #6a0dad; /* purple */
   padding: 10px;
   border-radius: 12px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
@@ -37,29 +37,41 @@
 .board-cell {
   width: 70px;
   height: 70px;
-  background-color: #cdc1b4;
+  background-color: #9b59b6; /* default purple tile */
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
   font-size: 20px;
-  color: #776e65;
+  color: #fff;
+  position: relative;
   transition: all 0.2s ease;
 }
 
-/* Different tile colors */
-.tile-2 { background-color: #eee4da; color: #776e65; }
-.tile-4 { background-color: #ede0c8; color: #776e65; }
-.tile-8 { background-color: #f2b179; color: #f9f6f2; }
-.tile-16 { background-color: #f59563; color: #f9f6f2; }
-.tile-32 { background-color: #f67c5f; color: #f9f6f2; }
-.tile-64 { background-color: #f65e3b; color: #f9f6f2; }
-.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 18px; }
-.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 18px; }
-.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 18px; }
-.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 16px; }
-.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 16px; }
+/* "AZTEC" label */
+.board-cell::after {
+  content: 'AZTEC';
+  position: absolute;
+  bottom: 3px;
+  left: 5px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  font-weight: normal;
+}
+
+/* Different tile colors (purple shades) */
+.tile-2 { background-color: #8e44ad; }
+.tile-4 { background-color: #9b59b6; }
+.tile-8 { background-color: #af7ac5; }
+.tile-16 { background-color: #b388eb; }
+.tile-32 { background-color: #d2b4de; }
+.tile-64 { background-color: #c39bd3; }
+.tile-128 { background-color: #bb8fce; font-size: 18px; }
+.tile-256 { background-color: #a569bd; font-size: 18px; }
+.tile-512 { background-color: #884ea0; font-size: 18px; }
+.tile-1024 { background-color: #76448a; font-size: 16px; }
+.tile-2048 { background-color: #633974; font-size: 16px; }
 
 /* Controls */
 .controls {
@@ -84,7 +96,7 @@
   background-color: #9f8b76;
 }
 
-/* Responsive board */
+/* Responsive */
 @media screen and (max-width: 768px) {
   .board {
     grid-template-columns: repeat(4, 60px);
