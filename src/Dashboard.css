@@ -24,23 +24,24 @@ button:hover {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
+  background-color: #f0f2f5;
 }
 
 /* --- Sidebar (Desktop) --- */
 .sidebar {
   width: 260px;
-  background-color: #6a0dad; /* Purple background */
+  background-color: #f9f6f2; /* light beige */
   padding: 20px;
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  color: white; /* Text color */
+  color: #333;
 }
 
 .sidebar h2 {
   margin-top: 0;
-  color: #fff;
+  color: #776e65; /* classic 2048 text color */
 }
 
 .profile {
@@ -56,33 +57,33 @@ button:hover {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
-  border: 2px solid #fff; /* Optional: white border */
+  border: 2px solid #ccc;
 }
 
 .stat-card {
-  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent card */
+  background-color: #ede4da; /* light tile color */
   padding: 12px;
   border-radius: 8px;
   text-align: center;
-  color: #fff;
+  color: #333;
 }
 
 .stat-card h4 {
   margin: 0;
   font-size: 14px;
-  color: #f0e6ff;
+  color: #776e65;
 }
 
 .stat-card p {
   margin: 5px 0 0 0;
   font-weight: bold;
   font-size: 16px;
-  color: #fff;
+  color: #333;
 }
 
 .stat-card button {
-  background-color: #b19cd9; /* lighter purple button */
-  color: #fff;
+  background-color: #8f7a66;
+  color: #f9f6f2;
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
@@ -92,7 +93,7 @@ button:hover {
 }
 
 .stat-card button:hover {
-  background-color: #a17ac9;
+  background-color: #9f8b76;
 }
 
 /* --- Mobile Topbar --- */
@@ -104,10 +105,10 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #6a0dad; /* Purple topbar */
+  background-color: #f9f6f2;
   padding: 10px 15px;
   border-bottom: 1px solid #ddd;
-  color: #fff;
+  color: #333;
 }
 
 .topbar-left {
@@ -121,19 +122,19 @@ button:hover {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #fff;
+  border: 2px solid #ccc;
 }
 
 .topbar-name {
   font-weight: bold;
   font-size: 16px;
-  color: #fff;
+  color: #333;
 }
 
 .hamburger-btn {
   font-size: 22px;
   background: none;
-  color: #fff;
+  color: #333;
 }
 
 .mobile-stats {

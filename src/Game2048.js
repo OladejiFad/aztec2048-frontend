@@ -1,13 +1,12 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import './Game2048.css';
 
-const SIZE = 4; // 4x4 board
+const SIZE = 4;
 
 const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
 
-  // Expose resetGame to parent via ref
   useImperativeHandle(ref, () => ({
     resetGame() {
       setScore(0);
@@ -15,17 +14,14 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     },
   }));
 
-  // Initialize board with two tiles
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
 
-  // Notify parent on score change
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -40,21 +36,17 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [board]);
 
-  // --- Helper functions ---
   function generateEmptyBoard() {
-    return Array(SIZE)
-      .fill()
-      .map(() => Array(SIZE).fill(null));
+    return Array(SIZE).fill().map(() => Array(SIZE).fill(null));
   }
 
   function addRandomTile(b) {
     const empty = [];
-    for (let i = 0; i < SIZE; i++) {
-      for (let j = 0; j < SIZE; j++) {
+    for (let i = 0; i < SIZE; i++)
+      for (let j = 0; j < SIZE; j++)
         if (!b[i][j]) empty.push([i, j]);
-      }
-    }
-    if (empty.length === 0) return b;
+
+    if (!empty.length) return b;
 
     const [x, y] = empty[Math.floor(Math.random() * empty.length)];
     const newBoard = b.map(row => row.slice());
@@ -128,7 +120,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   function checkGameOver(b) {
     for (let i = 0; i < SIZE; i++)
-      for (let j = 0; j < SIZE; j++) if (!b[i][j]) return false;
+      for (let j = 0; j < SIZE; j++)
+        if (!b[i][j]) return false;
 
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE - 1; j++)
@@ -150,6 +143,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
             {row.map((cell, j) => (
               <div key={j} className={`board-cell tile-${cell || 0}`}>
                 {cell || ''}
+                {cell && <span className="tile-label">Aztec</span>}
               </div>
             ))}
           </div>
