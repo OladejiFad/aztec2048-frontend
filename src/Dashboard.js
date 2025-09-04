@@ -23,11 +23,9 @@ function Dashboard() {
   const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   const gameRef = useRef();
   const lettersTimeoutRef = useRef(null);
-
   const navigate = useNavigate();
 
   // --- Responsive ---
@@ -42,25 +40,26 @@ function Dashboard() {
     setLoading(true);
     try {
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
+      const data = await res.json();
+
       if (res.status === 401) {
         setUser(null);
-        setErrorMsg('Session expired. Please log in.');
+        navigate('/login', { replace: true }); // Redirect to login if session expired
         return;
       }
-      const data = await res.json();
+
       if (res.ok) {
         setUser(data);
         setTotalScore(data.totalScore || 0);
         setGamesLeft(data.gamesLeft ?? 7);
-        setErrorMsg('');
       } else {
         setUser(null);
-        setErrorMsg(data.error || 'Failed to fetch user');
+        navigate('/login', { replace: true }); // Redirect on any other failure
       }
     } catch (err) {
+      console.error('Network error fetching user', err);
       setUser(null);
-      setErrorMsg('Network error fetching user');
-      console.error(err);
+      navigate('/login', { replace: true });
     } finally {
       setLoading(false);
     }
@@ -113,6 +112,7 @@ function Dashboard() {
       console.error('Logout failed:', err);
     } finally {
       setUser(null);
+      navigate('/login', { replace: true }); // Redirect to login after logout
     }
   };
 
@@ -124,14 +124,7 @@ function Dashboard() {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-
-  if (!user)
-    return (
-      <p>
-        You are not logged in.
-        {errorMsg && <span className="error-msg">{errorMsg}</span>}
-      </p>
-    );
+  if (!user) return null; // Redirect handled in useEffect
 
   return (
     <div className="dashboard-game-container">
