@@ -13,19 +13,18 @@ const AZTEC_MILESTONES = [
   { score: 30000, letter: 'C' },
 ];
 
-// Define colors for each letter
 const LETTER_COLORS = {
-  A: '#FF4C4C', // red
-  Z: '#4C9AFF', // blue
-  T: '#FFD700', // gold
-  E: '#32CD32', // lime green
-  C: '#FF69B4', // pink
+  A: '#FF4C4C',
+  Z: '#4C9AFF',
+  T: '#FFD700',
+  E: '#32CD32',
+  C: '#FF69B4',
 };
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-function Dashboard() {
-  const [user, setUser] = useState(null);
+function Dashboard({ user: initialUser, setUser: setAppUser }) {
+  const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
   const [totalScore, setTotalScore] = useState(0);
   const [gamesLeft, setGamesLeft] = useState(7);
@@ -46,30 +45,36 @@ function Dashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- Fetch user info ---
+  // --- Fetch user info with JWT ---
   const fetchUser = async () => {
     setLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
     try {
-      const res = await fetch(`${BACKEND_URL}/auth/api/me`, { credentials: 'include' });
+      const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
 
-      if (res.status === 401) {
-        setUser(null);
+      if (!res.ok) {
+        localStorage.removeItem('token');
+        setAppUser(null);
         navigate('/login', { replace: true });
         return;
       }
 
-      if (res.ok) {
-        setUser(data);
-        setTotalScore(data.totalScore || 0);
-        setGamesLeft(data.gamesLeft ?? 7);
-      } else {
-        setUser(null);
-        navigate('/login', { replace: true });
-      }
+      setUser(data);
+      setAppUser(data);
+      setTotalScore(data.totalScore || 0);
+      setGamesLeft(data.gamesLeft ?? 7);
     } catch (err) {
       console.error('Network error fetching user', err);
-      setUser(null);
+      localStorage.removeItem('token');
+      setAppUser(null);
       navigate('/login', { replace: true });
     } finally {
       setLoading(false);
@@ -85,10 +90,12 @@ function Dashboard() {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
       try {
-        const res = await fetch(`${BACKEND_URL}/auth/api/leaderboard`, { credentials: 'include' });
+        const token = localStorage.getItem('token');
+        const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await res.json();
-        const leaderboard = Array.isArray(data.leaderboard) ? data.leaderboard : [];
-        const sorted = leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+        const sorted = Array.isArray(data) ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)) : [];
         const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
@@ -102,20 +109,12 @@ function Dashboard() {
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
-
-    // Play sound for new letters
     newLetters.forEach(letter => playLetterSound(letter));
-
-    // Highlight newly unlocked letters briefly
     if (newLetters.length > 0) {
       setHighlightLetters(newLetters);
-      setTimeout(() => setHighlightLetters([]), 800); // highlight duration
+      setTimeout(() => setHighlightLetters([]), 800);
     }
-
-    // Update triggered letters
     triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
-
-    // Update displayed letters
     setAztecLetters(letters);
   };
 
@@ -123,10 +122,10 @@ function Dashboard() {
   const handleGameOver = async (finalScore) => {
     handleScoreChange(finalScore);
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
         method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
@@ -146,21 +145,15 @@ function Dashboard() {
   };
 
   // --- Logout ---
-  const logout = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/auth/logout`, { credentials: 'include' });
-    } catch (err) {
-      console.error('Logout failed:', err);
-    } finally {
-      setUser(null);
-      navigate('/login', { replace: true });
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    setAppUser(null);
+    navigate('/login', { replace: true });
   };
 
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
-  // --- Render AZTEC letters as colored badges ---
   const renderAztecLetters = () => (
     <div style={{ display: 'flex', gap: '5px' }}>
       {aztecLetters.map(letter => (
@@ -173,7 +166,6 @@ function Dashboard() {
             padding: '5px 10px',
             borderRadius: '5px',
             fontWeight: 'bold',
-            display: 'inline-block',
             minWidth: '24px',
             textAlign: 'center',
           }}
@@ -195,12 +187,7 @@ function Dashboard() {
           <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <img
-              src={
-                user.photo ||
-                `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
-                  user.displayName || user.username || 'User'
-                )}.svg`
-              }
+              src={user.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(user.displayName || 'User')}.svg`}
               alt="Avatar"
               style={{ width: '40px', height: '40px', borderRadius: '50%' }}
             />
@@ -211,12 +198,8 @@ function Dashboard() {
           <div className="stat-card"><h4>Games Left</h4><p>{gamesLeft}</p></div>
           <div className="stat-card"><h4>AZTEC Letters</h4>{renderAztecLetters()}</div>
           <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
-          <div className="stat-card">
-            <button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button>
-          </div>
-          <div className="stat-card">
-            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-          </div>
+          <div className="stat-card"><button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button></div>
+          <div className="stat-card"><button onClick={() => navigate('/leaderboard')}>Leaderboard</button></div>
           <div className="stat-card"><button onClick={logout}>Logout</button></div>
         </div>
       ) : (
@@ -224,14 +207,8 @@ function Dashboard() {
           <div className="topbar">
             <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img
-                src={
-                  user.photo ||
-                  `https://avatars.dicebear.com/api/initials/${encodeURIComponent(
-                    user.displayName || user.username || 'User'
-                  )}.svg`
-                }
+                src={user.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(user.displayName || 'User')}.svg`}
                 alt="Avatar"
-                className="topbar-profile-img"
                 style={{ width: '32px', height: '32px', borderRadius: '50%' }}
               />
               <div className="topbar-name">{user.displayName || user.username}</div>
@@ -255,11 +232,7 @@ function Dashboard() {
 
       <div className="main-content">
         {gamesLeft > 0 ? (
-          <Game2048
-            ref={gameRef}
-            onScoreChange={handleScoreChange}
-            onGameOver={handleGameOver}
-          />
+          <Game2048 ref={gameRef} onScoreChange={handleScoreChange} onGameOver={handleGameOver} />
         ) : (
           <p className="no-games-left">No games left this week.</p>
         )}

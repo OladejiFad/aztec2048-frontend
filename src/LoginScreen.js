@@ -30,7 +30,6 @@ export default function LoginScreen({ setUser }) {
       const data = await res.json();
       if (!res.ok) return setError(data.error || 'Login failed');
 
-      // Store JWT
       localStorage.setItem('token', data.token);
       setUser(data.user);
       navigate('/dashboard');

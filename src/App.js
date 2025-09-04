@@ -55,7 +55,7 @@ function App() {
 
       <Route
         path="/dashboard"
-        element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
+        element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
       <Route
