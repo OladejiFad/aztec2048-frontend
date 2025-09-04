@@ -30,17 +30,9 @@ const hasMovesLeft = (grid) => {
 };
 
 const TILE_COLORS = {
-  2: '#fcefe6',
-  4: '#f2e8cb',
-  8: '#f5b682',
-  16: '#f29446',
-  32: '#f27c5f',
-  64: '#f55d37',
-  128: '#ebcf74',
-  256: '#ebcc62',
-  512: '#e3c542',
-  1024: '#e0b02e',
-  2048: '#e0a21c',
+  2: '#fcefe6', 4: '#f2e8cb', 8: '#f5b682', 16: '#f29446',
+  32: '#f27c5f', 64: '#f55d37', 128: '#ebcf74', 256: '#ebcc62',
+  512: '#e3c542', 1024: '#e0b02e', 2048: '#e0a21c',
 };
 
 const Game2048 = () => {
@@ -82,20 +74,10 @@ const Game2048 = () => {
       };
 
       switch (key) {
-        case 'ArrowLeft':
-          newGrid = newGrid.map(row => processRow(row));
-          break;
-        case 'ArrowRight':
-          newGrid = newGrid.map(row => processRow(row, true));
-          break;
-        case 'ArrowUp':
-          newGrid = transpose(newGrid).map(row => processRow(row));
-          newGrid = transpose(newGrid);
-          break;
-        case 'ArrowDown':
-          newGrid = transpose(newGrid).map(row => processRow(row, true));
-          newGrid = transpose(newGrid);
-          break;
+        case 'ArrowLeft': newGrid = newGrid.map(row => processRow(row)); break;
+        case 'ArrowRight': newGrid = newGrid.map(row => processRow(row, true)); break;
+        case 'ArrowUp': newGrid = transpose(newGrid).map(row => processRow(row)); newGrid = transpose(newGrid); break;
+        case 'ArrowDown': newGrid = transpose(newGrid).map(row => processRow(row, true)); newGrid = transpose(newGrid); break;
         default: return prevGrid;
       }
 
@@ -112,11 +94,36 @@ const Game2048 = () => {
     });
   }, [gameOver]);
 
+  // --- Keyboard + Touch Support ---
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
     window.addEventListener('keydown', handleKeyDown);
+
+    let startX = 0, startY = 0;
+    const handleTouchStart = e => { const t = e.touches[0]; startX = t.clientX; startY = t.clientY; };
+    const handleTouchEnd = e => {
+      const t = e.changedTouches[0];
+      const diffX = t.clientX - startX;
+      const diffY = t.clientY - startY;
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 30) handleMove('ArrowRight');
+        else if (diffX < -30) handleMove('ArrowLeft');
+      } else {
+        if (diffY > 30) handleMove('ArrowDown');
+        else if (diffY < -30) handleMove('ArrowUp');
+      }
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchend', handleTouchEnd);
+
     initGame();
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
   }, [handleMove, initGame]);
 
   return (
