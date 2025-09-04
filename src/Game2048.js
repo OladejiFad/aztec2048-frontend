@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import './Game2048.css';
 
 const GRID_SIZE = 4;
@@ -35,19 +35,29 @@ const TILE_COLORS = {
   512: '#e3c542', 1024: '#e0b02e', 2048: '#e0a21c',
 };
 
-const Game2048 = () => {
+const Game2048 = forwardRef(({ onScoreChange }, ref) => {
   const [grid, setGrid] = useState(createEmptyGrid());
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
+  // --- Initialize game ---
   const initGame = useCallback(() => {
     let result = addRandomTile(createEmptyGrid());
     result = addRandomTile(result.grid);
     setGrid(result.grid);
     setScore(0);
     setGameOver(false);
-  }, []);
+    if (onScoreChange) onScoreChange(0);
+  }, [onScoreChange]);
 
+  // --- Expose resetGame to parent via ref ---
+  useImperativeHandle(ref, () => ({
+    resetGame: () => {
+      initGame();
+    }
+  }));
+
+  // --- Move logic ---
   const handleMove = useCallback((key) => {
     setGrid(prevGrid => {
       if (gameOver) return prevGrid;
@@ -85,16 +95,20 @@ const Game2048 = () => {
 
       if (moved) {
         const result = addRandomTile(newGrid);
-        setScore(prev => prev + points);
+        setScore(prev => {
+          const newScore = prev + points;
+          if (onScoreChange) onScoreChange(newScore);
+          return newScore;
+        });
         if (!hasMovesLeft(result.grid)) setGameOver(true);
         return result.grid;
       }
 
       return prevGrid;
     });
-  }, [gameOver]);
+  }, [gameOver, onScoreChange]);
 
-  // --- Keyboard + Touch Support ---
+  // --- Keyboard + Touch support ---
   useEffect(() => {
     const handleKeyDown = e => handleMove(e.key);
     window.addEventListener('keydown', handleKeyDown);
@@ -148,6 +162,6 @@ const Game2048 = () => {
       )}
     </div>
   );
-};
+});
 
 export default Game2048;

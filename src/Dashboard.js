@@ -23,19 +23,30 @@ export default function Dashboard({ user }) {
   const lettersTimeoutRef = useRef();
   const navigate = useNavigate();
 
+  // --- Submit score to backend ---
   const submitScore = async (score) => {
     try {
-      await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+      const res = await fetch(`${BACKEND_URL}/game/score`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ score }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error('Error submitting score:', errData);
+        return;
+      }
+
+      const data = await res.json();
+      setTotalScore(data.totalScore); // update local totalScore
     } catch (err) {
-      console.error(err);
+      console.error('Network or server error submitting score:', err);
     }
   };
 
+  // --- Handle score change from Game2048 ---
   const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
@@ -44,15 +55,16 @@ export default function Dashboard({ user }) {
     lettersTimeoutRef.current = setTimeout(() => newLetters.forEach(playLetterSound), 50);
 
     setAztecLetters(letters);
-    setTotalScore(score);
-    submitScore(score);
+    submitScore(score); // send score to backend
   };
 
+  // --- Reset game ---
   const handleReset = () => {
     setAztecLetters([]);
     gameRef.current?.resetGame();
   };
 
+  // --- Logout ---
   const handleLogout = async () => {
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, { method: 'GET', credentials: 'include' });
@@ -98,8 +110,6 @@ export default function Dashboard({ user }) {
         <Game2048
           ref={gameRef}
           onScoreChange={handleScoreChange}
-          userId={user._id}
-          backendUrl={BACKEND_URL}
         />
       </div>
     </div>
