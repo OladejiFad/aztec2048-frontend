@@ -23,7 +23,7 @@ export default function Dashboard({ user }) {
   const lettersTimeoutRef = useRef();
   const navigate = useNavigate();
 
-  // --- Submit score to backend ---
+  // --- Submit score safely ---
   const submitScore = async (score) => {
     try {
       const res = await fetch(`${BACKEND_URL}/game/score`, {
@@ -33,21 +33,19 @@ export default function Dashboard({ user }) {
         body: JSON.stringify({ score }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        console.error('Error submitting score:', errData);
-        return;
-      }
-
+      console.log("Submit score response status:", res.status);
       const data = await res.json();
-      setTotalScore(data.totalScore); // update local totalScore
+      console.log("Submit score response data:", data);
+
+      if (res.ok && data.totalScore) setTotalScore(data.totalScore);
     } catch (err) {
-      console.error('Network or server error submitting score:', err);
+      console.error('Error submitting score:', err);
     }
   };
 
-  // --- Handle score change from Game2048 ---
+  // --- Handle score changes ---
   const handleScoreChange = (score) => {
+    // Update letters
     const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !aztecLetters.includes(l));
 
@@ -55,7 +53,9 @@ export default function Dashboard({ user }) {
     lettersTimeoutRef.current = setTimeout(() => newLetters.forEach(playLetterSound), 50);
 
     setAztecLetters(letters);
-    submitScore(score); // send score to backend
+
+    // Submit score but don’t block the game
+    submitScore(score).catch(err => console.error(err));
   };
 
   // --- Reset game ---
@@ -76,7 +76,6 @@ export default function Dashboard({ user }) {
 
   return (
     <div className="dashboard-game-container">
-      {/* Sidebar for large screens */}
       <div className="sidebar">
         <img src={AztecLogo} alt="Aztec Logo" className="aztec-logo" />
         <div className="profile">
@@ -92,7 +91,6 @@ export default function Dashboard({ user }) {
         <button onClick={handleLogout}>Logout</button>
       </div>
 
-      {/* Topbar for small screens */}
       <div className="topbar">
         <div className="dropdown">
           <button onClick={() => setDropdownOpen(!dropdownOpen)}>☰</button>
@@ -105,12 +103,8 @@ export default function Dashboard({ user }) {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="main-content">
-        <Game2048
-          ref={gameRef}
-          onScoreChange={handleScoreChange}
-        />
+        <Game2048 ref={gameRef} onScoreChange={handleScoreChange} />
       </div>
     </div>
   );

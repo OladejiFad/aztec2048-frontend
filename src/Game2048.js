@@ -5,12 +5,16 @@ const GRID_SIZE = 4;
 
 const createEmptyGrid = () => Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 const transpose = (grid) => grid[0].map((_, i) => grid.map(row => row[i]));
+
 const getRandomEmptyCell = (grid) => {
   const empty = [];
-  grid.forEach((row, i) => row.forEach((cell, j) => { if (cell === 0) empty.push([i, j]); }));
+  grid.forEach((row, i) => row.forEach((cell, j) => {
+    if (cell === 0) empty.push([i, j]);
+  }));
   if (!empty.length) return null;
   return empty[Math.floor(Math.random() * empty.length)];
 };
+
 const addRandomTile = (grid) => {
   const pos = getRandomEmptyCell(grid);
   if (!pos) return { grid, newTile: null };
@@ -18,6 +22,7 @@ const addRandomTile = (grid) => {
   newGrid[pos[0]][pos[1]] = Math.random() < 0.9 ? 2 : 4;
   return { grid: newGrid, newTile: pos };
 };
+
 const hasMovesLeft = (grid) => {
   for (let i = 0; i < GRID_SIZE; i++) {
     for (let j = 0; j < GRID_SIZE; j++) {
@@ -42,6 +47,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
 
   // --- Initialize game ---
   const initGame = useCallback(() => {
+    console.log("Initializing game...");
     let result = addRandomTile(createEmptyGrid());
     result = addRandomTile(result.grid);
     setGrid(result.grid);
@@ -50,15 +56,11 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     if (onScoreChange) onScoreChange(0);
   }, [onScoreChange]);
 
-  // --- Expose resetGame to parent via ref ---
-  useImperativeHandle(ref, () => ({
-    resetGame: () => {
-      initGame();
-    }
-  }));
+  useImperativeHandle(ref, () => ({ resetGame: initGame }));
 
   // --- Move logic ---
   const handleMove = useCallback((key) => {
+    console.log("Move key pressed:", key);
     setGrid(prevGrid => {
       if (gameOver) return prevGrid;
 
@@ -74,10 +76,10 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
           if (skip) { skip = false; continue; }
           if (input[i] !== 0 && input[i] === input[i + 1]) {
             const merged = input[i] * 2;
-            newRow.push(merged);
             points += merged;
+            newRow.push(merged);
             skip = true;
-          } else newRow.push(input[i]);
+          } else if (input[i] !== 0) newRow.push(input[i]);
         }
         while (newRow.length < GRID_SIZE) newRow.push(0);
         return reverse ? newRow.reverse() : newRow;
@@ -97,10 +99,14 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
         const result = addRandomTile(newGrid);
         setScore(prev => {
           const newScore = prev + points;
+          console.log("Score updated:", newScore);
           if (onScoreChange) onScoreChange(newScore);
           return newScore;
         });
-        if (!hasMovesLeft(result.grid)) setGameOver(true);
+        if (!hasMovesLeft(result.grid)) {
+          console.log("Game over!");
+          setGameOver(true);
+        }
         return result.grid;
       }
 
@@ -108,8 +114,9 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     });
   }, [gameOver, onScoreChange]);
 
-  // --- Keyboard + Touch support ---
+  // --- Event listeners ---
   useEffect(() => {
+    console.log("Mounting Game2048 component...");
     const handleKeyDown = e => handleMove(e.key);
     window.addEventListener('keydown', handleKeyDown);
 
@@ -119,6 +126,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
       const t = e.changedTouches[0];
       const diffX = t.clientX - startX;
       const diffY = t.clientY - startY;
+
       if (Math.abs(diffX) > Math.abs(diffY)) {
         if (diffX > 30) handleMove('ArrowRight');
         else if (diffX < -30) handleMove('ArrowLeft');
@@ -131,6 +139,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     window.addEventListener('touchstart', handleTouchStart);
     window.addEventListener('touchend', handleTouchEnd);
 
+    // Start a new game on mount
     initGame();
 
     return () => {
