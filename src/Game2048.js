@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import './Game2048.css';
-import AztecLogo from './assets/azteclogo.jpg';
 
 const GRID_SIZE = 4;
 
@@ -84,7 +83,6 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
             const merged = input[i] * 2;
             newRow.push(merged);
             points += merged;
-            // Save merged tile position
             const colIdx = reverse ? row.length - 1 - i : i;
             mergedPositions.push([rowIdx, colIdx]);
             skip = true;
@@ -187,11 +185,7 @@ const Game2048 = forwardRef(({ onScoreChange, userId, backendUrl }, ref) => {
               className={`cell ${cell ? `cell-${cell}` : ''} ${isNew ? 'new-tile' : ''} ${isMerged ? 'merged-tile' : ''}`}
               style={{ background: cell ? TILE_COLORS[cell] || '#eee' : '#f0f0f0' }}
             >
-              {cell ? (
-                <span className="cell-number">{cell}</span>
-              ) : (
-                <img src={AztecLogo} alt="Aztec" className="tile-logo" />
-              )}
+              {cell ? <span className="cell-number">{cell}</span> : null}
             </div>
           );
         })}
