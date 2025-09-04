@@ -16,21 +16,25 @@ function App() {
     const fetchUser = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
-          credentials: 'include',
+          method: 'GET',
+          credentials: 'include', // always include cookies
         });
+
         if (!res.ok) {
           setUser(null);
           return;
         }
+
         const data = await res.json();
         setUser(data);
       } catch (err) {
-        console.error(err);
+        console.error('❌ Failed to fetch user:', err);
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, []);
 
@@ -45,11 +49,17 @@ function App() {
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-      {/* Dashboard */}
-      <Route path="/dashboard" element={<Dashboard user={user} />} />
+      {/* Dashboard (protected) */}
+      <Route
+        path="/dashboard"
+        element={user ? <Dashboard user={user} /> : <Navigate to="/login" replace />}
+      />
 
-      {/* Leaderboard */}
-      <Route path="/leaderboard" element={<LeaderboardScreen user={user} />} />
+      {/* Leaderboard (protected) */}
+      <Route
+        path="/leaderboard"
+        element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
+      />
 
       {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
