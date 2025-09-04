@@ -26,8 +26,6 @@ function Dashboard() {
   const [errorMsg, setErrorMsg] = useState('');
 
   const gameRef = useRef();
-  const popupRef = useRef(null);
-  const popupIntervalRef = useRef(null);
   const lettersTimeoutRef = useRef(null);
 
   const navigate = useNavigate();
@@ -107,22 +105,6 @@ function Dashboard() {
     if (gameRef.current) gameRef.current.resetGame();
   };
 
-  // --- Twitter login popup ---
-  const loginWithTwitter = () => {
-    popupRef.current = window.open(
-      `${BACKEND_URL}/auth/twitter`,
-      'Twitter Login',
-      'width=600,height=600'
-    );
-    popupIntervalRef.current = setInterval(() => {
-      if (!popupRef.current || popupRef.current.closed) {
-        clearInterval(popupIntervalRef.current);
-        popupIntervalRef.current = null;
-        fetchUser();
-      }
-    }, 500);
-  };
-
   // --- Logout ---
   const logout = async () => {
     try {
@@ -137,7 +119,6 @@ function Dashboard() {
   // --- Cleanup ---
   useEffect(() => {
     return () => {
-      if (popupIntervalRef.current) clearInterval(popupIntervalRef.current);
       if (lettersTimeoutRef.current) clearTimeout(lettersTimeoutRef.current);
     };
   }, []);
@@ -147,8 +128,7 @@ function Dashboard() {
   if (!user)
     return (
       <p>
-        You are not logged in.{' '}
-        <button onClick={loginWithTwitter}>Login with Twitter</button>
+        You are not logged in.
         {errorMsg && <span className="error-msg">{errorMsg}</span>}
       </p>
     );
