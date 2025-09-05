@@ -13,14 +13,14 @@ export default function LeaderboardScreen({ user }) {
 
     const fetchLeaderboard = async () => {
       try {
-        const token = localStorage.getItem('token'); // JWT auth
+        const token = localStorage.getItem('token');
         if (!token) {
           navigate('/login', { replace: true });
           return;
         }
 
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {

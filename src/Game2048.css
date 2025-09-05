@@ -3,16 +3,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
-  width: 100%;
+  gap: 10px;
+  width: 95%;
   max-width: 400px;
   margin: 0 auto;
   padding: 10px;
+  position: relative;
 }
 
 .game-2048-container h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 5vw; /* scales with screen width */
   color: #333;
   font-weight: 600;
 }
@@ -22,52 +23,51 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
-  width: 320px;
-  height: 320px;
-  background-color: #f5f2e7; /* beige */
-  padding: 10px;
-  border-radius: 12px;
+  gap: 2%;
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: #f5f2e7;
+  padding: 2%;
+  border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: pan-x pan-y; /* allow swipe gestures on mobile */
+  touch-action: pan-x pan-y;
 }
 
 /* Tiles */
 .board-cell {
-  background-color: #eee4da; /* default empty tile */
+  background-color: #eee4da;
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 24px;
+  font-size: 4vw; /* dynamic font size */
   color: #776e65;
   position: relative;
   transition: all 0.2s ease;
 }
 
-/* Aztec watermark */
 .tile-label {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 10px;
+  bottom: 2px;
+  right: 2px;
+  font-size: 2vw;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
 }
 
-/* Tile colors */
+/* Tile Colors */
 .tile-2 { background-color: #eee4da; color: #776e65; }
 .tile-4 { background-color: #ede0c8; color: #776e65; }
 .tile-8 { background-color: #f2b179; color: #f9f6f2; }
 .tile-16 { background-color: #f59563; color: #f9f6f2; }
 .tile-32 { background-color: #f67c5f; color: #f9f6f2; }
 .tile-64 { background-color: #f65e3b; color: #f9f6f2; }
-.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 20px; }
-.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 20px; }
-.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 20px; }
-.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 18px; }
-.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 18px; }
+.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 3.5vw; }
+.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 3.5vw; }
+.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 3.5vw; }
+.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 3vw; }
+.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 3vw; }
 
 /* Tile merge animation */
 .board-cell.merged {
@@ -87,27 +87,24 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  border-radius: 12px;
+  gap: 5%;
+  border-radius: 10px;
   color: #f9f6f2;
-  opacity: 0;
-  transform: scale(0.9);
   animation: fadeIn 0.3s forwards;
 }
+
 @keyframes fadeIn {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  to { opacity: 1; transform: scale(1); }
 }
+
 .game-over-overlay h2 {
-  font-size: 28px;
+  font-size: 6vw;
   margin: 0;
 }
 
 .game-over-overlay button {
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 2% 5%;
+  font-size: 4vw;
   background-color: #8f7a66;
   color: #f9f6f2;
   border: none;
@@ -120,23 +117,13 @@
   background-color: #9f8b76;
 }
 
-/* Responsive */
-@media screen and (max-width: 768px) {
-  .board {
-    width: 240px;
-    height: 240px;
-    gap: 6px;
-  }
-
-  .board-cell {
-    font-size: 18px;
-  }
-
-  .tile-128, .tile-256, .tile-512 {
-    font-size: 16px;
-  }
-
-  .tile-1024, .tile-2048 {
-    font-size: 14px;
-  }
+/* Responsive Adjustments for Tiny Screens */
+@media screen and (max-width: 360px) {
+  .game-2048-container h3 { font-size: 6vw; }
+  .board-cell { font-size: 5vw; }
+  .tile-128, .tile-256, .tile-512 { font-size: 4.5vw; }
+  .tile-1024, .tile-2048 { font-size: 4vw; }
+  .tile-label { font-size: 3vw; }
+  .game-over-overlay h2 { font-size: 7vw; }
+  .game-over-overlay button { font-size: 5vw; padding: 3% 5%; }
 }

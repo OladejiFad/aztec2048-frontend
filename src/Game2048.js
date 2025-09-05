@@ -9,6 +9,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
   const [board, setBoard] = useState(generateEmptyBoard());
   const [gameOver, setGameOver] = useState(false);
   const mergedCellsRef = useRef([]);
+  const boardRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
     resetGame() {
@@ -19,14 +20,17 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     },
   }));
 
+  // Initialize board
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
 
+  // Score callback
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
+  // Keyboard input
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -41,6 +45,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [board]);
 
+  // Touch input
   useEffect(() => {
     let startX = 0;
     let startY = 0;
@@ -53,16 +58,15 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     const handleTouchEnd = (e) => {
       const dx = e.changedTouches[0].clientX - startX;
       const dy = e.changedTouches[0].clientY - startY;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30) handleMove('right');
-        else if (dx < -30) handleMove('left');
-      } else {
-        if (dy > 30) handleMove('down');
-        else if (dy < -30) handleMove('up');
+      const threshold = 20; // Minimum swipe distance
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        dx > 0 ? handleMove('right') : handleMove('left');
+      } else if (Math.abs(dy) > threshold) {
+        dy > 0 ? handleMove('down') : handleMove('up');
       }
     };
 
-    const boardEl = document.querySelector('.board');
+    const boardEl = boardRef.current;
     boardEl?.addEventListener('touchstart', handleTouchStart);
     boardEl?.addEventListener('touchend', handleTouchEnd);
 
@@ -196,13 +200,12 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     <div className="game-2048-container">
       <h3>Score: {score}</h3>
 
-      <div className="board">
+      <div className="board" ref={boardRef}>
         {board.flatMap((row, i) =>
           row.map((cell, j) => (
             <div
               key={`${i}-${j}`}
-              className={`board-cell tile-${cell || 0} ${mergedCellsRef.current.some(([idx]) => idx === j) ? 'merged' : ''
-                }`}
+              className={`board-cell tile-${cell || 0} ${mergedCellsRef.current.some(([idx]) => idx === j) ? 'merged' : ''}`}
             >
               {cell || ''}
               {cell && <span className="tile-label">Aztec</span>}

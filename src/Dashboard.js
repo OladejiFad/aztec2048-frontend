@@ -45,7 +45,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- Fetch user info with JWT ---
+  // --- Fetch user info ---
   const fetchUser = async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
@@ -59,7 +59,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-
       if (!res.ok) {
         localStorage.removeItem('token');
         setAppUser(null);
@@ -72,7 +71,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setTotalScore(data.totalScore || 0);
       setGamesLeft(data.gamesLeft ?? 7);
     } catch (err) {
-      console.error('Network error fetching user', err);
+      console.error(err);
       localStorage.removeItem('token');
       setAppUser(null);
       navigate('/login', { replace: true });
@@ -99,7 +98,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
-        console.error('[ERROR] leaderboard fetch failed:', err);
+        console.error(err);
       }
     };
     fetchLeaderboardPosition();
@@ -132,7 +131,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setTotalScore(updatedData.totalScore);
       setGamesLeft(updatedData.gamesLeft ?? 0);
     } catch (err) {
-      console.error('[ERROR] updating score:', err);
+      console.error(err);
     }
   };
 
@@ -187,7 +186,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <img
-              src={user.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(user.displayName || 'User')}.svg`}
+              src={user.photo}
               alt="Avatar"
               style={{ width: '40px', height: '40px', borderRadius: '50%' }}
             />
@@ -207,7 +206,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <div className="topbar">
             <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img
-                src={user.photo || `https://avatars.dicebear.com/api/initials/${encodeURIComponent(user.displayName || 'User')}.svg`}
+                src={user.photo}
                 alt="Avatar"
                 style={{ width: '32px', height: '32px', borderRadius: '50%' }}
               />
