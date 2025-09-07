@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, BrowserRouter as Router } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PreDashboardScreen from './PreDashboardScreen';
 import LoginScreen from './LoginScreen';
@@ -48,23 +48,25 @@ function App() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <Routes>
-      <Route path="/" element={<PreDashboardScreen />} />
-      <Route path="/login" element={<LoginScreen setUser={setUser} />} />
-      <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
+    <Router>
+      <Routes>
+        <Route path="/" element={<PreDashboardScreen />} />
+        <Route path="/login" element={<LoginScreen setUser={setUser} />} />
+        <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-      <Route
-        path="/dashboard"
-        element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
-      />
+        <Route
+          path="/dashboard"
+          element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
+        />
 
-      <Route
-        path="/leaderboard"
-        element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
-      />
+        <Route
+          path="/leaderboard"
+          element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
+        />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 

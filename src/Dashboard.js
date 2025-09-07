@@ -107,9 +107,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [totalScore, user]);
 
   // --- AZTEC letters ---
-  const handleScoreChange = (score) => {
-    setTotalScore(score); // update Dashboard in real-time
-    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
+  // Only track current game's score locally
+  const handleScoreChange = (currentGameScore) => {
+    // Update any per-game UI if needed (optional)
+    const letters = AZTEC_MILESTONES.filter(m => currentGameScore >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
     newLetters.forEach(letter => playLetterSound(letter));
     if (newLetters.length > 0) {
@@ -120,11 +121,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAztecLetters(letters);
   };
 
+
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
-    handleScoreChange(finalScore);
-    setGamesLeft(prev => Math.max(prev - 1, 0)); // decrease games left immediately
+    // Add the current game's score to totalScore
+    setTotalScore(prev => prev + finalScore);
 
+    handleScoreChange(finalScore);
+    setGamesLeft(prev => Math.max(prev - 1, 0));
+
+    // Send score to backend
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
@@ -139,6 +145,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       console.error(err);
     }
   };
+
 
   // --- Game reset ---
   const handleReset = () => {

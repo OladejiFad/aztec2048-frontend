@@ -13,12 +13,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   useImperativeHandle(ref, () => ({
     resetGame() {
-      setScore(0);
+      // Don't reset score here
       setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
       setGameOver(false);
       mergedCellsRef.current = [];
     },
   }));
+
 
   // Initialize board
   useEffect(() => {
