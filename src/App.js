@@ -58,8 +58,11 @@ function App() {
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
-      {/* Leaderboard is public */}
-      <Route path="/leaderboard" element={<LeaderboardScreen />} />
+      {/* Leaderboard requires login */}
+      <Route
+        path="/leaderboard"
+        element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
+      />
 
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/" replace />} />

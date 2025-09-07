@@ -4,33 +4,35 @@ import './Game2048.css';
 const SIZE = 4;
 
 const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
-  const [score, setScore] = useState(0); // per-game score
+  const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
   const [gameOver, setGameOver] = useState(false);
   const mergedCellsRef = useRef([]);
+  const newTilesRef = useRef([]);
   const boardRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
     resetGame() {
-      setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
-      setScore(0); // reset current game's score
+      const newBoard = addRandomTile(addRandomTile(generateEmptyBoard()), newTilesRef);
+      setBoard(newBoard);
+      setScore(0);
       setGameOver(false);
       mergedCellsRef.current = [];
-      if (onScoreChange) onScoreChange(0); // notify Dashboard
+      newTilesRef.current = [];
+      if (onScoreChange) onScoreChange(0);
     },
   }));
 
-  // Initialize board
   useEffect(() => {
-    setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
+    const newBoard = addRandomTile(addRandomTile(generateEmptyBoard()), newTilesRef);
+    setBoard(newBoard);
   }, []);
 
-  // Notify Dashboard on per-game score change
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // --- Board manipulation functions ---
+  // --- Board manipulation ---
   const slide = useCallback((row, rowIndex) => {
     const arr = row.filter(v => v !== null);
     const mergedPositions = [];
@@ -40,29 +42,25 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
         arr[i] *= 2;
         setScore(prev => prev + arr[i]);
         arr[i + 1] = null;
-        mergedPositions.push(i);
+        mergedPositions.push([rowIndex, i]);
       }
     }
 
-    mergedCellsRef.current[rowIndex] = mergedPositions;
+    mergedCellsRef.current[rowIndex] = mergedPositions.map(pos => pos[1]);
     return arr.filter(v => v !== null);
   }, []);
 
-  const moveLeft = useCallback((b) => {
-    return b.map((row, i) => {
-      const s = slide(row, i);
-      while (s.length < SIZE) s.push(null);
-      return s;
-    });
-  }, [slide]);
+  const moveLeft = useCallback((b) => b.map((row, i) => {
+    const s = slide(row, i);
+    while (s.length < SIZE) s.push(null);
+    return s;
+  }), [slide]);
 
-  const moveRight = useCallback((b) => {
-    return b.map((row, i) => {
-      const s = slide(row.slice().reverse(), i);
-      while (s.length < SIZE) s.push(null);
-      return s.reverse();
-    });
-  }, [slide]);
+  const moveRight = useCallback((b) => b.map((row, i) => {
+    const s = slide(row.slice().reverse(), i);
+    while (s.length < SIZE) s.push(null);
+    return s.reverse();
+  }), [slide]);
 
   const transpose = useCallback((b) => b[0].map((_, i) => b.map(row => row[i])), []);
   const moveUp = useCallback((b) => transpose(moveLeft(transpose(b))), [transpose, moveLeft]);
@@ -95,7 +93,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const handleMove = useCallback((direction) => {
     if (gameOver) return;
 
-    let newBoard = [];
+    let newBoard;
     switch (direction) {
       case 'up': newBoard = moveUp(board); break;
       case 'down': newBoard = moveDown(board); break;
@@ -105,35 +103,40 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     }
 
     if (!boardsEqual(board, newBoard)) {
-      const newBoardWithTile = addRandomTile(newBoard);
+      const newBoardWithTile = addRandomTile(newBoard, newTilesRef);
       setBoard(newBoardWithTile);
 
       if (checkGameOver(newBoardWithTile)) {
         setGameOver(true);
-        if (onGameOver) onGameOver(score); // send per-game score to Dashboard
+        if (onGameOver) onGameOver(score);
       }
     }
   }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
 
-  // --- Keyboard input ---
+  // --- Keyboard ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      switch (e.key) {
-        case 'ArrowUp': handleMove('up'); break;
-        case 'ArrowDown': handleMove('down'); break;
-        case 'ArrowLeft': handleMove('left'); break;
-        case 'ArrowRight': handleMove('right'); break;
-        default: break;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        switch (e.key) {
+          case 'ArrowUp': handleMove('up'); break;
+          case 'ArrowDown': handleMove('down'); break;
+          case 'ArrowLeft': handleMove('left'); break;
+          case 'ArrowRight': handleMove('right'); break;
+          default: break;
+        }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // --- Touch input ---
+  // --- Touch ---
   useEffect(() => {
     let startX = 0;
     let startY = 0;
+
+    const threshold = window.innerWidth < 360 ? 10 : 20; // smaller threshold for tiny screens
 
     const handleTouchStart = (e) => {
       startX = e.touches[0].clientX;
@@ -143,7 +146,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     const handleTouchEnd = (e) => {
       const dx = e.changedTouches[0].clientX - startX;
       const dy = e.changedTouches[0].clientY - startY;
-      const threshold = 20;
+
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
         dx > 0 ? handleMove('right') : handleMove('left');
       } else if (Math.abs(dy) > threshold) {
@@ -152,12 +155,15 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     };
 
     const boardEl = boardRef.current;
-    boardEl?.addEventListener('touchstart', handleTouchStart);
-    boardEl?.addEventListener('touchend', handleTouchEnd);
+    if (!boardEl) return;
+
+    boardEl.style.touchAction = 'none';
+    boardEl.addEventListener('touchstart', handleTouchStart, { passive: false });
+    boardEl.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
-      boardEl?.removeEventListener('touchstart', handleTouchStart);
-      boardEl?.removeEventListener('touchend', handleTouchEnd);
+      boardEl.removeEventListener('touchstart', handleTouchStart);
+      boardEl.removeEventListener('touchend', handleTouchEnd);
     };
   }, [handleMove]);
 
@@ -165,17 +171,17 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
   }
 
-  function addRandomTile(b) {
+  function addRandomTile(b, newTilesRef) {
     const empty = [];
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE; j++)
         if (!b[i][j]) empty.push([i, j]);
-
     if (!empty.length) return b;
 
     const [x, y] = empty[Math.floor(Math.random() * empty.length)];
     const newBoard = b.map(row => row.slice());
     newBoard[x][y] = Math.random() < 0.9 ? 2 : 4;
+    newTilesRef.current = [[x, y]]; // store new tile for animation
     return newBoard;
   }
 
@@ -188,7 +194,9 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
           row.map((cell, j) => (
             <div
               key={`${i}-${j}`}
-              className={`board-cell tile-${cell || 0} ${mergedCellsRef.current.some(([idx]) => idx === j) ? 'merged' : ''}`}
+              className={`board-cell tile-${cell || 0} ${mergedCellsRef.current[i]?.includes(j) ? 'merged' : ''
+                } ${newTilesRef.current.some(([x, y]) => x === i && y === j) ? 'new-tile' : ''
+                }`}
             >
               {cell || ''}
               {cell && <span className="tile-label">Aztec</span>}

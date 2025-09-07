@@ -6,25 +6,23 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LeaderboardScreen({ user }) {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return; // Wait until user is available
 
     const fetchLeaderboard = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login', { replace: true });
-          return;
-        }
-
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
           console.error('Failed to fetch leaderboard');
+          setUsers([]);
           return;
         }
 
@@ -32,11 +30,14 @@ export default function LeaderboardScreen({ user }) {
         setUsers(data || []);
       } catch (err) {
         console.error(err);
+        setUsers([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchLeaderboard();
-  }, [user, navigate]);
+  }, [user]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -46,6 +47,9 @@ export default function LeaderboardScreen({ user }) {
       default: return rank;
     }
   };
+
+  if (loading) return <p>Loading leaderboard...</p>;
+  if (!user) return <p>Loading user data...</p>;
 
   return (
     <div className="leaderboard-page">
@@ -57,7 +61,7 @@ export default function LeaderboardScreen({ user }) {
       <div className="leaderboard-container">
         <ol>
           {users.map((u, idx) => {
-            const isCurrentUser = String(u._id) === String(user._id);
+            const isCurrentUser = user && String(u._id) === String(user._id);
             return (
               <li
                 key={u._id}
