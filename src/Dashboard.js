@@ -107,19 +107,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [totalScore, user]);
 
   // --- AZTEC letters ---
-  const handleScoreChange = (scoreIncrement) => {
-    setTotalScore(prev => prev + scoreIncrement);
+  const handleScoreChange = (score) => {
+    setTotalScore(score); // ✅ update total score immediately
 
-    const newScore = totalScore + scoreIncrement;
-    const letters = AZTEC_MILESTONES.filter(m => newScore >= m.score).map(m => m.letter);
+    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
-
     newLetters.forEach(letter => playLetterSound(letter));
     if (newLetters.length > 0) {
       setHighlightLetters(newLetters);
       setTimeout(() => setHighlightLetters([]), 800);
     }
-
     triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
     setAztecLetters(letters);
   };
@@ -127,7 +124,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
     handleScoreChange(finalScore);
-    setGamesLeft(prev => Math.max(prev - 1, 0));
+    setGamesLeft(prev => Math.max(prev - 1, 0)); // ✅ update games left
 
     try {
       const token = localStorage.getItem('token');
@@ -137,8 +134,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         body: JSON.stringify({ score: finalScore }),
       });
       const updatedData = await res.json();
-      if (updatedData.totalScore != null) setTotalScore(updatedData.totalScore);
-      if (updatedData.gamesLeft != null) setGamesLeft(updatedData.gamesLeft);
+      setTotalScore(updatedData.totalScore);
+      setGamesLeft(updatedData.gamesLeft ?? 0);
     } catch (err) {
       console.error(err);
     }
@@ -164,7 +161,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const renderAztecLetters = () => (
     <div style={{ display: 'flex', gap: '5px' }}>
-      {aztecLetters.length > 0 ? aztecLetters.map(letter => (
+      {aztecLetters.map(letter => (
         <span
           key={letter}
           className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
@@ -180,7 +177,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         >
           {letter}
         </span>
-      )) : <span>-</span>}
+      ))}
+      {aztecLetters.length === 0 && <span>-</span>}
     </div>
   );
 
@@ -220,6 +218,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               />
               <div className="topbar-name">{user.displayName || user.username}</div>
             </div>
+
             <button className="hamburger-btn" onClick={() => setShowDropdown(prev => !prev)}>☰</button>
           </div>
           <div className="mobile-stats">

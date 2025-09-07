@@ -74,6 +74,8 @@ html, body {
 /* === Tiles === */
 .tile {
   position: absolute;
+  width: calc(25% - 2%);
+  height: calc(25% - 2%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -86,7 +88,7 @@ html, body {
   position: absolute;
   bottom: 2px;
   right: 2px;
-  font-size: 0.1em; /* scaled dynamically in JSX */
+  font-size: 0.7rem;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
 }
@@ -98,11 +100,11 @@ html, body {
 .tile-16 { background-color: #f59563; color: #f9f6f2; }
 .tile-32 { background-color: #f67c5f; color: #f9f6f2; }
 .tile-64 { background-color: #f65e3b; color: #f9f6f2; }
-.tile-128 { background-color: #edcf72; color: #f9f6f2; }
-.tile-256 { background-color: #edcc61; color: #f9f6f2; }
-.tile-512 { background-color: #edc850; color: #f9f6f2; }
-.tile-1024 { background-color: #edc53f; color: #f9f6f2; }
-.tile-2048 { background-color: #edc22e; color: #f9f6f2; }
+.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 1.2rem; }
+.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 1.2rem; }
+.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 1.2rem; }
+.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 1rem; }
+.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 1rem; }
 
 /* === Animations === */
 .tile-new {
@@ -174,6 +176,9 @@ html, body {
 @media screen and (max-width: 768px) {
   .game-topbar h3 { font-size: 1.2rem; }
   .game-topbar button { font-size: 0.9rem; padding: 5px 10px; }
+  .tile-128, .tile-256, .tile-512 { font-size: 1rem; }
+  .tile-1024, .tile-2048 { font-size: 0.9rem; }
+  .tile-label { font-size: 0.6rem; }
   .game-over-overlay h2 { font-size: 1.5rem; }
   .game-over-overlay button { font-size: 0.9rem; padding: 8px 16px; }
 }
@@ -181,6 +186,9 @@ html, body {
 @media screen and (max-width: 480px) {
   .game-topbar h3 { font-size: 1rem; }
   .game-topbar button { font-size: 0.8rem; padding: 4px 8px; }
+  .tile-128, .tile-256, .tile-512 { font-size: 0.9rem; }
+  .tile-1024, .tile-2048 { font-size: 0.8rem; }
+  .tile-label { font-size: 0.5rem; }
   .game-over-overlay h2 { font-size: 1.2rem; }
   .game-over-overlay button { font-size: 0.8rem; padding: 6px 12px; }
 }

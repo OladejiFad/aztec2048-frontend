@@ -118,22 +118,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const boardRef = useRef();
-  const [boardSize, setBoardSize] = useState(400); // default size in px
 
-  // --- Dynamic sizing ---
-  useEffect(() => {
-    const updateBoardSize = () => {
-      if (boardRef.current) {
-        const width = Math.min(window.innerWidth * 0.9, 500);
-        setBoardSize(width);
-      }
-    };
-    updateBoardSize();
-    window.addEventListener("resize", updateBoardSize);
-    return () => window.removeEventListener("resize", updateBoardSize);
-  }, []);
-
-  // --- Expose resetGame ---
+  // Expose resetGame to parent
   useImperativeHandle(ref, () => ({
     resetGame() {
       const newBoard = addRandomTile(addRandomTile(generateEmptyBoard()));
@@ -143,18 +129,17 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     },
   }));
 
-  // --- Initialize board ---
+  // Initialize board
   useEffect(() => {
     const newBoard = addRandomTile(addRandomTile(generateEmptyBoard()));
     setBoard(newBoard);
   }, []);
 
-  // --- Notify score change ---
+  // Notify score change
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // --- Move handler ---
   const handleMove = useCallback(
     (direction) => {
       if (gameOver) return;
@@ -186,11 +171,11 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     [board, gameOver, score, onGameOver]
   );
 
-  // --- Send score to backend ---
   async function sendScore(finalScore) {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
+
       await fetch(`${BACKEND_URL}/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -201,32 +186,20 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     }
   }
 
-  // --- Keyboard & touch ---
+  // --- Keyboard & Touch ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
-        case "ArrowUp":
-          handleMove("up");
-          break;
-        case "ArrowDown":
-          handleMove("down");
-          break;
-        case "ArrowLeft":
-          handleMove("left");
-          break;
-        case "ArrowRight":
-          handleMove("right");
-          break;
-        default:
-          // Do nothing for other keys
-          break;
+        case "ArrowUp": handleMove("up"); break;
+        case "ArrowDown": handleMove("down"); break;
+        case "ArrowLeft": handleMove("left"); break;
+        case "ArrowRight": handleMove("right"); break;
+        default: break;
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleMove]);
-
 
   useEffect(() => {
     let startX = 0, startY = 0;
@@ -260,33 +233,20 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
         <h3>Score: {score}</h3>
         <button onClick={() => ref.current.resetGame()}>Restart</button>
       </div>
-      <div
-        className="board"
-        ref={boardRef}
-        style={{ width: boardSize, height: boardSize }}
-      >
+      <div className="board" ref={boardRef}>
         {board.flatMap((row, i) =>
           row.map((cell, j) => {
             if (!cell) return null;
             const isNew = board.newTile?.[0] === i && board.newTile?.[1] === j;
-            const tileSize = boardSize / SIZE - (boardSize * 0.02); // spacing adjustment
             return (
               <div
                 key={`${i}-${j}-${cell.value ?? cell}`}
                 className={`tile tile-${cell.value} ${isNew ? "tile-new" : ""}`}
-                style={{
-                  width: tileSize,
-                  height: tileSize,
-                  fontSize: tileSize * 0.4,
-                  transform: `translate(${j * (tileSize + tileSize * 0.02)}px, ${i * (tileSize + tileSize * 0.02)}px)`,
-                }}
+                style={{ transform: `translate(${j * 100}%, ${i * 100}%)` }}
               >
                 {cell.value}
-                <span className="tile-label" style={{ fontSize: tileSize * 0.1 }}>
-                  Aztec
-                </span>
+                <span className="tile-label">Aztec</span>
               </div>
-
             );
           })
         )}
