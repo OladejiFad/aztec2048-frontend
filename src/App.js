@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PreDashboardScreen from './PreDashboardScreen';
 import LoginScreen from './LoginScreen';
@@ -53,12 +53,17 @@ function App() {
         <Route path="/" element={<PreDashboardScreen />} />
         <Route path="/login" element={<LoginScreen setUser={setUser} />} />
         <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
+
+        {/* Dashboard requires login */}
         <Route
           path="/dashboard"
           element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
         />
-        {/* Leaderboard is now public */}
+
+        {/* Leaderboard is public */}
         <Route path="/leaderboard" element={<LeaderboardScreen />} />
+
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
