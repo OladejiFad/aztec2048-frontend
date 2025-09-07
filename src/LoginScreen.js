@@ -27,12 +27,20 @@ export default function LoginScreen({ setUser }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data = {};
+      try {
+        data = await res.json();
+      } catch { }
+
       if (!res.ok) return setError(data.error || 'Login failed');
 
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
-      navigate('/dashboard');
+      if (data.token && data.user) {
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
+        navigate('/dashboard');
+      } else {
+        setError('Invalid server response. Please try again.');
+      }
     } catch (err) {
       console.error(err);
       setError('An error occurred. Please try again.');

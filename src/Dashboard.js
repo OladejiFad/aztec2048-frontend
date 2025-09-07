@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
@@ -27,7 +26,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
-  const [totalScore, setTotalScore] = useState(0); // persistent across games
+  const [totalScore, setTotalScore] = useState(0);
   const [gamesLeft, setGamesLeft] = useState(7);
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
@@ -50,7 +49,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const fetchUser = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
+    console.log('[Dashboard] token from localStorage:', token);
+
     if (!token) {
+      console.log('[Dashboard] No token, redirecting to login');
       navigate('/login', { replace: true });
       return;
     }
@@ -59,8 +61,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('[Dashboard] /api/me response status:', res.status);
+
       const data = await res.json();
-      if (!res.ok) {
+      console.log('[Dashboard] /api/me data:', data);
+
+      if (!res.ok || !data) {
+        console.log('[Dashboard] Invalid response, removing token & redirecting');
         localStorage.removeItem('token');
         setAppUser(null);
         navigate('/login', { replace: true });
@@ -72,7 +79,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setTotalScore(data.totalScore || 0);
       setGamesLeft(data.gamesLeft ?? 7);
     } catch (err) {
-      console.error(err);
+      console.error('[Dashboard] fetchUser error:', err);
       localStorage.removeItem('token');
       setAppUser(null);
       navigate('/login', { replace: true });
@@ -80,6 +87,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setLoading(false);
     }
   }, [navigate, setAppUser]);
+
 
   useEffect(() => {
     fetchUser();
@@ -94,10 +102,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
+
+        let data = [];
+        try {
+          data = await res.json();
+        } catch { }
+
         const sorted = Array.isArray(data)
           ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
           : [];
+
         const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
@@ -122,9 +136,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
-    // Add per-game score to totalScore
     setTotalScore(prev => prev + finalScore);
-
     handleScoreChange(finalScore);
     setGamesLeft(prev => Math.max(prev - 1, 0));
 
@@ -135,8 +147,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ score: finalScore }),
       });
-      const updatedData = await res.json();
-      setTotalScore(updatedData.totalScore);
+
+      let updatedData = {};
+      try {
+        updatedData = await res.json();
+      } catch { }
+
+      setTotalScore(updatedData.totalScore ?? totalScore);
       setGamesLeft(updatedData.gamesLeft ?? 0);
     } catch (err) {
       console.error(err);
@@ -148,7 +165,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAztecLetters([]);
     triggeredLettersRef.current = [];
     setHighlightLetters([]);
-    if (gameRef.current) gameRef.current.resetGame(); // resets per-game score only
+    if (gameRef.current) gameRef.current.resetGame();
   };
 
   // --- Logout ---
@@ -159,27 +176,32 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!user) return null;
+  if (!user) {
+    navigate('/login', { replace: true });
+    return null;
+  }
 
   const renderAztecLetters = () => (
     <div style={{ display: 'flex', gap: '5px' }}>
-      {aztecLetters.length > 0 ? aztecLetters.map(letter => (
-        <span
-          key={letter}
-          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
-          style={{
-            backgroundColor: LETTER_COLORS[letter] || '#ccc',
-            color: '#fff',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            minWidth: '24px',
-            textAlign: 'center',
-          }}
-        >
-          {letter}
-        </span>
-      )) : <span>-</span>}
+      {aztecLetters.length > 0
+        ? aztecLetters.map(letter => (
+          <span
+            key={letter}
+            className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
+            style={{
+              backgroundColor: LETTER_COLORS[letter] || '#ccc',
+              color: '#fff',
+              padding: '5px 10px',
+              borderRadius: '5px',
+              fontWeight: 'bold',
+              minWidth: '24px',
+              textAlign: 'center',
+            }}
+          >
+            {letter}
+          </span>
+        ))
+        : <span>-</span>}
     </div>
   );
 
@@ -202,9 +224,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
           <div className="stat-card"><button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button></div>
           <div className="stat-card">
-            <Link to="/leaderboard">
-              <button>Leaderboard</button>
-            </Link>
+            <Link to="/leaderboard"><button>Leaderboard</button></Link>
           </div>
           <div className="stat-card"><button onClick={logout}>Logout</button></div>
         </div>
@@ -226,10 +246,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
           </div>
           <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
-            <Link to="/leaderboard" onClick={() => setShowDropdown(false)}>
-              <button>Leaderboard</button>
-            </Link>
-
+            <Link to="/leaderboard" onClick={() => setShowDropdown(false)}><button>Leaderboard</button></Link>
             <button onClick={logout}>Logout</button>
           </div>
         </div>
