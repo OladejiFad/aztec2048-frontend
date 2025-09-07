@@ -28,20 +28,13 @@ export default function RegisterScreen({ setUser }) {
         body: JSON.stringify({ displayName, email, password }),
       });
 
-      let data = {};
-      try {
-        data = await res.json();
-      } catch { }
-
+      const data = await res.json();
       if (!res.ok) return setError(data.error || 'Registration failed');
 
-      if (data.token && data.user) {
-        localStorage.setItem('token', data.token);
-        setUser(data.user);
-        navigate('/dashboard');
-      } else {
-        setError('Invalid server response. Please try again.');
-      }
+      // Store JWT and set user
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setError('An error occurred. Please try again.');
