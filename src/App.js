@@ -12,7 +12,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check JWT on app load
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -25,15 +24,15 @@ function App() {
         const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const data = await res.json();
 
         if (!res.ok) {
+          console.error('Invalid token', res.status);
           localStorage.removeItem('token');
           setUser(null);
-          return;
+        } else {
+          setUser(data);
         }
-
-        const data = await res.json();
-        setUser(data);
       } catch (err) {
         console.error(err);
         setUser(null);
@@ -53,19 +52,21 @@ function App() {
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
+      {/* Dashboard requires login */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
-      <Route
-        path="/leaderboard"
-        element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
-      />
+      {/* Leaderboard is public */}
+      <Route path="/leaderboard" element={<LeaderboardScreen />} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback route: redirect unknown paths to login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+
   );
 }
+
 
 export default App;
