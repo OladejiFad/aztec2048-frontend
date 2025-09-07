@@ -30,11 +30,11 @@ function App() {
           setUser(null);
         } else {
           const text = await res.text();
-          if (!text) {
+          const data = text ? JSON.parse(text) : null;
+          if (!data) {
             localStorage.removeItem('token');
             setUser(null);
           } else {
-            const data = JSON.parse(text);
             setUser(data);
           }
         }
@@ -54,23 +54,14 @@ function App() {
 
   return (
     <Routes>
-      {/* Entry screen */}
       <Route path="/" element={<PreDashboardScreen />} />
-
-      {/* Auth screens */}
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
-
-      {/* Dashboard protected */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
-
-      {/* Leaderboard public */}
       <Route path="/leaderboard" element={<LeaderboardScreen />} />
-
-      {/* Fallback unknown routes → PreDashboard */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

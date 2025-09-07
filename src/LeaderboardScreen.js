@@ -14,10 +14,17 @@ export default function LeaderboardScreen() {
       try {
         setLoading(true);
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`);
+
         if (!res.ok) throw new Error('Failed to fetch leaderboard');
 
-        const data = await res.json();
-        setUsers(data || []);
+        if (res.status === 204) {
+          setUsers([]);
+          return;
+        }
+
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : [];
+        setUsers(data);
       } catch (err) {
         console.error(err);
         setUsers([]);
