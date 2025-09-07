@@ -1,14 +1,12 @@
-/* Dashboard.css */
-
-/* --- Base --- */
+/* === Global Base === */
 body, html {
   margin: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
-  overscroll-behavior: none; /* prevent scroll bounce */
-  /* ❌ Removed touch-action: none so buttons/links still work */
+  overscroll-behavior: none;
 }
 
+/* === Buttons === */
 button {
   cursor: pointer;
   border: none;
@@ -23,24 +21,17 @@ button:hover {
   background-color: #580b99;
 }
 
-/* --- Reset Button --- */
 .reset-btn {
   background-color: #ff5252;
-  color: #fff;
   font-weight: bold;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: background 0.2s;
 }
-
 .reset-btn:hover {
   background-color: #e04848;
 }
 
-/* --- Dashboard Container --- */
+/* === Dashboard Container === */
 .dashboard-game-container {
-  display: flex;
-  flex-direction: row;
+  flex-direction: column; /* stack sidebar + board on mobile */
   min-height: 100vh;
   background-color: #f0f2f5;
 }
@@ -53,8 +44,6 @@ button:hover {
   flex-direction: column;
   gap: 15px;
   color: #fff;
-  position: relative;
-  z-index: 10;
 }
 
 .logo-container {
@@ -74,6 +63,8 @@ button:hover {
   text-align: center;
   margin: 0;
   color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .profile {
@@ -118,78 +109,39 @@ button:hover {
   color: #6a0dad;
   font-weight: bold;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
 }
 
 .stat-card button:hover {
-  background-color: #ddd;
+  background-color: #e0d4f7;
 }
 
-/* --- Mobile Topbar --- */
-.topbar-container {
-  width: 100%;
-}
-
-.topbar {
+/* === Mobile Topbar === */
+.mobile-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #6a0dad;
   padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
   color: #fff;
-   z-index: 10;
+  position: relative;
+  z-index: 10;
 }
 
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.topbar-profile-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-}
-
-.topbar-name {
-  font-weight: bold;
-  font-size: 16px;
-  color: #fff;
-}
-
-.hamburger-btn {
-  font-size: 22px;
-  background: none;
-  color: #fff;
-}
-
-.mobile-stats {
-  background-color: #fff;
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
+.dropdown-menu {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  font-size: 14px;
-}
-
-.dropdown {
-  display: none;
-  flex-direction: column;
   padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   background-color: #fff;
-  border-top: 1px solid #ddd;
+  position: absolute;
+  right: 10px;
+  top: 50px;
+  z-index: 20;
 }
 
-.dropdown.show {
-  display: flex;
-}
-
-/* --- Main Content --- */
+/* === Main Content === */
 .main-content {
   flex: 1;
   display: flex;
@@ -198,10 +150,9 @@ button:hover {
   padding: 20px;
   margin-left: 260px;
   position: relative;
-  z-index: 1; /* ✅ stays below topbar/sidebar */
 }
 
-/* --- AZTEC Letters --- */
+/* === AZTEC Letters === */
 .aztec-letter-badge {
   display: inline-block;
   padding: 5px 10px;
@@ -222,33 +173,22 @@ button:hover {
   100% { transform: scale(1); background-color: #4caf50; color: white; opacity: 1; }
 }
 
-/* --- No games left message --- */
-.no-games-left {
-  font-size: 18px;
-  color: #999;
-  text-align: center;
-  margin-top: 20px;
-}
-
-/* --- Responsive --- */
+/* === Responsive === */
 @media screen and (max-width: 1024px) {
   .sidebar { width: 200px; }
   .profile img { width: 60px; height: 60px; }
+  .aztec-letter-badge { min-width: 30px; text-align: center; }
 }
 
 @media screen and (max-width: 768px) {
   .dashboard-game-container { flex-direction: column; }
   .sidebar { display: none; }
-  .main-content { 
-    margin-left: 0; 
-    padding: 15px; 
-  }
+  .main-content { margin-left: 0; padding: 15px; }
 }
 
 @media screen and (max-width: 480px) {
-  .topbar-name { font-size: 13px; }
-  .mobile-stats { font-size: 12px; gap: 4px; padding: 10px; }
-  .topbar { padding: 8px 10px; }
+  .mobile-topbar span { font-size: 13px; }
+  .dropdown-menu { font-size: 12px; gap: 4px; padding: 10px; }
   button, .reset-btn { padding: 6px 10px; font-size: 13px; }
   .logo-img { width: 90px; }
 }
