@@ -45,11 +45,9 @@
   max-width: 700px;
   margin: 20px auto;
   background: #fff;
-  padding: 0; /* remove padding to avoid offset when using absolute rows */
+  padding: 15px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  position: relative; /* container must be relative for absolute rows */
-  height: auto; /* height is set dynamically in JS */
 }
 
 .leaderboard-container ol {
@@ -59,7 +57,6 @@
 }
 
 /* --- Items --- */
-
 .leaderboard-item {
   display: flex;
   align-items: center;
@@ -67,9 +64,7 @@
   padding: 12px 10px;
   border-bottom: 1px solid #eee;
   gap: 12px;
-  background: white;
-  transition: background 0.2s ease-in-out, transform 0.6s ease;
-  will-change: transform;
+  transition: background 0.2s ease-in-out;
 }
 
 .leaderboard-item:last-child {
@@ -135,17 +130,6 @@
   object-fit: cover;
   margin: 0 10px;
 }
-
-@keyframes bounceUp {
-  0%   { transform: translateY(-10px); }
-  50%  { transform: translateY(5px); }
-  100% { transform: translateY(0); }
-}
-
-.bounce-up {
-  animation: bounceUp 0.6s ease;
-}
-
 
 
 /* --- Responsive --- */
