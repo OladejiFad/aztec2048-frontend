@@ -15,6 +15,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
+      console.log('No token found in localStorage');
       setLoading(false);
       return;
     }
@@ -24,17 +25,23 @@ function App() {
         const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
+
+        console.log('Fetch status:', res.status);
 
         if (!res.ok) {
-          console.error('Invalid token', res.status);
+          console.error('Invalid token or fetch failed', res.status);
+          const errorText = await res.text();
+          console.log('Error response:', errorText);
           localStorage.removeItem('token');
           setUser(null);
         } else {
+          const data = await res.json();
+          console.log('User data fetched:', data);
           setUser(data);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Fetch error:', err);
+        localStorage.removeItem('token');
         setUser(null);
       } finally {
         setLoading(false);
@@ -52,21 +59,16 @@ function App() {
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-      {/* Dashboard requires login */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
-      {/* Leaderboard is public */}
       <Route path="/leaderboard" element={<LeaderboardScreen />} />
 
-      {/* Fallback route: redirect unknown paths to login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
-
   );
 }
-
 
 export default App;
