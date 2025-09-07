@@ -2,13 +2,25 @@ import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, us
 import './Game2048.css';
 
 const SIZE = 4;
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-const Game2048 = forwardRef(({ onScoreChange }, ref) => {
+const TILE_STYLES = {
+  2: { background: '#eee4da', color: '#776e65' },
+  4: { background: '#ede0c8', color: '#776e65' },
+  8: { background: '#f2b179', color: '#f9f6f2' },
+  16: { background: '#0cb689', color: '#f9f6f2' },
+  32: { background: '#37cbe1bc', color: '#f9f6f2' },
+  64: { background: '#f65e3b', color: '#f9f6f2' },
+  128: { background: '#72edeb', color: '#f9f6f2' },
+  256: { background: '#6d61ed', color: '#f9f6f2' },
+  512: { background: '#6aed50', color: '#f9f6f2' },
+  1024: { background: '#ed3fb6', color: '#f9f6f2' },
+  2048: { background: '#ca2eed', color: '#f9f6f2' },
+};
+
+const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
   const [gameOver, setGameOver] = useState(false);
-  const mergedCellsRef = useRef([]);
   const boardRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -16,16 +28,13 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
       setScore(0);
       setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
       setGameOver(false);
-      mergedCellsRef.current = [];
     },
   }));
 
-  // Initialize board
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
 
-  // Score callback
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
@@ -51,14 +60,11 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
 
   function slide(row) {
     const arr = row.filter(v => v !== null);
-    mergedCellsRef.current = [];
-
     for (let i = 0; i < arr.length - 1; i++) {
       if (arr[i] === arr[i + 1]) {
         arr[i] *= 2;
         setScore(prev => prev + arr[i]);
         arr[i + 1] = null;
-        mergedCellsRef.current.push([i]);
       }
     }
     return arr.filter(v => v !== null);
@@ -81,10 +87,8 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
   }, []);
 
   const transpose = useCallback((b) => b[0].map((_, i) => b.map(row => row[i])), []);
-
-  const moveUp = useCallback((b) => transpose(moveLeft(b.map(row => row.slice()))), [moveLeft, transpose]);
-
-  const moveDown = useCallback((b) => transpose(moveRight(b.map(row => row.slice()))), [moveRight, transpose]);
+  const moveUp = useCallback((b) => transpose(moveLeft(transpose(b))), [moveLeft, transpose]);
+  const moveDown = useCallback((b) => transpose(moveRight(transpose(b))), [moveRight, transpose]);
 
   const boardsEqual = useCallback((a, b) => {
     for (let i = 0; i < SIZE; i++)
@@ -109,11 +113,11 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     return true;
   }, []);
 
-  // --- handleMove wrapped in useCallback with all dependencies ---
+  // --- Handle moves ---
   const handleMove = useCallback((direction) => {
     if (gameOver) return;
 
-    let newBoard = [];
+    let newBoard;
     switch (direction) {
       case 'up': newBoard = moveUp(board); break;
       case 'down': newBoard = moveDown(board); break;
@@ -123,15 +127,17 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     }
 
     if (!boardsEqual(board, newBoard)) {
-      setBoard(addRandomTile(newBoard));
-      if (checkGameOver(newBoard)) {
+      const updatedBoard = addRandomTile(newBoard);
+      setBoard(updatedBoard);
+
+      if (checkGameOver(updatedBoard)) {
         setGameOver(true);
-        sendScore(score);
+        if (onGameOver) onGameOver(score);
       }
     }
-  }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver]);
+  }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
 
-  // Keyboard input
+  // --- Keyboard input ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -146,7 +152,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // Touch input
+  // --- Touch input ---
   useEffect(() => {
     let startX = 0;
     let startY = 0;
@@ -159,7 +165,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     const handleTouchEnd = (e) => {
       const dx = e.changedTouches[0].clientX - startX;
       const dy = e.changedTouches[0].clientY - startY;
-      const threshold = 20; // Minimum swipe distance
+      const threshold = 20;
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
         dx > 0 ? handleMove('right') : handleMove('left');
       } else if (Math.abs(dy) > threshold) {
@@ -177,36 +183,26 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     };
   }, [handleMove]);
 
-  async function sendScore(finalScore) {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      await fetch(`${BACKEND_URL}/score`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ score: finalScore })
-      });
-    } catch (err) {
-      console.error('Failed to send score:', err);
-    }
-  }
-
   return (
     <div className="game-2048-container">
       <h3>Score: {score}</h3>
-
       <div className="board" ref={boardRef}>
         {board.flatMap((row, i) =>
-          row.map((cell, j) => (
-            <div
-              key={`${i}-${j}`}
-              className={`board-cell tile-${cell || 0} ${mergedCellsRef.current.some(([idx]) => idx === j) ? 'merged' : ''}`}
-            >
-              {cell || ''}
-              {cell && <span className="tile-label">Aztec</span>}
-            </div>
-          ))
+          row.map((cell, j) => {
+            const style = TILE_STYLES[cell] || { background: '#cdc1b4', color: '#776e65' };
+            return (
+              <div
+                key={`${i}-${j}`}
+                className={`board-cell tile-${cell || 0}`}
+                style={{
+                  backgroundColor: style.background,
+                  color: style.color,
+                }}
+              >
+                {cell || ''}
+              </div>
+            );
+          })
         )}
       </div>
 
