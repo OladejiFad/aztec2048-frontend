@@ -6,7 +6,7 @@ body, html {
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
   overscroll-behavior: none; /* prevent scroll bounce */
-  touch-action: none;        /* prevent swipe scroll */
+  /* ❌ Removed touch-action: none so buttons/links still work */
 }
 
 button {
@@ -54,7 +54,7 @@ button:hover {
   gap: 15px;
   color: #fff;
   position: relative;
-  z-index: 2;
+  z-index: 10;
 }
 
 .logo-container {
@@ -138,6 +138,7 @@ button:hover {
   padding: 10px 15px;
   border-bottom: 1px solid #ddd;
   color: #fff;
+   z-index: 10;
 }
 
 .topbar-left {
@@ -173,6 +174,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  font-size: 14px;
 }
 
 .dropdown {
@@ -195,6 +197,8 @@ button:hover {
   align-items: flex-start;
   padding: 20px;
   margin-left: 260px;
+  position: relative;
+  z-index: 1; /* ✅ stays below topbar/sidebar */
 }
 
 /* --- AZTEC Letters --- */
@@ -236,12 +240,15 @@ button:hover {
   .dashboard-game-container { flex-direction: column; }
   .sidebar { display: none; }
   .main-content { 
-    margin-left: 0;  /* fix: no empty space */
+    margin-left: 0; 
     padding: 15px; 
   }
 }
 
 @media screen and (max-width: 480px) {
-  .topbar-name { font-size: 14px; }
-  .mobile-stats { font-size: 14px; gap: 4px; }
+  .topbar-name { font-size: 13px; }
+  .mobile-stats { font-size: 12px; gap: 4px; padding: 10px; }
+  .topbar { padding: 8px 10px; }
+  button, .reset-btn { padding: 6px 10px; font-size: 13px; }
+  .logo-img { width: 90px; }
 }
