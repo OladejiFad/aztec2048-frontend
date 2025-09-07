@@ -15,7 +15,6 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('No token found in localStorage');
       setLoading(false);
       return;
     }
@@ -26,21 +25,21 @@ function App() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log('Fetch status:', res.status);
-
-        if (!res.ok) {
-          console.error('Invalid token or fetch failed', res.status);
-          const errorText = await res.text();
-          console.log('Error response:', errorText);
+        if (!res.ok || res.status === 204) {
           localStorage.removeItem('token');
           setUser(null);
         } else {
-          const data = await res.json();
-          console.log('User data fetched:', data);
-          setUser(data);
+          const text = await res.text();
+          if (!text) {
+            localStorage.removeItem('token');
+            setUser(null);
+          } else {
+            const data = JSON.parse(text);
+            setUser(data);
+          }
         }
       } catch (err) {
-        console.error('Fetch error:', err);
+        console.error('Error fetching user:', err);
         localStorage.removeItem('token');
         setUser(null);
       } finally {
@@ -55,18 +54,24 @@ function App() {
 
   return (
     <Routes>
+      {/* Entry screen */}
       <Route path="/" element={<PreDashboardScreen />} />
+
+      {/* Auth screens */}
       <Route path="/login" element={<LoginScreen setUser={setUser} />} />
       <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
+      {/* Dashboard protected */}
       <Route
         path="/dashboard"
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
+      {/* Leaderboard public */}
       <Route path="/leaderboard" element={<LeaderboardScreen />} />
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Fallback unknown routes → PreDashboard */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

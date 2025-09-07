@@ -4,27 +4,17 @@ import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-export default function LeaderboardScreen({ user }) {
+export default function LeaderboardScreen() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return; // Wait until user is available
-
     const fetchLeaderboard = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) {
-          console.error('Failed to fetch leaderboard');
-          setUsers([]);
-          return;
-        }
+        const res = await fetch(`${BACKEND_URL}/auth/leaderboard`);
+        if (!res.ok) throw new Error('Failed to fetch leaderboard');
 
         const data = await res.json();
         setUsers(data || []);
@@ -37,7 +27,7 @@ export default function LeaderboardScreen({ user }) {
     };
 
     fetchLeaderboard();
-  }, [user]);
+  }, []);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -49,7 +39,6 @@ export default function LeaderboardScreen({ user }) {
   };
 
   if (loading) return <p>Loading leaderboard...</p>;
-  if (!user) return <p>Loading user data...</p>;
 
   return (
     <div className="leaderboard-page">
@@ -57,29 +46,20 @@ export default function LeaderboardScreen({ user }) {
         <h2>Leaderboard</h2>
         <button onClick={() => navigate('/dashboard')}>Back</button>
       </div>
-
       <div className="leaderboard-container">
         <ol>
-          {users.map((u, idx) => {
-            const isCurrentUser = user && String(u._id) === String(user._id);
-            return (
-              <li
-                key={u._id}
-                className={`leaderboard-item rank-${idx + 1} ${isCurrentUser ? 'current-user' : ''}`}
-              >
-                <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
-                <img
-                  src={
-                    u.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(u.email)}.svg`
-                  }
-                  alt="Avatar"
-                  className="leaderboard-avatar"
-                />
-                <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
-                <span className="leaderboard-score">{u.totalScore || 0}</span>
-              </li>
-            );
-          })}
+          {users.map((u, idx) => (
+            <li key={u._id} className={`leaderboard-item rank-${idx + 1}`}>
+              <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
+              <img
+                src={u.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(u.email)}.svg`}
+                alt="Avatar"
+                className="leaderboard-avatar"
+              />
+              <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
+              <span className="leaderboard-score">{u.totalScore || 0}</span>
+            </li>
+          ))}
         </ol>
       </div>
     </div>
