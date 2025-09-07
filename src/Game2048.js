@@ -2,10 +2,9 @@ import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, us
 import './Game2048.css';
 
 const SIZE = 4;
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(0); // per-game score
   const [board, setBoard] = useState(generateEmptyBoard());
   const [gameOver, setGameOver] = useState(false);
   const mergedCellsRef = useRef([]);
@@ -13,20 +12,20 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   useImperativeHandle(ref, () => ({
     resetGame() {
-      // Don't reset score here
       setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
+      setScore(0); // reset current game's score
       setGameOver(false);
       mergedCellsRef.current = [];
+      if (onScoreChange) onScoreChange(0); // notify Dashboard
     },
   }));
-
 
   // Initialize board
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
 
-  // Score callback
+  // Notify Dashboard on per-game score change
   useEffect(() => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
@@ -45,14 +44,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       }
     }
 
-    mergedCellsRef.current[rowIndex] = mergedPositions; // store per row
+    mergedCellsRef.current[rowIndex] = mergedPositions;
     return arr.filter(v => v !== null);
   }, []);
 
-
   const moveLeft = useCallback((b) => {
     return b.map((row, i) => {
-      const s = slide(row, i); // pass row index
+      const s = slide(row, i);
       while (s.length < SIZE) s.push(null);
       return s;
     });
@@ -60,15 +58,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   const moveRight = useCallback((b) => {
     return b.map((row, i) => {
-      const s = slide(row.slice().reverse(), i); // pass row index
+      const s = slide(row.slice().reverse(), i);
       while (s.length < SIZE) s.push(null);
       return s.reverse();
     });
   }, [slide]);
 
-
   const transpose = useCallback((b) => b[0].map((_, i) => b.map(row => row[i])), []);
-
   const moveUp = useCallback((b) => transpose(moveLeft(transpose(b))), [transpose, moveLeft]);
   const moveDown = useCallback((b) => transpose(moveRight(transpose(b))), [transpose, moveRight]);
 
@@ -114,8 +110,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
       if (checkGameOver(newBoardWithTile)) {
         setGameOver(true);
-        sendScore(score);
-        if (onGameOver) onGameOver(score); // notify Dashboard
+        if (onGameOver) onGameOver(score); // send per-game score to Dashboard
       }
     }
   }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
@@ -182,21 +177,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     const newBoard = b.map(row => row.slice());
     newBoard[x][y] = Math.random() < 0.9 ? 2 : 4;
     return newBoard;
-  }
-
-  async function sendScore(finalScore) {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      await fetch(`${BACKEND_URL}/score`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ score: finalScore })
-      });
-    } catch (err) {
-      console.error('Failed to send score:', err);
-    }
   }
 
   return (

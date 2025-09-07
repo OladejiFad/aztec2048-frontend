@@ -53,17 +53,12 @@ function App() {
         <Route path="/" element={<PreDashboardScreen />} />
         <Route path="/login" element={<LoginScreen setUser={setUser} />} />
         <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
-
         <Route
           path="/dashboard"
           element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
         />
-
-        <Route
-          path="/leaderboard"
-          element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
-        />
-
+        {/* Leaderboard is now public */}
+        <Route path="/leaderboard" element={<LeaderboardScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

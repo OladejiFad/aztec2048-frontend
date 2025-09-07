@@ -26,7 +26,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
-  const [totalScore, setTotalScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(0); // persistent across games
   const [gamesLeft, setGamesLeft] = useState(7);
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
@@ -107,9 +107,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [totalScore, user]);
 
   // --- AZTEC letters ---
-  // Only track current game's score locally
   const handleScoreChange = (currentGameScore) => {
-    // Update any per-game UI if needed (optional)
     const letters = AZTEC_MILESTONES.filter(m => currentGameScore >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
     newLetters.forEach(letter => playLetterSound(letter));
@@ -121,16 +119,14 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAztecLetters(letters);
   };
 
-
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
-    // Add the current game's score to totalScore
+    // Add per-game score to totalScore
     setTotalScore(prev => prev + finalScore);
 
     handleScoreChange(finalScore);
     setGamesLeft(prev => Math.max(prev - 1, 0));
 
-    // Send score to backend
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
@@ -146,13 +142,12 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   };
 
-
   // --- Game reset ---
   const handleReset = () => {
     setAztecLetters([]);
     triggeredLettersRef.current = [];
     setHighlightLetters([]);
-    if (gameRef.current) gameRef.current.resetGame();
+    if (gameRef.current) gameRef.current.resetGame(); // resets per-game score only
   };
 
   // --- Logout ---
@@ -231,14 +226,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <button
               onClick={() => {
                 navigate('/leaderboard');
-                setShowDropdown(false); // close menu after navigation
+                setShowDropdown(false);
               }}
             >
               Leaderboard
             </button>
             <button onClick={logout}>Logout</button>
           </div>
-
         </div>
       )}
 
