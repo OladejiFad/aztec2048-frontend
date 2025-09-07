@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
@@ -46,13 +46,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, []);
 
   // --- Fetch user info ---
-  const fetchUser = useCallback(async () => {
+  const fetchUser = async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
-    console.log('[Dashboard] token from localStorage:', token);
-
     if (!token) {
-      console.log('[Dashboard] No token, redirecting to login');
       navigate('/login', { replace: true });
       return;
     }
@@ -61,13 +58,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('[Dashboard] /api/me response status:', res.status);
-
       const data = await res.json();
-      console.log('[Dashboard] /api/me data:', data);
-
-      if (!res.ok || !data) {
-        console.log('[Dashboard] Invalid response, removing token & redirecting');
+      if (!res.ok) {
         localStorage.removeItem('token');
         setAppUser(null);
         navigate('/login', { replace: true });
@@ -79,19 +71,18 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setTotalScore(data.totalScore || 0);
       setGamesLeft(data.gamesLeft ?? 7);
     } catch (err) {
-      console.error('[Dashboard] fetchUser error:', err);
+      console.error(err);
       localStorage.removeItem('token');
       setAppUser(null);
       navigate('/login', { replace: true });
     } finally {
       setLoading(false);
     }
-  }, [navigate, setAppUser]);
-
+  };
 
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]);
+  }, []);
 
   // --- Leaderboard position ---
   useEffect(() => {
@@ -102,16 +93,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        let data = [];
-        try {
-          data = await res.json();
-        } catch { }
-
-        const sorted = Array.isArray(data)
-          ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
-          : [];
-
+        const data = await res.json();
+        const sorted = Array.isArray(data) ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)) : [];
         const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
@@ -122,8 +105,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [totalScore, user]);
 
   // --- AZTEC letters ---
-  const handleScoreChange = (currentGameScore) => {
-    const letters = AZTEC_MILESTONES.filter(m => currentGameScore >= m.score).map(m => m.letter);
+  const handleScoreChange = (score) => {
+    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
     const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
     newLetters.forEach(letter => playLetterSound(letter));
     if (newLetters.length > 0) {
@@ -136,10 +119,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
-    setTotalScore(prev => prev + finalScore);
     handleScoreChange(finalScore);
-    setGamesLeft(prev => Math.max(prev - 1, 0));
-
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
@@ -147,13 +127,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ score: finalScore }),
       });
-
-      let updatedData = {};
-      try {
-        updatedData = await res.json();
-      } catch { }
-
-      setTotalScore(updatedData.totalScore ?? totalScore);
+      const updatedData = await res.json();
+      setTotalScore(updatedData.totalScore);
       setGamesLeft(updatedData.gamesLeft ?? 0);
     } catch (err) {
       console.error(err);
@@ -176,32 +151,28 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (!user) {
-    navigate('/login', { replace: true });
-    return null;
-  }
+  if (!user) return null;
 
   const renderAztecLetters = () => (
     <div style={{ display: 'flex', gap: '5px' }}>
-      {aztecLetters.length > 0
-        ? aztecLetters.map(letter => (
-          <span
-            key={letter}
-            className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
-            style={{
-              backgroundColor: LETTER_COLORS[letter] || '#ccc',
-              color: '#fff',
-              padding: '5px 10px',
-              borderRadius: '5px',
-              fontWeight: 'bold',
-              minWidth: '24px',
-              textAlign: 'center',
-            }}
-          >
-            {letter}
-          </span>
-        ))
-        : <span>-</span>}
+      {aztecLetters.map(letter => (
+        <span
+          key={letter}
+          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
+          style={{
+            backgroundColor: LETTER_COLORS[letter] || '#ccc',
+            color: '#fff',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            minWidth: '24px',
+            textAlign: 'center',
+          }}
+        >
+          {letter}
+        </span>
+      ))}
+      {aztecLetters.length === 0 && <span>-</span>}
     </div>
   );
 
@@ -214,7 +185,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
           <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <img src={user.photo} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+            <img
+              src={user.photo}
+              alt="Avatar"
+              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
+            />
             <span>{user.displayName || user.username}</span>
           </div>
 
@@ -223,16 +198,18 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <div className="stat-card"><h4>AZTEC Letters</h4>{renderAztecLetters()}</div>
           <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
           <div className="stat-card"><button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button></div>
-          <div className="stat-card">
-            <Link to="/leaderboard"><button>Leaderboard</button></Link>
-          </div>
+          <div className="stat-card"><button onClick={() => navigate('/leaderboard')}>Leaderboard</button></div>
           <div className="stat-card"><button onClick={logout}>Logout</button></div>
         </div>
       ) : (
         <div className="topbar-container">
           <div className="topbar">
             <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={user.photo} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+              <img
+                src={user.photo}
+                alt="Avatar"
+                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+              />
               <div className="topbar-name">{user.displayName || user.username}</div>
             </div>
 
@@ -246,7 +223,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
           </div>
           <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
-            <Link to="/leaderboard" onClick={() => setShowDropdown(false)}><button>Leaderboard</button></Link>
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
             <button onClick={logout}>Logout</button>
           </div>
         </div>

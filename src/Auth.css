@@ -1,18 +1,9 @@
 /* ------------------ */
-/* Global fix         */
-/* ------------------ */
-* {
-  box-sizing: border-box;
-}
-
-/* ------------------ */
 /* Full page wrapper  */
 /* ------------------ */
 .auth-page {
-  background-color: #4b0082;
+  background-color: #4b0082; /* deep purple */
   min-height: 100vh;
-  width: 100%;
-  max-width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,14 +11,13 @@
   padding: 2rem;
   color: white;
   overflow-x: hidden;
-  font-size: clamp(0.9rem, 2vw, 1rem); /* ✅ base fluid font size */
 }
 
 /* ------------------ */
 /* Logo styling       */
 /* ------------------ */
 .auth-logo {
-  width: clamp(70px, 12vw, 120px); /* ✅ fluid logo size */
+  width: 120px;
   margin-bottom: 1.5rem;
 }
 
@@ -35,9 +25,9 @@
 /* Card (login/register) */
 /* ------------------ */
 .auth-card {
-  background: #f5f5f5;
+  background: #f5f5f5; /* light background for readability */
   color: black;
-  padding: clamp(15px, 4vw, 30px); /* ✅ fluid padding */
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   width: 100%;
@@ -48,7 +38,6 @@
 
 .auth-card h2 {
   margin-bottom: 20px;
-  font-size: clamp(1.2rem, 3vw, 1.6rem); /* ✅ fluid heading */
 }
 
 /* ------------------ */
@@ -56,11 +45,11 @@
 /* ------------------ */
 .auth-card input {
   width: 100%;
-  padding: clamp(8px, 2vw, 12px) 10px;
+  padding: 12px 10px;
   margin-bottom: 15px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: clamp(0.9rem, 2.5vw, 1rem); /* ✅ fluid input text */
+  font-size: 1rem;
   display: block;
 }
 
@@ -69,19 +58,18 @@
 /* ------------------ */
 .auth-card button {
   width: 100%;
-  padding: clamp(8px, 2.5vw, 12px);
-  background: #4b0082;
+  padding: 12px;
+  background: #4b0082; /* purple */
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
-  font-size: clamp(0.9rem, 2.5vw, 1rem); /* ✅ fluid button text */
 }
 
 .auth-card button:hover {
-  background: #5c0fa8;
+  background: #5c0fa8; /* lighter purple */
   transform: scale(1.03);
 }
 
@@ -91,38 +79,33 @@
 .auth-card .error {
   color: #e74c3c;
   margin-bottom: 10px;
-  font-size: clamp(0.8rem, 2vw, 0.95rem); /* ✅ fluid error text */
 }
 
 .auth-card p {
   margin-top: 10px;
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-size: 0.9rem;
 }
 
 /* ------------------ */
 /* Extra info section */
 /* ------------------ */
 .auth-info {
-  width: 100%;
   max-width: 650px;
   text-align: left;
   color: white;
   margin-top: 1rem;
-  font-size: clamp(0.85rem, 2vw, 1rem); /* ✅ fluid text */
-  overflow-x: hidden;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
+  font-size: 1rem;
 }
 
+/* Prevents overflow on mobile */
 .airdrop-guide {
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
   border-radius: 8px;
-  max-height: clamp(150px, 40vh, 250px);
-  overflow-y: auto;
+  max-height: 250px;   /* limit height */
+  overflow-y: auto;    /* scroll if too long */
   line-height: 1.5;
 }
-
 
 /* Scrollbar styling */
 .airdrop-guide::-webkit-scrollbar {
@@ -135,7 +118,7 @@
 
 .auth-info h3 {
   margin-bottom: 1rem;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: 1.2rem;
 }
 
 .auth-info ul {
@@ -147,8 +130,7 @@
 .note {
   margin-top: 1rem;
   font-style: italic;
-  color: #ffd700;
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  color: #ffd700; /* gold highlight */
 }
 
 /* ------------------ */
@@ -158,13 +140,12 @@
   background: #4b0082;
   color: white;
   border: none;
-  padding: clamp(6px, 2vw, 10px) clamp(10px, 3vw, 14px);
+  padding: 0.6rem 1rem;
   border-radius: 8px;
   cursor: pointer;
   margin-bottom: 1rem;
   font-weight: bold;
   transition: background 0.3s, transform 0.2s;
-  font-size: clamp(0.85rem, 2.5vw, 1rem); /* ✅ fluid toggle */
 }
 
 .toggle-btn:hover {
@@ -175,16 +156,63 @@
 /* ------------------ */
 /* Responsive Styling */
 /* ------------------ */
+
+/* Tablets */
+@media (max-width: 768px) {
+  .auth-page {
+    padding: 1.5rem;
+  }
+
+  .auth-logo {
+    width: 100px;
+  }
+
+  .auth-card {
+    padding: 20px;
+  }
+
+  .auth-info {
+    font-size: 0.95rem;
+  }
+
+  .airdrop-guide {
+    max-height: 200px;
+  }
+}
+
+/* Mobile */
 @media (max-width: 480px) {
   .auth-page {
     padding: 1rem;
     justify-content: center;
   }
-}
 
-/* Ultra-small devices (<360px wide) */
-@media (max-width: 360px) {
+  .auth-logo {
+    width: 80px;
+    margin-bottom: 1rem;
+  }
+
   .auth-card {
-    padding: 12px;
+    padding: 15px;
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-card h2 {
+    font-size: 1.4rem;
+  }
+
+  .auth-card input,
+  .auth-card button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .auth-info {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .airdrop-guide {
+    max-height: 180px;
   }
 }

@@ -9,12 +9,11 @@
   margin: 0 auto;
   padding: 10px;
   position: relative;
-  box-sizing: border-box;
 }
 
 .game-2048-container h3 {
   margin: 0;
-  font-size: min(5vw, 28px);
+  font-size: 5vw; /* scales with screen width */
   color: #333;
   font-weight: 600;
 }
@@ -27,12 +26,11 @@
   gap: 2%;
   width: 100%;
   aspect-ratio: 1;
-  background-color: #87349b;
+  background-color: #f5f2e7;
   padding: 2%;
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: none;
-  box-sizing: border-box;
+  touch-action: pan-x pan-y;
 }
 
 /* Tiles */
@@ -43,18 +41,17 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: min(4vw, 22px);
+  font-size: 4vw; /* dynamic font size */
   color: #776e65;
   position: relative;
   transition: all 0.2s ease;
-  min-width: 0;
 }
 
 .tile-label {
   position: absolute;
   bottom: 2px;
   right: 2px;
-  font-size: min(2vw, 12px);
+  font-size: 2vw;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
 }
@@ -63,14 +60,14 @@
 .tile-2 { background-color: #eee4da; color: #776e65; }
 .tile-4 { background-color: #ede0c8; color: #776e65; }
 .tile-8 { background-color: #f2b179; color: #f9f6f2; }
-.tile-16 { background-color: #0cb689; color: #f9f6f2; }
-.tile-32 { background-color: #37cbe1bc; color: #f9f6f2; }
+.tile-16 { background-color: #f59563; color: #f9f6f2; }
+.tile-32 { background-color: #f67c5f; color: #f9f6f2; }
 .tile-64 { background-color: #f65e3b; color: #f9f6f2; }
-.tile-128 { background-color: #72edeb; color: #f9f6f2; font-size: min(3.5vw, 20px); }
-.tile-256 { background-color: #6d61ed; color: #f9f6f2; font-size: min(3.5vw, 20px); }
-.tile-512 { background-color: #6aed50; color: #f9f6f2; font-size: min(3.5vw, 20px); }
-.tile-1024 { background-color: #ed3fb6; color: #f9f6f2; font-size: min(3vw, 18px); }
-.tile-2048 { background-color: #ca2eed; color: #f9f6f2; font-size: min(3vw, 18px); }
+.tile-128 { background-color: #edcf72; color: #f9f6f2; font-size: 3.5vw; }
+.tile-256 { background-color: #edcc61; color: #f9f6f2; font-size: 3.5vw; }
+.tile-512 { background-color: #edc850; color: #f9f6f2; font-size: 3.5vw; }
+.tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 3vw; }
+.tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 3vw; }
 
 /* Tile merge animation */
 .board-cell.merged {
@@ -78,27 +75,20 @@
   transition: transform 0.1s ease;
 }
 
-/* New tile animation */
-.board-cell.new-tile {
-  animation: pop 0.15s ease-out forwards;
-}
-
-@keyframes pop {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
 /* Game Over Overlay */
 .game-over-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5%;
+  border-radius: 10px;
   color: #f9f6f2;
   animation: fadeIn 0.3s forwards;
 }
@@ -108,14 +98,13 @@
 }
 
 .game-over-overlay h2 {
-  font-size: min(6vw, 28px);
+  font-size: 6vw;
   margin: 0;
-  text-align: center;
 }
 
 .game-over-overlay button {
   padding: 2% 5%;
-  font-size: min(4vw, 20px);
+  font-size: 4vw;
   background-color: #8f7a66;
   color: #f9f6f2;
   border: none;
@@ -129,12 +118,12 @@
 }
 
 /* Responsive Adjustments for Tiny Screens */
-@media screen and (max-width: 375px) {
-  .game-2048-container h3 { font-size: min(6vw, 24px); }
-  .board-cell { font-size: min(5vw, 20px); }
-  .tile-128, .tile-256, .tile-512 { font-size: min(4.5vw, 18px); }
-  .tile-1024, .tile-2048 { font-size: min(4vw, 16px); }
-  .tile-label { font-size: min(3vw, 12px); }
-  .game-over-overlay h2 { font-size: min(7vw, 24px); }
-  .game-over-overlay button { font-size: min(5vw, 20px); padding: 3% 5%; }
+@media screen and (max-width: 360px) {
+  .game-2048-container h3 { font-size: 6vw; }
+  .board-cell { font-size: 5vw; }
+  .tile-128, .tile-256, .tile-512 { font-size: 4.5vw; }
+  .tile-1024, .tile-2048 { font-size: 4vw; }
+  .tile-label { font-size: 3vw; }
+  .game-over-overlay h2 { font-size: 7vw; }
+  .game-over-overlay button { font-size: 5vw; padding: 3% 5%; }
 }

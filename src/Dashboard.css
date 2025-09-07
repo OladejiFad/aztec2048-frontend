@@ -1,8 +1,4 @@
 /* --- General --- */
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
   font-family: 'Arial', sans-serif;
@@ -163,18 +159,13 @@ button:hover {
 .dropdown {
   display: none;
   flex-direction: column;
-  gap: 5px;
+  padding: 10px;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
 }
 
 .dropdown.show {
   display: flex;
-  position: absolute;
-  top: 50px;
-  right: 10px;
-  background: #fff;
-  padding: 5px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
 /* --- Main Content --- */
@@ -232,15 +223,15 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 2%;
-  width: 95vw;
-  max-width: 360px;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
   aspect-ratio: 1;
   background-color: #f5f2e7;
-  padding: 2%;
+  padding: 10px;
   border-radius: 12px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: none;
+  touch-action: pan-x pan-y;
 }
 
 .board-cell {
@@ -250,7 +241,7 @@ button:hover {
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(14px, 4vw, 24px); /* fully responsive */
+  font-size: 24px;
   color: #776e65;
   position: relative;
   transition: all 0.2s ease;
@@ -260,7 +251,7 @@ button:hover {
   position: absolute;
   bottom: 4px;
   right: 4px;
-  font-size: clamp(8px, 2vw, 12px);
+  font-size: 10px;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
 }
@@ -271,7 +262,10 @@ button:hover {
 /* --- Game Over Overlay --- */
 .game-over-overlay {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -287,11 +281,11 @@ button:hover {
 
 @keyframes fadeIn { to { opacity: 1; transform: scale(1); } }
 
-.game-over-overlay h2 { font-size: clamp(18px, 6vw, 28px); margin: 0; text-align: center; }
+.game-over-overlay h2 { font-size: 28px; margin: 0; }
 
 .game-over-overlay button {
   padding: 10px 20px;
-  font-size: clamp(12px, 4vw, 16px);
+  font-size: 16px;
   background-color: #8f7a66;
   color: #f9f6f2;
   border: none;
@@ -303,24 +297,22 @@ button:hover {
 .game-over-overlay button:hover { background-color: #9f8b76; }
 
 /* --- Responsive --- */
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 1024px) {
+  .sidebar { width: 200px; }
+  .profile img { width: 60px; height: 60px; }
+}
+
+@media screen and (max-width: 768px) {
   .dashboard-game-container { flex-direction: column; }
-
   .sidebar { display: none; }
+  .main-content { padding: 15px; }
+}
 
-  .main-content { padding: 10px; justify-content: center; align-items: center; }
-
-  .board {
-    width: 90vw;
-    max-width: 320px;
-    gap: 2%;
-  }
-
-  .board-cell { font-size: clamp(12px, 4vw, 20px); border-radius: 6px; }
-
-  .tile-128, .tile-256, .tile-512 { font-size: clamp(10px, 3vw, 18px); }
-
-  .tile-1024, .tile-2048 { font-size: clamp(8px, 2.5vw, 16px); }
-
-  .game-2048-container { padding: 5px; max-width: 95vw; }
+@media screen and (max-width: 480px) {
+  .topbar-name { font-size: 14px; }
+  .mobile-stats { font-size: 14px; gap: 4px; }
+  .board { gap: 6px; }
+  .board-cell { font-size: 16px; }
+  .tile-128, .tile-256, .tile-512 { font-size: 14px; }
+  .tile-1024, .tile-2048 { font-size: 12px; }
 }
