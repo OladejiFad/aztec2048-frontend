@@ -1,5 +1,13 @@
-/* Container */
+/* Global Fixes */
+html, body {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
 .game-2048-container {
+  overscroll-behavior: contain;
+  touch-action: none;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,14 +19,42 @@
   position: relative;
 }
 
-.game-2048-container h3 {
+/* === TOPBAR (Score only) === */
+.game-topbar {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* center score since no reset button */
+  align-items: center;
+  padding: 6px 10px;
+  background: #faf8ef;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.game-topbar h3 {
   margin: 0;
-  font-size: 5vw; /* scales with screen width */
+  font-size: 5vw;
   color: #333;
   font-weight: 600;
 }
 
-/* Board */
+
+.game-topbar button {
+  background-color: #8f7a66;
+  color: #f9f6f2;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 3.5vw;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.game-topbar button:hover {
+  background-color: #9f8b76;
+}
+
+/* === BOARD === */
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -30,10 +66,10 @@
   padding: 2%;
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
-/* Tiles */
+/* === TILES === */
 .board-cell {
   background-color: #eee4da;
   border-radius: 8px;
@@ -41,7 +77,7 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 4vw; /* dynamic font size */
+  font-size: 4vw;
   color: #776e65;
   position: relative;
   transition: all 0.2s ease;
@@ -56,7 +92,7 @@
   pointer-events: none;
 }
 
-/* Tile Colors */
+/* === TILE COLORS === */
 .tile-2 { background-color: #eee4da; color: #776e65; }
 .tile-4 { background-color: #ede0c8; color: #776e65; }
 .tile-8 { background-color: #f2b179; color: #f9f6f2; }
@@ -69,13 +105,7 @@
 .tile-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 3vw; }
 .tile-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 3vw; }
 
-/* Tile merge animation */
-.board-cell.merged {
-  transform: scale(1.1);
-  transition: transform 0.1s ease;
-}
-
-/* Game Over Overlay */
+/* === GAME OVER OVERLAY === */
 .game-over-overlay {
   position: absolute;
   top: 0;
@@ -117,9 +147,10 @@
   background-color: #9f8b76;
 }
 
-/* Responsive Adjustments for Tiny Screens */
+/* === RESPONSIVE ADJUSTMENTS === */
 @media screen and (max-width: 360px) {
-  .game-2048-container h3 { font-size: 6vw; }
+  .game-topbar h3 { font-size: 6vw; }
+  .game-topbar button { font-size: 5vw; padding: 4px 8px; }
   .board-cell { font-size: 5vw; }
   .tile-128, .tile-256, .tile-512 { font-size: 4.5vw; }
   .tile-1024, .tile-2048 { font-size: 4vw; }

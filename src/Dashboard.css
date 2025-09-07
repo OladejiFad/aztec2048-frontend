@@ -1,8 +1,12 @@
-/* --- General --- */
-body {
+/* Dashboard.css */
+
+/* --- Base --- */
+body, html {
   margin: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
+  overscroll-behavior: none; /* prevent scroll bounce */
+  touch-action: none;        /* prevent swipe scroll */
 }
 
 button {
@@ -19,6 +23,20 @@ button:hover {
   background-color: #580b99;
 }
 
+/* --- Reset Button --- */
+.reset-btn {
+  background-color: #ff5252;
+  color: #fff;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background-color: #e04848;
+}
+
 /* --- Dashboard Container --- */
 .dashboard-game-container {
   display: flex;
@@ -27,7 +45,6 @@ button:hover {
   background-color: #f0f2f5;
 }
 
-/* --- Sidebar (Desktop) --- */
 .sidebar {
   width: 260px;
   background-color: #6a0dad;
@@ -36,6 +53,8 @@ button:hover {
   flex-direction: column;
   gap: 15px;
   color: #fff;
+  position: relative;
+  z-index: 2;
 }
 
 .logo-container {
@@ -175,6 +194,7 @@ button:hover {
   justify-content: center;
   align-items: flex-start;
   padding: 20px;
+  margin-left: 260px;
 }
 
 /* --- AZTEC Letters --- */
@@ -206,96 +226,6 @@ button:hover {
   margin-top: 20px;
 }
 
-/* --- Game 2048 Container --- */
-.game-2048-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  gap: 15px;
-  padding: 10px;
-}
-
-/* --- Responsive Board --- */
-.board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
-  background-color: #f5f2e7;
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: pan-x pan-y;
-}
-
-.board-cell {
-  background-color: #eee4da;
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 24px;
-  color: #776e65;
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.tile-label {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 10px;
-  color: rgba(0,0,0,0.2);
-  pointer-events: none;
-}
-
-/* Tile merge animation */
-.board-cell.merged { transform: scale(1.1); transition: transform 0.1s ease; }
-
-/* --- Game Over Overlay --- */
-.game-over-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 12px;
-  color: #f9f6f2;
-  opacity: 0;
-  transform: scale(0.9);
-  animation: fadeIn 0.3s forwards;
-}
-
-@keyframes fadeIn { to { opacity: 1; transform: scale(1); } }
-
-.game-over-overlay h2 { font-size: 28px; margin: 0; }
-
-.game-over-overlay button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #8f7a66;
-  color: #f9f6f2;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.game-over-overlay button:hover { background-color: #9f8b76; }
-
 /* --- Responsive --- */
 @media screen and (max-width: 1024px) {
   .sidebar { width: 200px; }
@@ -305,14 +235,13 @@ button:hover {
 @media screen and (max-width: 768px) {
   .dashboard-game-container { flex-direction: column; }
   .sidebar { display: none; }
-  .main-content { padding: 15px; }
+  .main-content { 
+    margin-left: 0;  /* fix: no empty space */
+    padding: 15px; 
+  }
 }
 
 @media screen and (max-width: 480px) {
   .topbar-name { font-size: 14px; }
   .mobile-stats { font-size: 14px; gap: 4px; }
-  .board { gap: 6px; }
-  .board-cell { font-size: 16px; }
-  .tile-128, .tile-256, .tile-512 { font-size: 14px; }
-  .tile-1024, .tile-2048 { font-size: 12px; }
 }
