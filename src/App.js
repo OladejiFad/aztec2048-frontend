@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import PreDashboardScreen from './PreDashboardScreen';
 import LoginScreen from './LoginScreen';
@@ -12,7 +12,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check JWT on app load
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -48,25 +47,23 @@ function App() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<PreDashboardScreen />} />
-        <Route path="/login" element={<LoginScreen setUser={setUser} />} />
-        <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
+    <Routes>
+      <Route path="/" element={<PreDashboardScreen />} />
+      <Route path="/login" element={<LoginScreen setUser={setUser} />} />
+      <Route path="/register" element={<RegisterScreen setUser={setUser} />} />
 
-        {/* Dashboard requires login */}
-        <Route
-          path="/dashboard"
-          element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
-        />
+      {/* Dashboard requires login */}
+      <Route
+        path="/dashboard"
+        element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
+      />
 
-        {/* Leaderboard is public */}
-        <Route path="/leaderboard" element={<LeaderboardScreen />} />
+      {/* Leaderboard is public */}
+      <Route path="/leaderboard" element={<LeaderboardScreen />} />
 
-        {/* Fallback route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+      {/* Fallback route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
