@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
@@ -201,7 +202,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
           <div className="stat-card"><button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button></div>
           <div className="stat-card">
-            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+            <Link to="/leaderboard">
+              <button>Leaderboard</button>
+            </Link>
           </div>
           <div className="stat-card"><button onClick={logout}>Logout</button></div>
         </div>
@@ -223,14 +226,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
           </div>
           <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
-            <button
-              onClick={() => {
-                navigate('/leaderboard');
-                setShowDropdown(false);
-              }}
-            >
-              Leaderboard
-            </button>
+            <Link to="/leaderboard" onClick={() => setShowDropdown(false)}>
+              <button>Leaderboard</button>
+            </Link>
+
             <button onClick={logout}>Logout</button>
           </div>
         </div>

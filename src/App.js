@@ -12,6 +12,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Check JWT on app load
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -58,11 +59,8 @@ function App() {
         element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />}
       />
 
-      {/* Leaderboard requires login */}
-      <Route
-        path="/leaderboard"
-        element={user ? <LeaderboardScreen user={user} /> : <Navigate to="/login" replace />}
-      />
+      {/* Leaderboard is now public */}
+      <Route path="/leaderboard" element={<LeaderboardScreen />} />
 
       {/* Fallback route */}
       <Route path="*" element={<Navigate to="/" replace />} />
