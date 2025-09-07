@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Game2048 from './Game2048';
@@ -46,7 +46,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, []);
 
   // --- Fetch user info ---
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
     if (!token) {
@@ -78,11 +78,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate, setAppUser]);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   // --- Leaderboard position ---
   useEffect(() => {

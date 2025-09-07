@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, useCallback } from 'react';
 import './Game2048.css';
 
 const SIZE = 4;
@@ -30,52 +30,7 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // Keyboard input
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      switch (e.key) {
-        case 'ArrowUp': handleMove('up'); break;
-        case 'ArrowDown': handleMove('down'); break;
-        case 'ArrowLeft': handleMove('left'); break;
-        case 'ArrowRight': handleMove('right'); break;
-        default: break;
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [board]);
-
-  // Touch input
-  useEffect(() => {
-    let startX = 0;
-    let startY = 0;
-
-    const handleTouchStart = (e) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    };
-
-    const handleTouchEnd = (e) => {
-      const dx = e.changedTouches[0].clientX - startX;
-      const dy = e.changedTouches[0].clientY - startY;
-      const threshold = 20; // Minimum swipe distance
-      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
-        dx > 0 ? handleMove('right') : handleMove('left');
-      } else if (Math.abs(dy) > threshold) {
-        dy > 0 ? handleMove('down') : handleMove('up');
-      }
-    };
-
-    const boardEl = boardRef.current;
-    boardEl?.addEventListener('touchstart', handleTouchStart);
-    boardEl?.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      boardEl?.removeEventListener('touchstart', handleTouchStart);
-      boardEl?.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [board]);
-
+  // --- Board utilities ---
   function generateEmptyBoard() {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
   }
@@ -109,42 +64,53 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
     return arr.filter(v => v !== null);
   }
 
-  function moveLeft(b) {
+  const moveLeft = useCallback((b) => {
     return b.map(row => {
       const s = slide(row);
       while (s.length < SIZE) s.push(null);
       return s;
     });
-  }
+  }, []);
 
-  function moveRight(b) {
+  const moveRight = useCallback((b) => {
     return b.map(row => {
       const s = slide(row.slice().reverse());
       while (s.length < SIZE) s.push(null);
       return s.reverse();
     });
-  }
+  }, []);
 
-  function transpose(b) {
-    return b[0].map((_, i) => b.map(row => row[i]));
-  }
+  const transpose = useCallback((b) => b[0].map((_, i) => b.map(row => row[i])), []);
 
-  function moveUp(b) {
-    return transpose(moveLeft(transpose(b)));
-  }
+  const moveUp = useCallback((b) => transpose(moveLeft(b.map(row => row.slice()))), [moveLeft, transpose]);
 
-  function moveDown(b) {
-    return transpose(moveRight(transpose(b)));
-  }
+  const moveDown = useCallback((b) => transpose(moveRight(b.map(row => row.slice()))), [moveRight, transpose]);
 
-  function boardsEqual(a, b) {
+  const boardsEqual = useCallback((a, b) => {
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE; j++)
         if (a[i][j] !== b[i][j]) return false;
     return true;
-  }
+  }, []);
 
-  function handleMove(direction) {
+  const checkGameOver = useCallback((b) => {
+    for (let i = 0; i < SIZE; i++)
+      for (let j = 0; j < SIZE; j++)
+        if (!b[i][j]) return false;
+
+    for (let i = 0; i < SIZE; i++)
+      for (let j = 0; j < SIZE - 1; j++)
+        if (b[i][j] === b[i][j + 1]) return false;
+
+    for (let j = 0; j < SIZE; j++)
+      for (let i = 0; i < SIZE - 1; i++)
+        if (b[i][j] === b[i + 1][j]) return false;
+
+    return true;
+  }, []);
+
+  // --- handleMove wrapped in useCallback with all dependencies ---
+  const handleMove = useCallback((direction) => {
     if (gameOver) return;
 
     let newBoard = [];
@@ -163,23 +129,53 @@ const Game2048 = forwardRef(({ onScoreChange }, ref) => {
         sendScore(score);
       }
     }
-  }
+  }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver]);
 
-  function checkGameOver(b) {
-    for (let i = 0; i < SIZE; i++)
-      for (let j = 0; j < SIZE; j++)
-        if (!b[i][j]) return false;
+  // Keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+        case 'ArrowUp': handleMove('up'); break;
+        case 'ArrowDown': handleMove('down'); break;
+        case 'ArrowLeft': handleMove('left'); break;
+        case 'ArrowRight': handleMove('right'); break;
+        default: break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleMove]);
 
-    for (let i = 0; i < SIZE; i++)
-      for (let j = 0; j < SIZE - 1; j++)
-        if (b[i][j] === b[i][j + 1]) return false;
+  // Touch input
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
 
-    for (let j = 0; j < SIZE; j++)
-      for (let i = 0; i < SIZE - 1; i++)
-        if (b[i][j] === b[i + 1][j]) return false;
+    const handleTouchStart = (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
 
-    return true;
-  }
+    const handleTouchEnd = (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      const threshold = 20; // Minimum swipe distance
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        dx > 0 ? handleMove('right') : handleMove('left');
+      } else if (Math.abs(dy) > threshold) {
+        dy > 0 ? handleMove('down') : handleMove('up');
+      }
+    };
+
+    const boardEl = boardRef.current;
+    boardEl?.addEventListener('touchstart', handleTouchStart);
+    boardEl?.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      boardEl?.removeEventListener('touchstart', handleTouchStart);
+      boardEl?.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleMove]);
 
   async function sendScore(finalScore) {
     try {
