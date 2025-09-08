@@ -3,20 +3,6 @@ import './Game2048.css';
 
 const SIZE = 4;
 
-const TILE_STYLES = {
-  2: { background: '#eee4da', color: '#776e65' },
-  4: { background: '#ede0c8', color: '#776e65' },
-  8: { background: '#f2b179', color: '#f9f6f2' },
-  16: { background: '#0cb689', color: '#f9f6f2' },
-  32: { background: '#37cbe1bc', color: '#f9f6f2' },
-  64: { background: '#f65e3b', color: '#f9f6f2' },
-  128: { background: '#72edeb', color: '#f9f6f2' },
-  256: { background: '#6d61ed', color: '#f9f6f2' },
-  512: { background: '#6aed50', color: '#f9f6f2' },
-  1024: { background: '#ed3fb6', color: '#f9f6f2' },
-  2048: { background: '#ca2eed', color: '#f9f6f2' },
-};
-
 const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
@@ -129,12 +115,17 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (!boardsEqual(board, newBoard)) {
       const updatedBoard = addRandomTile(newBoard);
       setBoard(updatedBoard);
-
-      if (checkGameOver(updatedBoard)) {
+      if (score >= 30000 || checkGameOver(updatedBoard)) {
         setGameOver(true);
+
+        // ✅ notify parent
         if (onGameOver) onGameOver(score);
+
+
       }
+
     }
+
   }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
 
   // --- Keyboard input ---
@@ -183,35 +174,45 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     };
   }, [handleMove]);
 
+  // --- Helpers for score badge ---
+  function getScoreClass(b) {
+    const maxTile = Math.max(...b.flat().filter(Boolean));
+
+    if (maxTile >= 2048) return "score-gold";
+    if (maxTile >= 512) return "score-purple";
+    if (maxTile >= 128) return "score-green";
+    return "score-default";
+  }
+
   return (
     <div className="game-2048-container">
-      <h3>Score: {score}</h3>
+      <div className={`score ${getScoreClass(board)}`}>Score: {score}</div>
       <div className="board" ref={boardRef}>
         {board.flatMap((row, i) =>
-          row.map((cell, j) => {
-            const style = TILE_STYLES[cell] || { background: '#cdc1b4', color: '#776e65' };
-            return (
-              <div
-                key={`${i}-${j}`}
-                className={`board-cell tile-${cell || 0}`}
-                style={{
-                  backgroundColor: style.background,
-                  color: style.color,
-                }}
-              >
-                {cell || ''}
-              </div>
-            );
-          })
+          row.map((cell, j) => (
+            <div
+              key={`${i}-${j}`}
+              className={`board-cell ${cell ? `tile-${cell}` : ''}`}
+            >
+              {cell || ''}
+            </div>
+          ))
         )}
       </div>
-
       {gameOver && (
         <div className="game-over-overlay">
-          <h2>Game Over</h2>
-          <button onClick={() => ref.current.resetGame()}>Restart</button>
+          {score >= 30000 ? (
+            <>
+              <h2>🎉 Congratulations! 🎉</h2>
+              <h4>You won Aztec Test, You are one of us!</h4>
+              <p>You reached {score} points!</p>
+            </>
+          ) : (
+            <h2>Game Over</h2>
+          )}
         </div>
       )}
+
     </div>
   );
 });

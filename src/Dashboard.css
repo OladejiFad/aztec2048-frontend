@@ -1,8 +1,9 @@
 /* --- General --- */
-body {
+body, html {
   margin: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
+  overflow-x: hidden; /* ✅ prevent horizontal overflow on tiny screens */
 }
 
 button {
@@ -303,10 +304,26 @@ button:hover {
 }
 
 @media screen and (max-width: 768px) {
-  .dashboard-game-container { flex-direction: column; }
-  .sidebar { display: none; }
-  .main-content { padding: 15px; }
+  .dashboard-game-container { 
+    flex-direction: column; 
+  }
+  .sidebar { 
+    display: none; 
+  }
+  .main-content { 
+    padding: 15px; 
+  }
+
+  /* Mobile stat cards styling */
+  .mobile-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #fff;
+    padding: 12px;
+  }
 }
+
 
 @media screen and (max-width: 480px) {
   .topbar-name { font-size: 14px; }
@@ -315,4 +332,8 @@ button:hover {
   .board-cell { font-size: 16px; }
   .tile-128, .tile-256, .tile-512 { font-size: 14px; }
   .tile-1024, .tile-2048 { font-size: 12px; }
+
+  /* ✅ shrink stat cards on tiny screens */
+  .stat-card h4 { font-size: 12px; }
+  .stat-card p { font-size: 14px; }
 }

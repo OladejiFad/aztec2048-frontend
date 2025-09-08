@@ -1,24 +1,53 @@
-/* Container */
+/* ---------------- Container ---------------- */
 .game-2048-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   width: 95%;
-  max-width: 400px;
+  max-width: 420px;
   margin: 0 auto;
   padding: 10px;
   position: relative;
 }
 
-.game-2048-container h3 {
-  margin: 0;
-  font-size: clamp(1.2rem, 5vw, 2rem);
-  color: #333;
-  font-weight: 600;
+/* Score Badge */
+/* Default Score Badge */
+.score {
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  text-align: center;
+  margin-bottom: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #fff;
 }
 
-/* Board */
+/* Dynamic Colors */
+.score-default {
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  box-shadow: 0 4px 15px rgba(229, 46, 113, 0.5);
+}
+
+.score-green {
+  background: linear-gradient(135deg, #0cb689, #37e37b);
+  box-shadow: 0 4px 15px rgba(12, 182, 137, 0.5);
+}
+
+.score-purple {
+  background: linear-gradient(135deg, #6d61ed, #ca2eed);
+  box-shadow: 0 4px 15px rgba(109, 97, 237, 0.5);
+}
+
+.score-gold {
+  background: linear-gradient(135deg, #ffcc00, #ff9900);
+  box-shadow: 0 4px 20px rgba(255, 204, 0, 0.6);
+}
+
+
+
+/* ---------------- Board ---------------- */
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -26,58 +55,55 @@
   gap: 2%;
   width: 100%;
   aspect-ratio: 1;
-  background-color: #f5f2e7;
+  background-color: #222; /* darker for contrast */
   padding: 2%;
   border-radius: 10px;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
   touch-action: pan-x pan-y;
 }
 
-/* Tiles */
+/* ---------------- Tiles ---------------- */
 .board-cell {
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-size: clamp(0.8rem, 4vw, 2rem); /* scales down on iPhone 5 */
   transition: all 0.2s ease;
+  color: #fff; /* fallback text color */
 }
 
-/* Tile Colors */
-.tile-2 { background-color: #eee4da; color: #fff; }
-.tile-4 { background-color: #ede0c8; color: #fff; }
-.tile-8 { background-color: #f2b179; color: #fff; }
-.tile-16 { background-color: #0cb689; color: #fff; }
-.tile-32 { background-color: #37cbe1bc; color: #fff; }
-.tile-64 { background-color: #f65e3b; color: #fff; }
-.tile-128 { background-color: #72edeb; color: #fff; font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
-.tile-256 { background-color: #6d61ed; color: #fff; font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
-.tile-512 { background-color: #6aed50; color: #fff; font-size: clamp(1.2rem, 3.5vw, 1.8rem); }
-.tile-1024 { background-color: #ed3fb6; color: #fff; font-size: clamp(1rem, 3vw, 1.5rem); }
-.tile-2048 { background-color: #ca2eed; color: #fff; font-size: clamp(1rem, 3vw, 1.5rem); }
 
-/* Tile merge animation */
-.board-cell.merged {
-  transform: scale(1.1);
-  transition: transform 0.1s ease;
-}
+/* --- Tile Colors (Custom Scheme with Dynamic Text Contrast) --- */
+.tile-2    { background-color: #eee4da; color: #776e65; }  /* dark text */
+.tile-4    { background-color: #ede0c8; color: #776e65; }  /* dark text */
+.tile-8    { background-color: #f2b179; color: #fff; }
+.tile-16   { background-color: #0cb689; color: #fff; }
+.tile-32   { background-color: #37cbe1bc; color: #fff; }
+.tile-64   { background-color: #f65e3b; color: #fff; }
+.tile-128  { background-color: #72edeb; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
+.tile-256  { background-color: #6d61ed; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
+.tile-512  { background-color: #6aed50; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
+.tile-1024 { background-color: #ed3fb6; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
+.tile-2048 { background-color: #ca2eed; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
 
-/* Game Over Overlay */
+
+/* ---------------- Game Over Overlay ---------------- */
 .game-over-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5%;
   border-radius: 10px;
-  color: #f9f6f2;
+  color: #fff;
   animation: fadeIn 0.3s forwards;
 }
 
@@ -86,15 +112,23 @@
 }
 
 .game-over-overlay h2 {
-  font-size: clamp(1.5rem, 6vw, 2.5rem);
-  margin: 0;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 
+.game-over-overlay h4 {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #28a745; /* nice green for success */
+  margin-bottom: 1rem;
+}
+
+
 .game-over-overlay button {
-  padding: 2% 5%;
-  font-size: clamp(1rem, 4vw, 1.5rem);
+  padding: 8px 16px;
+  font-size: clamp(0.9rem, 4vw, 1.2rem);
   background-color: #8f7a66;
-  color: #f9f6f2;
+  color: #fff;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -103,4 +137,32 @@
 
 .game-over-overlay button:hover {
   background-color: #9f8b76;
+}
+
+/* ---------------- Extra Small Screen Tweaks ---------------- */
+@media (max-width: 340px) {
+  .game-2048-container {
+    max-width: 95%;
+    padding: 5px;
+  }
+
+  .board-cell {
+    font-size: clamp(0.7rem, 3vw, 1rem);
+    border-radius: 6px;
+  }
+
+ .game-over-overlay h2 {
+  font-size: clamp(1.5rem, 5vw, 2rem); /* scales smoothly */
+  margin-bottom: 0.5rem;
+  text-align: center; /* center for all screens */
+}
+
+.game-over-overlay h4 {
+  font-size: clamp(1rem, 3.5vw, 1.2rem);
+  font-style: italic;
+  color: #28a745; /* nice green for success */
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 }

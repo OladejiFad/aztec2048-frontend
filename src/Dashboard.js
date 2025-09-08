@@ -94,8 +94,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        const sorted = Array.isArray(data) ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)) : [];
-        const pos = sorted.findIndex(u => String(u._id) === String(user._id)) + 1;
+        const sorted = Array.isArray(data)
+          ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
+          : [];
+        const pos =
+          sorted.findIndex((u) => String(u._id) === String(user._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
         console.error(err);
@@ -106,30 +109,53 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter(m => score >= m.score).map(m => m.letter);
-    const newLetters = letters.filter(l => !triggeredLettersRef.current.includes(l));
-    newLetters.forEach(letter => playLetterSound(letter));
+    // Letters logic only
+    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
+      (m) => m.letter
+    );
+    const newLetters = letters.filter(
+      (l) => !triggeredLettersRef.current.includes(l)
+    );
+    newLetters.forEach((letter) => playLetterSound(letter));
     if (newLetters.length > 0) {
       setHighlightLetters(newLetters);
       setTimeout(() => setHighlightLetters([]), 800);
     }
-    triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
+    triggeredLettersRef.current = [
+      ...triggeredLettersRef.current,
+      ...newLetters,
+    ];
     setAztecLetters(letters);
+
   };
+
 
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
     handleScoreChange(finalScore);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ score: finalScore }),
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ score: finalScore }),
+        }
+      );
       const updatedData = await res.json();
-      setTotalScore(updatedData.totalScore);
+
+      // ✅ trust backend for both totalScore and gamesLeft
+      setTotalScore(updatedData.totalScore ?? totalScore);
       setGamesLeft(updatedData.gamesLeft ?? 0);
+
+      // ✅ keep app user in sync
+      setUser((prev) => ({ ...prev, totalScore: updatedData.totalScore }));
+      setAppUser((prev) => ({ ...prev, totalScore: updatedData.totalScore }));
+
     } catch (err) {
       console.error(err);
     }
@@ -155,10 +181,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const renderAztecLetters = () => (
     <div style={{ display: 'flex', gap: '5px' }}>
-      {aztecLetters.map(letter => (
+      {aztecLetters.map((letter) => (
         <span
           key={letter}
-          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''}`}
+          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''
+            }`}
           style={{
             backgroundColor: LETTER_COLORS[letter] || '#ccc',
             color: '#fff',
@@ -184,7 +211,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <img src={aztecLogo} alt="Aztec Logo" className="logo-img" />
           </div>
           <h2 className="sidebar-title">AZTEC 2048</h2>
-          <div className="profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div
+            className="profile"
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
             <img
               src={user.photo}
               alt="Avatar"
@@ -193,35 +223,82 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <span>{user.displayName || user.username}</span>
           </div>
 
-          <div className="stat-card"><h4>Total Score</h4><p>{totalScore}</p></div>
-          <div className="stat-card"><h4>Games Left</h4><p>{gamesLeft}</p></div>
-          <div className="stat-card"><h4>AZTEC Letters</h4>{renderAztecLetters()}</div>
-          <div className="stat-card"><h4>Your Position</h4><p>{userPosition || '-'}</p></div>
-          <div className="stat-card"><button onClick={handleReset} disabled={gamesLeft <= 0}>Reset Game</button></div>
-          <div className="stat-card"><button onClick={() => navigate('/leaderboard')}>Leaderboard</button></div>
-          <div className="stat-card"><button onClick={logout}>Logout</button></div>
+          <div className="stat-card">
+            <h4>Total Score</h4>
+            <p>{totalScore}</p>
+          </div>
+          <div className="stat-card">
+            <h4>Games Left</h4>
+            <p>{gamesLeft}</p>
+          </div>
+          <div className="stat-card">
+            <h4>AZTEC Letters</h4>
+            {renderAztecLetters()}
+          </div>
+          <div className="stat-card">
+            <h4>Your Position</h4>
+            <p>{userPosition || '-'}</p>
+          </div>
+          <div className="stat-card">
+            <button onClick={handleReset} disabled={gamesLeft <= 0}>
+              Reset Game
+            </button>
+          </div>
+          <div className="stat-card">
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+          </div>
+          <div className="stat-card">
+            <button onClick={logout}>Logout</button>
+          </div>
         </div>
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              className="topbar-left"
+              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            >
               <img
                 src={user.photo}
                 alt="Avatar"
                 style={{ width: '32px', height: '32px', borderRadius: '50%' }}
               />
-              <div className="topbar-name">{user.displayName || user.username}</div>
+              <div className="topbar-name">
+                {user.displayName || user.username}
+              </div>
             </div>
 
-            <button className="hamburger-btn" onClick={() => setShowDropdown(prev => !prev)}>☰</button>
+            <button
+              className="hamburger-btn"
+              onClick={() => setShowDropdown((prev) => !prev)}
+            >
+              ☰
+            </button>
           </div>
           <div className="mobile-stats">
-            <div>Total Score: {totalScore}</div>
-            <div>Games Left: {gamesLeft}</div>
-            <div>AZTEC Letters: {renderAztecLetters()}</div>
-            <div>Your Position: {userPosition || '-'}</div>
-            <button onClick={handleReset} disabled={gamesLeft <= 0} style={{ marginTop: '10px' }}>Reset Game</button>
+            <div className="stat-card">
+              <h4>Total Score</h4>
+              <p>{totalScore}</p>
+            </div>
+            <div className="stat-card">
+              <h4>Games Left</h4>
+              <p>{gamesLeft}</p>
+            </div>
+            <div className="stat-card">
+              <h4>AZTEC Letters</h4>
+              {renderAztecLetters()}
+            </div>
+            <div className="stat-card">
+              <h4>Your Position</h4>
+              <p>{userPosition || '-'}</p>
+            </div>
+            <div className="stat-card">
+              <button onClick={handleReset} disabled={gamesLeft <= 0}>
+                Reset Game
+              </button>
+            </div>
           </div>
+
           <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
             <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
             <button onClick={logout}>Logout</button>
@@ -231,7 +308,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
       <div className="main-content">
         {gamesLeft > 0 ? (
-          <Game2048 ref={gameRef} onScoreChange={handleScoreChange} onGameOver={handleGameOver} />
+          <Game2048
+            ref={gameRef}
+            onScoreChange={handleScoreChange}
+            onGameOver={handleGameOver}
+          />
         ) : (
           <p className="no-games-left">No games left this week.</p>
         )}
