@@ -18,6 +18,8 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
+
+
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
@@ -184,10 +186,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAppUser(null);
     navigate('/login', { replace: true });
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (!user) return null;
-
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
 
@@ -211,6 +209,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       </div>
     );
   };
+  if (loading) return <p>Loading...</p>;
+  if (!user) return null;
+  const avatarUrl = user.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email)}.svg`;
 
   return (
     <div className="dashboard-game-container">
@@ -221,7 +222,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
           <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile profile-row">
-            <img src={user.photo} alt="Avatar" />
+            <img src={avatarUrl} alt="Avatar" />
+
+
             <span>{user.displayName || user.username}</span>
           </div>
 
@@ -257,7 +260,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         <div className="topbar-container">
           <div className="topbar">
             <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={user.photo} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
+              />
+
+
               <div className="topbar-name">{user.displayName || user.username}</div>
 
               {/* Mobile topbar stats */}
@@ -290,21 +299,26 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
                 <button onClick={logout}>Logout</button>
               </div>
-
-
             </div>
           </div>
 
         </div>
       )}
 
-      <div className="main-content">
-        {user.gamesLeft > 0 ? (
-          <Game2048 ref={gameRef} onScoreChange={handleScoreChange} onGameOver={handleGameOver} />
-        ) : (
-          <p className="no-games-left">No games left this week.</p>
-        )}
+      <div
+        className="main-content"
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+      >
+        <Game2048
+          ref={gameRef}
+          onScoreChange={handleScoreChange}
+          onGameOver={handleGameOver}
+        />
       </div>
+
+
     </div>
   );
 }

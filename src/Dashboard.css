@@ -486,25 +486,26 @@ button:hover {
   /* --- AZTEC Letters Mobile Adjustments --- */
   .aztec-letter-badge {
     background-color: transparent !important; /* remove badge background */
-    color: inherit; /* keep the letter color */
-    font-size: 14px; /* smaller font on mobile */
-    padding: 2px 4px; /* smaller padding */
-    border: none; /* remove any border */
+    color: unset !important;                   /* keep the original letter color */
+    font-size: 16px;                           /* adjust font size for mobile */
+    padding: 0 2px;                            /* minimal padding */
+    min-width: 0;                              /* remove extra width */
+    border: none;                              /* no border */
   }
 
-  /* AZTEC letters container scroll */
-  .aztec-letters-container {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 4px;
-  }
-  .aztec-letters-container::-webkit-scrollbar { display: none; }
-  .aztec-letters-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+ .aztec-letters-container {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 2px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+.aztec-letters-container::-webkit-scrollbar { display: none; }
+
+}
+
+
 
 
 
