@@ -11,13 +11,15 @@ function PreDashboardScreen() {
   return (
     <div className="pre-dashboard">
       {/* Birds */}
-      <FaDove className="bird-icon" style={{ top: '15%', left: '0%' }} />
-      <FaDove className="bird-icon" style={{ top: '25%', left: '10%' }} />
-      <FaDove className="bird-icon" style={{ top: '35%', left: '5%' }} />
+      <FaDove className="bird-icon" style={{ top: '15%', left: '0%', color: '#ffffffc5' }} />
+      <FaDove className="bird-icon" style={{ top: '25%', left: '10%', color: '#f950f3ff' }} />
+      <FaDove className="bird-icon" style={{ top: '35%', left: '5%', color: '#bbb' }} />
 
       {/* Moon and Books wrapped together */}
       <div className="moon-and-books">
-        <div className="moon"></div>
+        <div className="moon">
+          <span className="moon-text">AZTEC</span>
+        </div>
         <div className="books-container">
           <img src={book} alt="AZTEC Book" className="book box" />
           <div className="glowing-orb"></div>

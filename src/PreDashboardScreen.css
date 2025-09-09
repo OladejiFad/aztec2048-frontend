@@ -2,7 +2,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* 🔒 completely disables scrolling */
+  overflow: hidden; /* completely disables scrolling */
   height: 100%;
 }
 
@@ -65,11 +65,11 @@ html, body {
 
 /* Moon inside the container */
 .moon {
-  position: relative; /* remove absolute positioning */
+  position: relative;
   top: 0;
   left: 0;
-  transform: none; /* no translateX */
-  margin-bottom: 3vh; /* spacing between moon and books */
+  transform: none;
+  margin-bottom: 3vh;
   width: 12vw;
   max-width: 120px;
   height: 12vw;
@@ -78,6 +78,21 @@ html, body {
   border-radius: 50%;
   box-shadow: 0 0 3vw rgba(255, 255, 255, 0.5);
   animation: moonGlow 4s infinite alternate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Moon text */
+.moon-text {
+  font-size: clamp(1rem, 1vw, 1rem);
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 0 0.5vw rgba(255,255,255,0.7);
+  background: linear-gradient(45deg, #ff4e50, #fc913a, #f9d423, #e0e0e0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Books container */
@@ -98,9 +113,9 @@ html, body {
 
 /* Books */
 .book {
-  width: 15vw;
-  max-width: 150px;
-  height: 18vw;
+  width: 20vw;
+  max-width: 220px;
+  height: 10vw;
   max-height: 180px;
   object-fit: cover;
   border-radius: 0.5vw;
@@ -178,16 +193,26 @@ html, body {
 /* Birds */
 .bird-icon {
   position: absolute;
-  color: #fff;
-  font-size: clamp(16px, 2.5vw, 24px);
+  z-index: 10; /* in front of moon */
+  width: 3vw;       /* small size for realistic bird */
+  max-width: 40px;
+  height: auto;
   animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite;
-  z-index: 2;
 }
 
-.bird-icon:nth-child(1) { animation-delay: 0s; top: 20vh; }
-.bird-icon:nth-child(2) { animation-delay: 3s; top: 22vh; }
-.bird-icon:nth-child(3) { animation-delay: 6s; top: 24vh; }
+.bird-icon img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
+/* FaDove birds style */
+.fa-dove {
+  font-size: clamp(16px, 2.5vw, 24px);
+  animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite;
+}
+
+/* Bird animation */
 @keyframes flyIcon {
   0% { left: -10vw; }
   25% { left: 25%; }
@@ -247,7 +272,8 @@ html, body {
   .book, .book2 { width: 25vw; height: 30vw; }
   .privacy-message h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
   .privacy-message p { font-size: clamp(0.9rem, 3.5vw, 1.1rem); }
-  .bird-icon { font-size: 5vw; }
+  .bird-icon { width: 5vw; max-width: 30px; }
+  .fa-dove { font-size: 5vw; }
 }
 
 @media (max-width: 600px) {
