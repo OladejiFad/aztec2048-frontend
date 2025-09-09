@@ -211,7 +211,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   };
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
-  const avatarUrl = user.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email)}.svg`;
+  const avatarUrl = user.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email || 'user')}.svg`;
+
 
   return (
     <div className="dashboard-game-container">

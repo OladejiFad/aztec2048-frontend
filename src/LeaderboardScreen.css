@@ -56,6 +56,18 @@
   margin: 0;
 }
 
+/* Shared Avatar Styling */
+.leaderboard-avatar,
+.profile img,
+.topbar-left img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff; /* optional */
+}
+
+
 /* --- Items --- */
 .leaderboard-item {
   display: flex;

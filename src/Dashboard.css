@@ -294,6 +294,8 @@ button:hover {
   animation: flashBadge 0.8s ease-in-out forwards;
 }
 
+
+
 .topbar-stats {
   display: flex;
   gap: 8px;
@@ -503,6 +505,17 @@ button:hover {
 }
 .aztec-letters-container::-webkit-scrollbar { display: none; }
 
+}
+
+/* Shared Avatar Styling */
+.leaderboard-avatar,
+.profile img,
+.topbar-left img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff; /* optional */
 }
 
 
