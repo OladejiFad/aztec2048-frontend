@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import './LeaderboardScreen.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-export default function LeaderboardScreen({ user }) {
-  const [users, setUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(user);
+export default function LeaderboardScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedUser = location.state?.user;
+  const [currentUser, setCurrentUser] = useState(passedUser);
+  const [users, setUsers] = useState([]);
+  const [userPosition, setUserPosition] = useState(null);
 
-  // Fetch leaderboard and current user if needed
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
@@ -19,7 +21,7 @@ export default function LeaderboardScreen({ user }) {
           return;
         }
 
-        // 1️⃣ Fetch leaderboard
+        // Fetch leaderboard
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -36,8 +38,8 @@ export default function LeaderboardScreen({ user }) {
 
         setUsers(sortedUsers);
 
-        // 2️⃣ Fetch current user details if not passed
-        if (!user) {
+        // Fetch current user if none passed
+        if (!passedUser) {
           const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -48,6 +50,16 @@ export default function LeaderboardScreen({ user }) {
             navigate('/login', { replace: true });
           }
         }
+
+        // Set user position
+        const currId = passedUser?._id;
+        const idToUse = currId || (await (await fetch(`${BACKEND_URL}/auth/api/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })).json())._id;
+
+        const pos =
+          sortedUsers.findIndex((u) => String(u._id) === String(idToUse)) + 1;
+        setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
         console.error(err);
         navigate('/login', { replace: true });
@@ -55,7 +67,7 @@ export default function LeaderboardScreen({ user }) {
     };
 
     fetchLeaderboard();
-  }, [user, navigate]);
+  }, [passedUser, navigate]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -72,6 +84,8 @@ export default function LeaderboardScreen({ user }) {
 
   if (!currentUser) return <p>Loading...</p>;
 
+  const currentUserId = currentUser._id;
+
   return (
     <div className="leaderboard-page">
       <div className="leaderboard-header">
@@ -80,9 +94,18 @@ export default function LeaderboardScreen({ user }) {
       </div>
 
       <div className="leaderboard-container">
+        {/* Highlight current user rank at the top */}
+        {userPosition && (
+          <div className="current-user-rank-card">
+            <h4>Your Rank: {getRankDisplay(userPosition)}</h4>
+            <span>{currentUser.displayName || 'Anonymous'}</span>
+            <span>Score: {currentUser.totalScore || 0}</span>
+          </div>
+        )}
+
         <ol>
           {users.map((u, idx) => {
-            const isCurrentUser = String(u._id) === String(currentUser._id);
+            const isCurrentUser = String(u._id) === String(currentUserId);
             const avatarUrl =
               u.photo ||
               `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(

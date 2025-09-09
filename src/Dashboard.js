@@ -157,7 +157,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       );
       const updatedData = await res.json();
 
-      // Update user state only
       const updatedUser = {
         ...user,
         totalScore: updatedData.totalScore ?? user.totalScore,
@@ -175,13 +174,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAztecLetters([]);
     triggeredLettersRef.current = [];
     setHighlightLetters([]);
-    gameRef.current?.resetGame?.(); // optional chaining
-    gameRef.current?.resetBoard?.(); // optional, depending on Game2048
+    gameRef.current?.resetGame?.();
+    gameRef.current?.resetBoard?.();
   };
 
   // --- Leaderboard navigation ---
   const goToLeaderboard = () => {
-    navigate('/leaderboard', { replace: false });
+    navigate('/leaderboard', { state: { user } }); // ✅ pass user via state
   };
 
   // --- Logout ---

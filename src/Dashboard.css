@@ -1,9 +1,9 @@
-/* --- General ---Dashboard.css */
+/* --- General --- */
 body, html {
   margin: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f0f2f5;
-  overflow-x: hidden; /* ✅ prevent horizontal overflow on tiny screens */
+  overflow-x: hidden; /* prevent horizontal overflow */
 }
 
 button {
@@ -73,6 +73,18 @@ button:hover {
   border: 2px solid #fff;
 }
 
+.sidebar .profile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar .profile-row img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
 .stat-card {
   background-color: rgba(255, 255, 255, 0.15);
   padding: 12px;
@@ -106,23 +118,6 @@ button:hover {
   background-color: #ddd;
 }
 
-.sidebar .profile-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.sidebar .profile-row img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-.topbar-left img {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-}
-
-
 /* --- Mobile Topbar --- */
 .topbar-container {
   width: 100%;
@@ -144,12 +139,10 @@ button:hover {
   gap: 10px;
 }
 
-.topbar-profile-img {
-  width: 40px;
-  height: 40px;
+.topbar-left img {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
 }
 
 .topbar-name {
@@ -164,148 +157,15 @@ button:hover {
   color: #fff;
 }
 
-.mobile-stats {
-  background-color: #fff;
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.dropdown-wrapper {
-  position: relative;
-}
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px 0;
-  min-width: 140px;
-  max-width: 200px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  opacity: 0;
-  transform: translateY(-5px);
-  pointer-events: none; /* prevent interaction when hidden */
- transition: opacity 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-}
-
-.dropdown.show {
-  display: flex;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.dropdown button {
-  background-color: #fff;
-  color: #6a0dad;
-  font-weight: bold;
-  padding: 10px 15px;
-  text-align: left;
-  border: none;
-  border-bottom: 1px solid #eee;
-  width: 100%;
-  transition: background-color 0.2s;
-}
-
-.dropdown button:last-child {
-  border-bottom: none; /* no border on last button */
-}
-
-.dropdown button:hover {
-  background-color: #f0f0f0;
-}
-
-/* --- Main Content --- */
-.main-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-}
-
-/* --- AZTEC Letters Container --- */
-.aztec-letters-container {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap; /* default wrap on larger screens */
-}
-
-/* Mobile override: horizontal scroll */
-@media screen and (max-width: 480px) {
-  .aztec-letters-container {
-    flex-wrap: nowrap;           /* keep letters in a row */
-    overflow-x: auto;            /* enable horizontal scroll */
-    -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
-    gap: 4px;                    /* slightly smaller gap */
-  }
-
-  /* optional: hide the scrollbar entirely */
-  .aztec-letters-container::-webkit-scrollbar {
-    display: none;
-  }
-  .aztec-letters-container {
-    -ms-overflow-style: none;  /* hide scrollbar in IE/Edge */
-    scrollbar-width: none;     /* hide scrollbar in Firefox */
-  }
-}
-
-
-/* --- AZTEC Letters --- */
-.aztec-letter-badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-weight: bold;
-  font-size: 16px; /* default font size */
-  min-width: 24px;
-  text-align: center;
-  color: #fff;
-  transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
-}
-
-/* Specific colors for letters */
-.aztec-letter-A { background-color: #FF4C4C; }
-.aztec-letter-Z { background-color: #4C9AFF; }
-.aztec-letter-T { background-color: #FFD700; }
-.aztec-letter-E { background-color: #32CD32; }
-.aztec-letter-C { background-color: #FF69B4; }
-
-/* Milestone collected */
-.aztec-letter-badge.five-letters {
-  font-size: 14px;
-  padding: 3px 6px;
-  min-width: 18px;
-  border: 2px solid gold;
-}
-
-/* Flash animation */
-.aztec-letter-badge.flash {
-  animation: flashBadge 0.8s ease-in-out forwards;
-}
-
-
-
 .topbar-stats {
   display: flex;
   gap: 8px;
   margin-left: 10px;
   flex-wrap: nowrap;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* ✅ smooth momentum scroll on iOS */
-  scroll-behavior: smooth; /* optional: smooth scroll when programmatically scrolling */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
-
 
 .topbar-stats .stat-card.small {
   background: rgba(255,255,255,0.15);
@@ -328,33 +188,92 @@ button:hover {
   font-weight: bold;
 }
 
+/* --- Dropdown Menu --- */
+.dropdown-wrapper { position: relative; }
 
-@keyframes flashBadge {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  25% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 140px;
+  max-width: 200px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
 
+.dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
 
+.dropdown button {
+  background-color: #fff;
+  color: #6a0dad;
+  font-weight: bold;
+  padding: 10px 15px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  transition: background-color 0.2s;
+}
 
-/* --- No games left message --- */
-.no-games-left {
-  font-size: 18px;
-  color: #999;
+.dropdown button:last-child { border-bottom: none; }
+.dropdown button:hover { background-color: #f0f0f0; }
+
+/* --- Main Content --- */
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+/* --- AZTEC Letters --- */
+.aztec-letters-container {
+  display: flex;
+  gap: 2px; /* letters close together */
+  flex-wrap: nowrap;
+}
+
+.aztec-letter-badge {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
   text-align: center;
-  margin-top: 20px;
+  color: #fff;
+  transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
 }
 
-/* --- Game 2048 Container --- */
+/* Individual letter colors */
+.aztec-letter-A { background-color: #FF4C4C; }
+.aztec-letter-Z { background-color: #4C9AFF; }
+.aztec-letter-T { background-color: #FFD700; }
+.aztec-letter-E { background-color: #32CD32; }
+.aztec-letter-C { background-color: #FF69B4; }
+
+/* Optional smaller badge style */
+.aztec-letter-badge.five-letters {
+  font-size: 14px;
+  padding: 3px 6px;
+  border: 2px solid gold;
+}
+
+/* --- Game 2048 Board --- */
 .game-2048-container {
   display: flex;
   flex-direction: column;
@@ -366,7 +285,6 @@ button:hover {
   padding: 10px;
 }
 
-/* --- Responsive Board --- */
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -404,10 +322,8 @@ button:hover {
   pointer-events: none;
 }
 
-/* Tile merge animation */
 .board-cell.merged { transform: scale(1.1); transition: transform 0.1s ease; }
 
-/* --- Game Over Overlay --- */
 .game-over-overlay {
   position: absolute;
   top: 0;
@@ -439,7 +355,6 @@ button:hover {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
 .game-over-overlay button:hover { background-color: #9f8b76; }
@@ -451,29 +366,13 @@ button:hover {
 }
 
 @media screen and (max-width: 768px) {
-  .dashboard-game-container { 
-    flex-direction: column; 
-  }
-  .sidebar { 
-    display: none; 
-  }
-  .main-content { 
-    padding: 15px; 
-  }
-
-  /* Mobile stat cards styling */
-  .mobile-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: #fff;
-    padding: 12px;
-  }
+  .dashboard-game-container { flex-direction: column; }
+  .sidebar { display: none; }
+  .main-content { padding: 15px; }
+  .mobile-stats { display: flex; flex-direction: column; gap: 10px; background-color: #fff; padding: 12px; }
 }
 
-
 @media screen and (max-width: 480px) {
-  /* Topbar & stats adjustments */
   .topbar-name { font-size: 14px; }
   .mobile-stats { font-size: 14px; gap: 4px; }
   .board { gap: 6px; }
@@ -481,30 +380,12 @@ button:hover {
   .tile-128, .tile-256, .tile-512 { font-size: 14px; }
   .tile-1024, .tile-2048 { font-size: 12px; }
 
-  /* Shrink stat cards */
   .stat-card h4 { font-size: 12px; }
   .stat-card p { font-size: 14px; }
 
-  /* --- AZTEC Letters Mobile Adjustments --- */
-  .aztec-letter-badge {
-    background-color: transparent !important; /* remove badge background */
-    color: unset !important;                   /* keep the original letter color */
-    font-size: 16px;                           /* adjust font size for mobile */
-    padding: 0 2px;                            /* minimal padding */
-    min-width: 0;                              /* remove extra width */
-    border: none;                              /* no border */
-  }
-
- .aztec-letters-container {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  gap: 2px;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.aztec-letters-container::-webkit-scrollbar { display: none; }
-
+  /* Letters stay colored, close together, no scroll */
+  .aztec-letters-container { gap: 2px; flex-wrap: nowrap; overflow: visible; }
+  .aztec-letter-badge { padding: 5px 8px; border-radius: 4px; }
 }
 
 /* Shared Avatar Styling */
@@ -515,10 +396,17 @@ button:hover {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #fff; /* optional */
+  border: 2px solid #fff;
 }
 
+@media screen and (max-width: 360px) {
+  .aztec-letters-container {
+    gap: 1px;       /* less gap */
+  }
 
-
-
+  .aztec-letter-badge {
+    font-size: 14px; /* slightly smaller text */
+    padding: 3px 5px; /* tighter padding */
+  }
+}
 

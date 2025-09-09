@@ -56,7 +56,32 @@
   margin: 0;
 }
 
-/* Shared Avatar Styling */
+/* --- Current User Highlight Card --- */
+.current-user-rank-card {
+  background: #e0f7fa;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.current-user-rank-card h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #00796b;
+}
+
+.current-user-rank-card span {
+  margin-left: 10px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+/* --- Shared Avatar Styling --- */
 .leaderboard-avatar,
 .profile img,
 .topbar-left img {
@@ -66,7 +91,6 @@
   object-fit: cover;
   border: 2px solid #fff; /* optional */
 }
-
 
 /* --- Items --- */
 .leaderboard-item {
@@ -135,14 +159,12 @@
   border-radius: 6px;
 }
 
-.leaderboard-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 10px;
+/* --- Highlight current user in the list --- */
+.leaderboard-item.current-user {
+  background-color: #f0f8ff;
+  font-weight: bold;
+  border-left: 4px solid #6a0dad;
 }
-
 
 /* --- Responsive --- */
 @media (max-width: 600px) {
@@ -157,18 +179,6 @@
     padding: 12px;
   }
 
-  .leaderboard-item.current-user {
-  background-color: #f0f8ff;
-  font-weight: bold;
-}
-.leaderboard-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-
   .leaderboard-item {
     flex-direction: column;
     align-items: flex-start;
@@ -178,5 +188,12 @@
   .leaderboard-rank,
   .leaderboard-score {
     text-align: left;
+  }
+
+  .leaderboard-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
   }
 }
