@@ -25,7 +25,6 @@ button:hover {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
-  background-color: #f0f2f5;
 }
 
 /* --- Sidebar (Desktop) --- */
@@ -184,15 +183,46 @@ button:hover {
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 140px;
+  max-width: 200px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none; /* prevent interaction when hidden */
+ transition: opacity 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+
   z-index: 1000;
-  display: flex; /* keep flex for button column */
+  display: flex;
   flex-direction: column;
 }
 
 .dropdown.show {
   display: flex;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown button {
+  background-color: #fff;
+  color: #6a0dad;
+  font-weight: bold;
+  padding: 10px 15px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.dropdown button:last-child {
+  border-bottom: none; /* no border on last button */
+}
+
+.dropdown button:hover {
+  background-color: #f0f0f0;
 }
 
 /* --- Main Content --- */
@@ -208,7 +238,26 @@ button:hover {
 .aztec-letters-container {
   display: flex;
   gap: 5px;
-  flex-wrap: wrap; /* optional: wraps on small screens */
+  flex-wrap: wrap; /* default wrap on larger screens */
+}
+
+/* Mobile override: horizontal scroll */
+@media screen and (max-width: 480px) {
+  .aztec-letters-container {
+    flex-wrap: nowrap;           /* keep letters in a row */
+    overflow-x: auto;            /* enable horizontal scroll */
+    -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
+    gap: 4px;                    /* slightly smaller gap */
+  }
+
+  /* optional: hide the scrollbar entirely */
+  .aztec-letters-container::-webkit-scrollbar {
+    display: none;
+  }
+  .aztec-letters-container {
+    -ms-overflow-style: none;  /* hide scrollbar in IE/Edge */
+    scrollbar-width: none;     /* hide scrollbar in Firefox */
+  }
 }
 
 
@@ -244,6 +293,39 @@ button:hover {
 .aztec-letter-badge.flash {
   animation: flashBadge 0.8s ease-in-out forwards;
 }
+
+.topbar-stats {
+  display: flex;
+  gap: 8px;
+  margin-left: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* ✅ smooth momentum scroll on iOS */
+  scroll-behavior: smooth; /* optional: smooth scroll when programmatically scrolling */
+}
+
+
+.topbar-stats .stat-card.small {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+.topbar-stats .stat-card.small h4 {
+  font-size: 10px;
+  margin: 0;
+}
+
+.topbar-stats .stat-card.small p {
+  font-size: 12px;
+  margin: 0;
+  font-weight: bold;
+}
+
 
 @keyframes flashBadge {
   0% {
@@ -400,3 +482,5 @@ button:hover {
   .stat-card h4 { font-size: 12px; }
   .stat-card p { font-size: 14px; }
 }
+
+

@@ -259,7 +259,20 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img src={user.photo} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
               <div className="topbar-name">{user.displayName || user.username}</div>
+
+              {/* Mobile topbar stats */}
+              <div className="topbar-stats">
+                <div className="stat-card small">
+                  <h4>Games Left</h4>
+                  <p>{user.gamesLeft}</p>
+                </div>
+                <div className="stat-card small">
+                  <h4>AZTEC Letters</h4>
+                  {renderAztecLetters()}
+                </div>
+              </div>
             </div>
+
 
             <div className="dropdown-wrapper" style={{ position: 'relative' }}>
               <button
@@ -272,38 +285,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 ☰
               </button>
 
-              {showDropdown && (
-                <div ref={dropdownRef} className="dropdown">
-                  <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-                  <button onClick={logout}>Logout</button>
-                </div>
-              )}
+              <div ref={dropdownRef} className={`dropdown ${showDropdown ? 'show' : ''}`}>
+                <button onClick={handleReset} disabled={user.gamesLeft <= 0}>Reset Game</button>
+                <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+                <button onClick={logout}>Logout</button>
+              </div>
+
+
             </div>
           </div>
 
-          <div className="mobile-stats">
-            <div className="stat-card">
-              <h4>Total Score</h4>
-              <p>{user.totalScore}</p>
-            </div>
-            <div className="stat-card">
-              <h4>Games Left</h4>
-              <p>{user.gamesLeft}</p>
-            </div>
-            <div className="stat-card">
-              <h4>AZTEC Letters</h4>
-              {renderAztecLetters()}
-            </div>
-            <div className="stat-card">
-              <h4>Your Position</h4>
-              <p>{userPosition || '-'}</p>
-            </div>
-            <div className="stat-card">
-              <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
-                Reset Game
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
