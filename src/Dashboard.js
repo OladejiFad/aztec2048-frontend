@@ -222,10 +222,12 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
-  // ✅ RoboHash fallback avatar
-  const avatarUrl =
-    user.photo ||
-    `https://robohash.org/${encodeURIComponent(user.email || 'user')}?set=set2&size=128x128`;
+  // --- Avatar helper ---
+  const getAvatarUrl = (u) =>
+    u?.photo ||
+    `https://robohash.org/${encodeURIComponent(u?.email || 'user')}?set=set2&size=128x128`;
+
+  const avatarUrl = getAvatarUrl(user);
 
   return (
     <div className="dashboard-game-container">

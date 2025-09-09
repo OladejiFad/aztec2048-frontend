@@ -21,7 +21,6 @@ export default function LeaderboardScreen() {
           return;
         }
 
-        // ✅ fetch leaderboard (always fresh on mount)
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -37,7 +36,6 @@ export default function LeaderboardScreen() {
           : [];
         setUsers(sortedUsers);
 
-        // ✅ fetch current user
         const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -48,7 +46,6 @@ export default function LeaderboardScreen() {
         const meData = await meRes.json();
         setCurrentUser(meData);
 
-        // ✅ find user position
         const pos =
           sortedUsers.findIndex((u) => String(u._id) === String(meData._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
@@ -76,6 +73,10 @@ export default function LeaderboardScreen() {
     }
   };
 
+  const getAvatarUrl = (u) =>
+    u?.photo ||
+    `https://robohash.org/${encodeURIComponent(u?.email || 'user')}?set=set2&size=64x64`;
+
   if (loading) return <p>Loading leaderboard...</p>;
   if (!currentUser) return <p>No user data</p>;
 
@@ -87,7 +88,6 @@ export default function LeaderboardScreen() {
       </div>
 
       <div className="leaderboard-container">
-        {/* ✅ highlight current user */}
         {userPosition && (
           <div className="current-user-rank-card">
             <h4>Your Rank: {getRankDisplay(userPosition)}</h4>
@@ -99,9 +99,6 @@ export default function LeaderboardScreen() {
         <ol>
           {users.map((u, idx) => {
             const isCurrentUser = String(u._id) === String(currentUser._id);
-            const avatarUrl =
-              u.photo ||
-              `https://robohash.org/${encodeURIComponent(u.email || 'user')}?set=set2&size=64x64`;
 
             return (
               <li
@@ -113,7 +110,7 @@ export default function LeaderboardScreen() {
                   {getRankDisplay(idx + 1)}
                 </span>
                 <img
-                  src={avatarUrl}
+                  src={getAvatarUrl(u)}
                   alt="Avatar"
                   className="leaderboard-avatar"
                 />

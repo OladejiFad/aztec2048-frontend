@@ -82,9 +82,9 @@ button:hover {
 .sidebar .profile-row img {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
 }
 
+/* --- Stat Cards --- */
 .stat-card {
   background-color: rgba(255, 255, 255, 0.15);
   padding: 12px;
@@ -157,6 +157,7 @@ button:hover {
   color: #fff;
 }
 
+/* --- Mobile Stats inside topbar --- */
 .topbar-stats {
   display: flex;
   gap: 8px;
@@ -244,7 +245,7 @@ button:hover {
 /* --- AZTEC Letters --- */
 .aztec-letters-container {
   display: flex;
-  gap: 2px; /* letters close together */
+  gap: 2px;
   flex-wrap: nowrap;
 }
 
@@ -259,14 +260,12 @@ button:hover {
   transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
 }
 
-/* Individual letter colors */
 .aztec-letter-A { background-color: #FF4C4C; }
 .aztec-letter-Z { background-color: #4C9AFF; }
 .aztec-letter-T { background-color: #FFD700; }
 .aztec-letter-E { background-color: #32CD32; }
 .aztec-letter-C { background-color: #FF69B4; }
 
-/* Optional smaller badge style */
 .aztec-letter-badge.five-letters {
   font-size: 14px;
   padding: 3px 6px;
@@ -381,7 +380,6 @@ button:hover {
   .stat-card h4 { font-size: 12px; }
   .stat-card p { font-size: 14px; }
 
-  /* Letters stay colored, close together, no scroll */
   .aztec-letters-container { gap: 2px; flex-wrap: nowrap; overflow: visible; }
   .aztec-letter-badge { padding: 5px 8px; border-radius: 4px; }
 }
@@ -399,12 +397,11 @@ button:hover {
 
 @media screen and (max-width: 360px) {
   .aztec-letters-container {
-    gap: 1px;       /* less gap */
+    gap: 1px;
   }
 
   .aztec-letter-badge {
-    font-size: 14px; /* slightly smaller text */
-    padding: 3px 5px; /* tighter padding */
+    font-size: 14px;
+    padding: 3px 5px;
   }
 }
-
