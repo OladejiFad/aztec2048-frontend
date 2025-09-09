@@ -263,7 +263,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const avatarUrl =
     user.photo ||
-    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(
+    `https://avatars.dicebear.com/v2/bottts/${encodeURIComponent(
       user.email || 'user'
     )}.svg`;
 
