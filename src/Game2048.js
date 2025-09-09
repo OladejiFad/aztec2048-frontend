@@ -9,6 +9,9 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [gameOver, setGameOver] = useState(false);
   const boardRef = useRef(null);
 
+  // ✅ ref for touch start positions
+  const touchStartRef = useRef({ x: 0, y: 0 });
+
   useImperativeHandle(ref, () => ({
     resetGame() {
       setScore(0);
@@ -134,19 +137,21 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
+  // ✅ Updated touch handling
   useEffect(() => {
-    let startX = 0;
-    let startY = 0;
-
     const handleTouchStart = (e) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
     };
 
     const handleTouchEnd = (e) => {
-      const dx = e.changedTouches[0].clientX - startX;
-      const dy = e.changedTouches[0].clientY - startY;
+      e.preventDefault();
+      const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+      const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
       const threshold = 20;
+
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
         dx > 0 ? handleMove('right') : handleMove('left');
       } else if (Math.abs(dy) > threshold) {
@@ -155,8 +160,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     };
 
     const boardEl = boardRef.current;
-    boardEl?.addEventListener('touchstart', handleTouchStart);
-    boardEl?.addEventListener('touchend', handleTouchEnd);
+    boardEl?.addEventListener('touchstart', handleTouchStart, { passive: false });
+    boardEl?.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       boardEl?.removeEventListener('touchstart', handleTouchStart);

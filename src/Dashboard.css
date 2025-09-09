@@ -377,7 +377,7 @@ button:hover {
   padding: 10px;
   border-radius: 12px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
 .board-cell {

@@ -51,7 +51,7 @@
   padding: 2%;
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-  touch-action: pan-x pan-y;
+  touch-action: none;
 }
 
 /* Tiles */
@@ -61,23 +61,25 @@
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(0.8rem, 4vw, 2rem);
+  font-size: clamp(1rem, 5vw, 2.5rem); /* default font size */
   transition: all 0.2s ease;
-  color: #fff;
+  color: #000; /* black numbers */
 }
 
-/* Tile colors */
-.tile-2    { background-color: #eee4da; color: #776e65; }
-.tile-4    { background-color: #ede0c8; color: #776e65; }
-.tile-8    { background-color: #f2b179; color: #fff; }
-.tile-16   { background-color: #0cb689; color: #fff; }
-.tile-32   { background-color: #37cbe1bc; color: #fff; }
-.tile-64   { background-color: #f65e3b; color: #fff; }
-.tile-128  { background-color: #17bc14b2; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
-.tile-256  { background-color: #6d61ed; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
-.tile-512  { background-color: #6aed50; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
-.tile-1024 { background-color: #ed3fb6; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
-.tile-2048 { background-color: #ca2eed; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
+/* Tile colors and scaling for bigger tiles */
+.tile-2    { background-color: #eee4da; }
+.tile-4    { background-color: #ede0c8; }
+.tile-8    { background-color: #f2b179; }
+.tile-16   { background-color: #0cb689; }
+.tile-32   { background-color: #37cbe1bc; }
+.tile-64   { background-color: #f65e3b; }
+.tile-128  { background-color: #17bc14b2; font-size: clamp(1rem, 4.5vw, 2rem); }
+.tile-256  { background-color: #6d61ed; font-size: clamp(1rem, 4.5vw, 2rem); }
+.tile-512  { background-color: #6aed50; font-size: clamp(1rem, 4.5vw, 2rem); }
+.tile-1024 { background-color: #ed3fb6; font-size: clamp(0.9rem, 3.8vw, 1.8rem); } /* slightly smaller */
+.tile-2048 { background-color: #ca2eed; font-size: clamp(0.9rem, 3.8vw, 1.8rem); }
+.tile-4096 { background-color: #ff6f61; font-size: clamp(0.8rem, 3.5vw, 1.6rem); }
+.tile-8192 { background-color: #ffd700; font-size: clamp(0.8rem, 3.5vw, 1.6rem); }
 
 /* Game Over Overlay */
 .game-over-overlay {
@@ -123,7 +125,12 @@
 /* Extra Small Screens */
 @media (max-width: 340px) {
   .game-2048-container { max-width: 95%; padding: 5px; }
-  .game-board .board-cell { font-size: clamp(0.7rem, 3vw, 1rem); border-radius: 6px; }
+  .game-board .board-cell { font-size: clamp(1rem, 6vw, 2.2rem); border-radius: 6px; } /* bigger on tiny screens */
+  .tile-1024 { font-size: clamp(0.8rem, 5vw, 1.6rem); }
+  .tile-2048 { font-size: clamp(0.8rem, 5vw, 1.6rem); }
+  .tile-4096 { font-size: clamp(0.7rem, 4.5vw, 1.4rem); }
+  .tile-8192 { font-size: clamp(0.7rem, 4.5vw, 1.4rem); }
+
   .game-over-overlay h2 { font-size: clamp(1.5rem, 5vw, 2rem); text-align: center; }
   .game-over-overlay h4 { font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; }
 }
