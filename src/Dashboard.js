@@ -115,8 +115,14 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // --- AZTEC letters ---
+
+
+
+  const debounceTimer = useRef(null);
+  const DEBOUNCE_DELAY = 2000; // 2 seconds
+
   const handleScoreChange = (score) => {
+    // AZTEC letters logic (keep as is)
     const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
       (m) => m.letter
     );
@@ -132,7 +138,37 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ...newLetters,
     ];
     setAztecLetters(letters);
+
+    // ✅ Live totalScore update (debounced)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(
+          `${BACKEND_URL}/auth/api/update-score/${user._id}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ score }), // send current score
+          }
+        );
+        const updatedData = await res.json();
+        const updatedUser = {
+          ...user,
+          totalScore: updatedData.totalScore ?? user.totalScore,
+          gamesLeft: updatedData.gamesLeft ?? user.gamesLeft,
+        };
+        setUser(updatedUser);
+        setAppUser(updatedUser);
+      } catch (err) {
+        console.error('Live score update failed:', err);
+      }
+    }, DEBOUNCE_DELAY);
   };
+
 
   useEffect(() => {
     if (highlightLetters.length === 0) return;
@@ -141,33 +177,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [highlightLetters]);
 
   // --- Game over ---
-  const handleGameOver = async (finalScore) => {
+  const handleGameOver = (finalScore) => {
     handleScoreChange(finalScore);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ score: finalScore }),
-        }
-      );
-      const updatedData = await res.json();
-
-      const updatedUser = {
-        ...user,
-        totalScore: updatedData.totalScore ?? user.totalScore,
-        gamesLeft: updatedData.gamesLeft ?? user.gamesLeft,
-      };
-      setUser(updatedUser);
-      setAppUser(updatedUser);
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   // --- Game reset ---
