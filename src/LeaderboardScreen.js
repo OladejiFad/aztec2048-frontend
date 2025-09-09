@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import './LeaderboardScreen.css';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LeaderboardScreen() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const passedUser = location.state?.user;
-  const [currentUser, setCurrentUser] = useState(passedUser);
+  const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -21,7 +20,7 @@ export default function LeaderboardScreen() {
           return;
         }
 
-        // Fetch leaderboard
+        // ✅ fetch leaderboard
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -35,39 +34,33 @@ export default function LeaderboardScreen() {
         const sortedUsers = Array.isArray(data)
           ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
           : [];
-
         setUsers(sortedUsers);
 
-        // Fetch current user if none passed
-        if (!passedUser) {
-          const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (meRes.ok) {
-            const meData = await meRes.json();
-            setCurrentUser(meData);
-          } else {
-            navigate('/login', { replace: true });
-          }
-        }
-
-        // Set user position
-        const currId = passedUser?._id;
-        const idToUse = currId || (await (await fetch(`${BACKEND_URL}/auth/api/me`, {
+        // ✅ fetch current user
+        const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
-        })).json())._id;
+        });
+        if (!meRes.ok) {
+          navigate('/login', { replace: true });
+          return;
+        }
+        const meData = await meRes.json();
+        setCurrentUser(meData);
 
+        // ✅ find user position
         const pos =
-          sortedUsers.findIndex((u) => String(u._id) === String(idToUse)) + 1;
+          sortedUsers.findIndex((u) => String(u._id) === String(meData._id)) + 1;
         setUserPosition(pos > 0 ? pos : '-');
       } catch (err) {
         console.error(err);
         navigate('/login', { replace: true });
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchLeaderboard();
-  }, [passedUser, navigate]);
+  }, [navigate]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -82,9 +75,8 @@ export default function LeaderboardScreen() {
     }
   };
 
-  if (!currentUser) return <p>Loading...</p>;
-
-  const currentUserId = currentUser._id;
+  if (loading) return <p>Loading leaderboard...</p>;
+  if (!currentUser) return <p>No user data</p>;
 
   return (
     <div className="leaderboard-page">
@@ -94,7 +86,7 @@ export default function LeaderboardScreen() {
       </div>
 
       <div className="leaderboard-container">
-        {/* Highlight current user rank at the top */}
+        {/* ✅ highlight current user */}
         {userPosition && (
           <div className="current-user-rank-card">
             <h4>Your Rank: {getRankDisplay(userPosition)}</h4>
@@ -105,7 +97,7 @@ export default function LeaderboardScreen() {
 
         <ol>
           {users.map((u, idx) => {
-            const isCurrentUser = String(u._id) === String(currentUserId);
+            const isCurrentUser = String(u._id) === String(currentUser._id);
             const avatarUrl =
               u.photo ||
               `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(

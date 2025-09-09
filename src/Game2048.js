@@ -14,11 +14,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   useImperativeHandle(ref, () => ({
     resetGame() {
+      if (gameOver) return; // ✅ don’t revive finished game
       setScore(0);
       setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
       setGameOver(false);
     },
   }));
+
 
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
@@ -180,18 +182,23 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   return (
     <div className="game-2048-container">
       <div className={`score ${getScoreClass(board)}`}>Score: {score}</div>
-      <div className="game-board" ref={boardRef}>
-        {board.flatMap((row, i) =>
-          row.map((cell, j) => (
-            <div
-              key={`${i}-${j}`}
-              className={`board-cell ${cell ? `tile-${cell}` : ''}`}
-            >
-              {cell || ''}
-            </div>
-          ))
-        )}
-      </div>
+
+      {/* ✅ Hide board when game is over */}
+      {!gameOver && (
+        <div className="game-board" ref={boardRef}>
+          {board.flatMap((row, i) =>
+            row.map((cell, j) => (
+              <div
+                key={`${i}-${j}`}
+                className={`board-cell ${cell ? `tile-${cell}` : ''}`}
+              >
+                {cell || ''}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {gameOver && (
         <div className="game-over-overlay">
           {score >= 30000 ? (
@@ -207,6 +214,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       )}
     </div>
   );
+
 });
 
 export default Game2048;

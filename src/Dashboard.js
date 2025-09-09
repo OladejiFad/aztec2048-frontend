@@ -24,11 +24,15 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const gameRef = useRef();
+  const gameRef = useRef(null);
   const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+
+  // Derived: numeric gamesLeft to avoid string issues
+  const gamesLeft = Number(user?.gamesLeft ?? 0);
+  const hasGames = gamesLeft > 0;
 
   // --- Responsive ---
   useEffect(() => {
@@ -70,9 +74,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   }, [navigate, setAppUser]);
 
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  useEffect(() => { fetchUser(); }, [fetchUser]);
 
   // --- Leaderboard position ---
   useEffect(() => {
@@ -115,19 +117,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
-      (m) => m.letter
-    );
+    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map((m) => m.letter);
 
-    const newLetters = letters.filter(
-      (l) => !triggeredLettersRef.current.includes(l)
-    );
-
+    const newLetters = letters.filter((l) => !triggeredLettersRef.current.includes(l));
     newLetters.forEach((letter) => playLetterSound(letter));
-
-    if (newLetters.length > 0) {
-      setHighlightLetters(newLetters);
-    }
+    if (newLetters.length > 0) setHighlightLetters(newLetters);
 
     triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
     setAztecLetters(letters);
@@ -144,17 +138,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     handleScoreChange(finalScore);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ score: finalScore }),
-        }
-      );
+      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ score: finalScore }),
+      });
       const updatedData = await res.json();
 
       const updatedUser = {
@@ -171,17 +159,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Game reset ---
   const handleReset = () => {
-    setAztecLetters([]);
-    triggeredLettersRef.current = [];
-    setHighlightLetters([]);
-    gameRef.current?.resetGame?.();
-    gameRef.current?.resetBoard?.();
+    if (!hasGames) return; // ✅ do nothing if gamesLeft === 0
+    if (gameRef.current?.resetGame) {
+      triggeredLettersRef.current = [];
+      setAztecLetters([]);
+      setHighlightLetters([]);
+      gameRef.current.resetGame();
+    }
   };
 
-  // --- Leaderboard navigation ---
-  const goToLeaderboard = () => {
-    navigate('/leaderboard', { state: { user } }); // ✅ pass user via state
-  };
+  // --- Leaderboard navigation (close dropdown first, then navigate) ---
+  const goToLeaderboard = useCallback(() => {
+    setShowDropdown(false);
+    setTimeout(() => navigate('/leaderboard?reload=' + Date.now()), 0); // ✅ forces fresh load
+  }, [navigate]);
+
 
   // --- Logout ---
   const logout = () => {
@@ -219,9 +211,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const avatarUrl =
     user.photo ||
-    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(
-      user.email || 'user'
-    )}.svg`;
+    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email || 'user')}.svg`;
 
   return (
     <div className="dashboard-game-container">
@@ -242,7 +232,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
           <div className="stat-card">
             <h4>Games Left</h4>
-            <p>{user.gamesLeft}</p>
+            <p>{gamesLeft}</p>
           </div>
           <div className="stat-card">
             <h4>AZTEC Letters</h4>
@@ -253,35 +243,28 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>{userPosition || '-'}</p>
           </div>
           <div className="stat-card">
-            <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
+            <button type="button" onClick={handleReset} disabled={!hasGames}>
               Reset Game
             </button>
           </div>
           <div className="stat-card">
-            <button onClick={goToLeaderboard}>Leaderboard</button>
+            <button type="button" onClick={goToLeaderboard}>Leaderboard</button>
           </div>
           <div className="stat-card">
-            <button onClick={logout}>Logout</button>
+            <button type="button" onClick={logout}>Logout</button>
           </div>
         </div>
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div
-              className="topbar-left"
-              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-            >
-              <img
-                src={avatarUrl}
-                alt="Avatar"
-                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-              />
+            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src={avatarUrl} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
               <div className="topbar-name">{user.displayName || user.username}</div>
 
               <div className="topbar-stats">
                 <div className="stat-card small">
                   <h4>Games Left</h4>
-                  <p>{user.gamesLeft}</p>
+                  <p>{gamesLeft}</p>
                 </div>
                 <div className="stat-card small">
                   <h4>AZTEC Letters</h4>
@@ -297,19 +280,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 onClick={() => setShowDropdown((prev) => !prev)}
                 aria-label="Menu"
                 aria-expanded={showDropdown}
+                type="button"
               >
                 ☰
               </button>
 
-              <div
-                ref={dropdownRef}
-                className={`dropdown ${showDropdown ? 'show' : ''}`}
-              >
-                <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
+              <div ref={dropdownRef} className={`dropdown ${showDropdown ? 'show' : ''}`}>
+                <button type="button" onClick={handleReset} disabled={!hasGames}>
                   Reset Game
                 </button>
-                <button onClick={goToLeaderboard}>Leaderboard</button>
-                <button onClick={logout}>Logout</button>
+                <button type="button" onClick={goToLeaderboard}>
+                  Leaderboard
+                </button>
+                <button type="button" onClick={logout}>
+                  Logout
+                </button>
               </div>
             </div>
           </div>
@@ -322,11 +307,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         onTouchMove={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
       >
-        <Game2048
-          ref={gameRef}
-          onScoreChange={handleScoreChange}
-          onGameOver={handleGameOver}
-        />
+        {hasGames ? (
+          // key forces a clean re-mount whenever availability flips,
+          // ensuring Reset works and stale refs aren’t kept around
+          <Game2048
+            key="playable"
+            ref={gameRef}
+            onScoreChange={handleScoreChange}
+            onGameOver={handleGameOver}
+          />
+        ) : (
+          <div className="no-games-left-message">
+            <h2>No Games Left!</h2>
+            <p>Come back later to play again.</p>
+          </div>
+        )}
       </div>
     </div>
   );

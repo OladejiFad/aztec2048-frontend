@@ -58,7 +58,7 @@
 
 /* --- Current User Highlight Card --- */
 .current-user-rank-card {
-  background: #e0f7fa;
+  background: #f3e8ff; /* light purple background */
   padding: 12px 15px;
   margin-bottom: 15px;
   border-radius: 8px;
@@ -72,7 +72,7 @@
 .current-user-rank-card h4 {
   margin: 0;
   font-size: 1.1rem;
-  color: #00796b;
+  color: #6a0dad;
 }
 
 .current-user-rank-card span {
@@ -97,10 +97,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 10px;
+  padding: 10px 8px; /* tighter spacing */
   border-bottom: 1px solid #eee;
   gap: 12px;
-  transition: background 0.2s ease-in-out;
+  transition: all 0.25s ease;
 }
 
 .leaderboard-item:last-child {
@@ -164,6 +164,8 @@
   background-color: #f0f8ff;
   font-weight: bold;
   border-left: 4px solid #6a0dad;
+  box-shadow: 0 0 6px rgba(106, 13, 173, 0.3); /* glow effect */
+  transition: all 0.25s ease;
 }
 
 /* --- Responsive --- */
