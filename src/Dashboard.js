@@ -13,21 +13,11 @@ const AZTEC_MILESTONES = [
   { score: 30000, letter: 'C' },
 ];
 
-const LETTER_COLORS = {
-  A: '#FF4C4C',
-  Z: '#4C9AFF',
-  T: '#FFD700',
-  E: '#32CD32',
-  C: '#FF69B4',
-};
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
-  const [totalScore, setTotalScore] = useState(0);
-  const [gamesLeft, setGamesLeft] = useState(7);
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
@@ -37,6 +27,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const gameRef = useRef();
   const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   // --- Responsive ---
   useEffect(() => {
@@ -68,8 +60,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
       setUser(data);
       setAppUser(data);
-      setTotalScore(data.totalScore || 0);
-      setGamesLeft(data.gamesLeft ?? 7);
     } catch (err) {
       console.error(err);
       localStorage.removeItem('token');
@@ -105,30 +95,49 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       }
     };
     fetchLeaderboardPosition();
-  }, [totalScore, user]);
+  }, [user]);
+
+  // --- Close dropdown on outside click ---
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        dropdownRef.current &&
+        buttonRef.current &&
+        !dropdownRef.current.contains(e.target) &&
+        !buttonRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
-    // Letters logic only
     const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
       (m) => m.letter
     );
+
     const newLetters = letters.filter(
       (l) => !triggeredLettersRef.current.includes(l)
     );
+
     newLetters.forEach((letter) => playLetterSound(letter));
+
     if (newLetters.length > 0) {
       setHighlightLetters(newLetters);
-      setTimeout(() => setHighlightLetters([]), 800);
     }
-    triggeredLettersRef.current = [
-      ...triggeredLettersRef.current,
-      ...newLetters,
-    ];
-    setAztecLetters(letters);
 
+    triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
+    setAztecLetters(letters);
   };
 
+  useEffect(() => {
+    if (highlightLetters.length === 0) return;
+    const timeout = setTimeout(() => setHighlightLetters([]), 800);
+    return () => clearTimeout(timeout);
+  }, [highlightLetters]);
 
   // --- Game over ---
   const handleGameOver = async (finalScore) => {
@@ -148,14 +157,14 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       );
       const updatedData = await res.json();
 
-      // ✅ trust backend for both totalScore and gamesLeft
-      setTotalScore(updatedData.totalScore ?? totalScore);
-      setGamesLeft(updatedData.gamesLeft ?? 0);
-
-      // ✅ keep app user in sync
-      setUser((prev) => ({ ...prev, totalScore: updatedData.totalScore }));
-      setAppUser((prev) => ({ ...prev, totalScore: updatedData.totalScore }));
-
+      // Update user state only
+      const updatedUser = {
+        ...user,
+        totalScore: updatedData.totalScore ?? user.totalScore,
+        gamesLeft: updatedData.gamesLeft ?? user.gamesLeft,
+      };
+      setUser(updatedUser);
+      setAppUser(updatedUser);
     } catch (err) {
       console.error(err);
     }
@@ -179,29 +188,29 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
-  const renderAztecLetters = () => (
-    <div style={{ display: 'flex', gap: '5px' }}>
-      {aztecLetters.map((letter) => (
-        <span
-          key={letter}
-          className={`aztec-letter-badge ${highlightLetters.includes(letter) ? 'flash' : ''
-            }`}
-          style={{
-            backgroundColor: LETTER_COLORS[letter] || '#ccc',
-            color: '#fff',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            minWidth: '24px',
-            textAlign: 'center',
-          }}
-        >
-          {letter}
-        </span>
-      ))}
-      {aztecLetters.length === 0 && <span>-</span>}
-    </div>
-  );
+  const renderAztecLetters = () => {
+    const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
+
+    return (
+      <div className="aztec-letters-container">
+        {aztecLetters.length > 0
+          ? aztecLetters.map((letter) => {
+            const justFlashed = highlightLetters.includes(letter);
+            return (
+              <span
+                key={letter}
+                aria-label={`Letter ${letter}`}
+                className={`aztec-letter-badge aztec-letter-${letter} ${justFlashed ? 'flash' : ''
+                  } ${allLettersActive ? 'five-letters' : ''}`}
+              >
+                {letter}
+              </span>
+            );
+          })
+          : <span>-</span>}
+      </div>
+    );
+  };
 
   return (
     <div className="dashboard-game-container">
@@ -211,25 +220,18 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <img src={aztecLogo} alt="Aztec Logo" className="logo-img" />
           </div>
           <h2 className="sidebar-title">AZTEC 2048</h2>
-          <div
-            className="profile"
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-          >
-            <img
-              src={user.photo}
-              alt="Avatar"
-              style={{ width: '40px', height: '40px', borderRadius: '50%' }}
-            />
+          <div className="profile profile-row">
+            <img src={user.photo} alt="Avatar" />
             <span>{user.displayName || user.username}</span>
           </div>
 
           <div className="stat-card">
             <h4>Total Score</h4>
-            <p>{totalScore}</p>
+            <p>{user.totalScore}</p>
           </div>
           <div className="stat-card">
             <h4>Games Left</h4>
-            <p>{gamesLeft}</p>
+            <p>{user.gamesLeft}</p>
           </div>
           <div className="stat-card">
             <h4>AZTEC Letters</h4>
@@ -240,7 +242,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>{userPosition || '-'}</p>
           </div>
           <div className="stat-card">
-            <button onClick={handleReset} disabled={gamesLeft <= 0}>
+            <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
               Reset Game
             </button>
           </div>
@@ -254,35 +256,39 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div
-              className="topbar-left"
-              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-            >
-              <img
-                src={user.photo}
-                alt="Avatar"
-                style={{ width: '32px', height: '32px', borderRadius: '50%' }}
-              />
-              <div className="topbar-name">
-                {user.displayName || user.username}
-              </div>
+            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src={user.photo} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+              <div className="topbar-name">{user.displayName || user.username}</div>
             </div>
 
-            <button
-              className="hamburger-btn"
-              onClick={() => setShowDropdown((prev) => !prev)}
-            >
-              ☰
-            </button>
+            <div className="dropdown-wrapper" style={{ position: 'relative' }}>
+              <button
+                ref={buttonRef}
+                className="hamburger-btn"
+                onClick={() => setShowDropdown(prev => !prev)}
+                aria-label="Menu"
+                aria-expanded={showDropdown}
+              >
+                ☰
+              </button>
+
+              {showDropdown && (
+                <div ref={dropdownRef} className="dropdown">
+                  <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+                  <button onClick={logout}>Logout</button>
+                </div>
+              )}
+            </div>
           </div>
+
           <div className="mobile-stats">
             <div className="stat-card">
               <h4>Total Score</h4>
-              <p>{totalScore}</p>
+              <p>{user.totalScore}</p>
             </div>
             <div className="stat-card">
               <h4>Games Left</h4>
-              <p>{gamesLeft}</p>
+              <p>{user.gamesLeft}</p>
             </div>
             <div className="stat-card">
               <h4>AZTEC Letters</h4>
@@ -293,26 +299,17 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               <p>{userPosition || '-'}</p>
             </div>
             <div className="stat-card">
-              <button onClick={handleReset} disabled={gamesLeft <= 0}>
+              <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
                 Reset Game
               </button>
             </div>
-          </div>
-
-          <div className={`dropdown ${showDropdown ? 'show' : ''}`}>
-            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
-            <button onClick={logout}>Logout</button>
           </div>
         </div>
       )}
 
       <div className="main-content">
-        {gamesLeft > 0 ? (
-          <Game2048
-            ref={gameRef}
-            onScoreChange={handleScoreChange}
-            onGameOver={handleGameOver}
-          />
+        {user.gamesLeft > 0 ? (
+          <Game2048 ref={gameRef} onScoreChange={handleScoreChange} onGameOver={handleGameOver} />
         ) : (
           <p className="no-games-left">No games left this week.</p>
         )}

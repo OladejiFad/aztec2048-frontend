@@ -25,7 +25,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // --- Board utilities ---
   function generateEmptyBoard() {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
   }
@@ -99,7 +98,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return true;
   }, []);
 
-  // --- Handle moves ---
   const handleMove = useCallback((direction) => {
     if (gameOver) return;
 
@@ -117,18 +115,11 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       setBoard(updatedBoard);
       if (score >= 30000 || checkGameOver(updatedBoard)) {
         setGameOver(true);
-
-        // ✅ notify parent
         if (onGameOver) onGameOver(score);
-
-
       }
-
     }
-
   }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
 
-  // --- Keyboard input ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -143,7 +134,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // --- Touch input ---
   useEffect(() => {
     let startX = 0;
     let startY = 0;
@@ -174,10 +164,8 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     };
   }, [handleMove]);
 
-  // --- Helpers for score badge ---
   function getScoreClass(b) {
     const maxTile = Math.max(...b.flat().filter(Boolean));
-
     if (maxTile >= 2048) return "score-gold";
     if (maxTile >= 512) return "score-purple";
     if (maxTile >= 128) return "score-green";
@@ -187,7 +175,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   return (
     <div className="game-2048-container">
       <div className={`score ${getScoreClass(board)}`}>Score: {score}</div>
-      <div className="board" ref={boardRef}>
+      <div className="game-board" ref={boardRef}>
         {board.flatMap((row, i) =>
           row.map((cell, j) => (
             <div
@@ -212,7 +200,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
           )}
         </div>
       )}
-
     </div>
   );
 });

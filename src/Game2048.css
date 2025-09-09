@@ -1,4 +1,3 @@
-/* ---------------- Container ---------------- */
 .game-2048-container {
   display: flex;
   flex-direction: column;
@@ -12,7 +11,6 @@
 }
 
 /* Score Badge */
-/* Default Score Badge */
 .score {
   padding: 8px 18px;
   border-radius: 30px;
@@ -24,72 +22,64 @@
   color: #fff;
 }
 
-/* Dynamic Colors */
 .score-default {
   background: linear-gradient(135deg, #ff8a00, #e52e71);
   box-shadow: 0 4px 15px rgba(229, 46, 113, 0.5);
 }
-
 .score-green {
   background: linear-gradient(135deg, #0cb689, #37e37b);
   box-shadow: 0 4px 15px rgba(12, 182, 137, 0.5);
 }
-
 .score-purple {
   background: linear-gradient(135deg, #6d61ed, #ca2eed);
   box-shadow: 0 4px 15px rgba(109, 97, 237, 0.5);
 }
-
 .score-gold {
   background: linear-gradient(135deg, #ffcc00, #ff9900);
   box-shadow: 0 4px 20px rgba(255, 204, 0, 0.6);
 }
 
-
-
-/* ---------------- Board ---------------- */
-.board {
+/* Game Board */
+.game-board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 2%;
   width: 100%;
   aspect-ratio: 1;
-  background-color: #222; /* darker for contrast */
+  background-color: #222;
   padding: 2%;
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
   touch-action: pan-x pan-y;
 }
 
-/* ---------------- Tiles ---------------- */
-.board-cell {
+/* Tiles */
+.game-board .board-cell {
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(0.8rem, 4vw, 2rem); /* scales down on iPhone 5 */
+  font-size: clamp(0.8rem, 4vw, 2rem);
   transition: all 0.2s ease;
-  color: #fff; /* fallback text color */
+  color: #fff;
 }
 
-
-/* --- Tile Colors (Custom Scheme with Dynamic Text Contrast) --- */
-.tile-2    { background-color: #eee4da; color: #776e65; }  /* dark text */
-.tile-4    { background-color: #ede0c8; color: #776e65; }  /* dark text */
+/* Tile colors */
+.tile-2    { background-color: #eee4da; color: #776e65; }
+.tile-4    { background-color: #ede0c8; color: #776e65; }
 .tile-8    { background-color: #f2b179; color: #fff; }
 .tile-16   { background-color: #0cb689; color: #fff; }
 .tile-32   { background-color: #37cbe1bc; color: #fff; }
 .tile-64   { background-color: #f65e3b; color: #fff; }
-.tile-128  { background-color: #72edeb; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
+.tile-128  { background-color: #17bc14b2; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
 .tile-256  { background-color: #6d61ed; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
 .tile-512  { background-color: #6aed50; color: #fff; font-size: clamp(0.9rem, 3.5vw, 1.5rem); }
 .tile-1024 { background-color: #ed3fb6; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
 .tile-2048 { background-color: #ca2eed; color: #fff; font-size: clamp(0.8rem, 3vw, 1.2rem); }
 
-
-/* ---------------- Game Over Overlay ---------------- */
+/* Game Over Overlay */
 .game-over-overlay {
   position: absolute;
   top: 0;
@@ -111,19 +101,13 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-.game-over-overlay h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
+.game-over-overlay h2 { font-size: 2rem; margin-bottom: 0.5rem; }
 .game-over-overlay h4 {
   font-size: 1.2rem;
   font-style: italic;
-  color: #28a745; /* nice green for success */
+  color: #28a745;
   margin-bottom: 1rem;
 }
-
-
 .game-over-overlay button {
   padding: 8px 16px;
   font-size: clamp(0.9rem, 4vw, 1.2rem);
@@ -134,35 +118,12 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
+.game-over-overlay button:hover { background-color: #9f8b76; }
 
-.game-over-overlay button:hover {
-  background-color: #9f8b76;
-}
-
-/* ---------------- Extra Small Screen Tweaks ---------------- */
+/* Extra Small Screens */
 @media (max-width: 340px) {
-  .game-2048-container {
-    max-width: 95%;
-    padding: 5px;
-  }
-
-  .board-cell {
-    font-size: clamp(0.7rem, 3vw, 1rem);
-    border-radius: 6px;
-  }
-
- .game-over-overlay h2 {
-  font-size: clamp(1.5rem, 5vw, 2rem); /* scales smoothly */
-  margin-bottom: 0.5rem;
-  text-align: center; /* center for all screens */
-}
-
-.game-over-overlay h4 {
-  font-size: clamp(1rem, 3.5vw, 1.2rem);
-  font-style: italic;
-  color: #28a745; /* nice green for success */
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
+  .game-2048-container { max-width: 95%; padding: 5px; }
+  .game-board .board-cell { font-size: clamp(0.7rem, 3vw, 1rem); border-radius: 6px; }
+  .game-over-overlay h2 { font-size: clamp(1.5rem, 5vw, 2rem); text-align: center; }
+  .game-over-overlay h4 { font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; }
 }

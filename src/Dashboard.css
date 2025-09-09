@@ -1,4 +1,4 @@
-/* --- General --- */
+/* --- General ---Dashboard.css */
 body, html {
   margin: 0;
   font-family: 'Arial', sans-serif;
@@ -107,6 +107,23 @@ button:hover {
   background-color: #ddd;
 }
 
+.sidebar .profile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar .profile-row img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.topbar-left img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+
 /* --- Mobile Topbar --- */
 .topbar-container {
   width: 100%;
@@ -157,12 +174,21 @@ button:hover {
   gap: 5px;
 }
 
+.dropdown-wrapper {
+  position: relative;
+}
+
 .dropdown {
-  display: none;
-  flex-direction: column;
-  padding: 10px;
+  position: absolute;
+  top: 100%;
+  right: 0;
   background-color: #fff;
-  border-top: 1px solid #ddd;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  z-index: 1000;
+  display: flex; /* keep flex for button column */
+  flex-direction: column;
 }
 
 .dropdown.show {
@@ -178,26 +204,63 @@ button:hover {
   padding: 20px;
 }
 
+/* --- AZTEC Letters Container --- */
+.aztec-letters-container {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap; /* optional: wraps on small screens */
+}
+
+
 /* --- AZTEC Letters --- */
 .aztec-letter-badge {
   display: inline-block;
   padding: 5px 10px;
-  border-radius: 6px;
-  background-color: #4caf50;
-  color: white;
+  border-radius: 5px;
   font-weight: bold;
+  font-size: 16px; /* default font size */
+  min-width: 24px;
+  text-align: center;
+  color: #fff;
   transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
 }
 
+/* Specific colors for letters */
+.aztec-letter-A { background-color: #FF4C4C; }
+.aztec-letter-Z { background-color: #4C9AFF; }
+.aztec-letter-T { background-color: #FFD700; }
+.aztec-letter-E { background-color: #32CD32; }
+.aztec-letter-C { background-color: #FF69B4; }
+
+/* Milestone collected */
+.aztec-letter-badge.five-letters {
+  font-size: 14px;
+  padding: 3px 6px;
+  min-width: 18px;
+  border: 2px solid gold;
+}
+
+/* Flash animation */
 .aztec-letter-badge.flash {
   animation: flashBadge 0.8s ease-in-out forwards;
 }
 
 @keyframes flashBadge {
-  0% { transform: scale(1); background-color: #4caf50; color: white; opacity: 1; }
-  25% { transform: scale(1.5); background-color: #ffeb3b; color: #000; opacity: 1; }
-  100% { transform: scale(1); background-color: #4caf50; color: white; opacity: 1; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
+
+
 
 /* --- No games left message --- */
 .no-games-left {
