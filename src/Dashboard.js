@@ -184,8 +184,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   // --- Leaderboard navigation ---
   const goToLeaderboard = useCallback(() => {
     setShowDropdown(false);
-    navigate('/leaderboard?reload=' + Date.now(), { replace: false });
+    navigate('/leaderboard');
   }, [navigate]);
+
 
 
   // --- Logout ---

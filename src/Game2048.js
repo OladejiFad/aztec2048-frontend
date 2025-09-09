@@ -14,7 +14,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   useImperativeHandle(ref, () => ({
     resetGame() {
-      if (gameOver) return; // ✅ don’t revive finished game
       setScore(0);
       setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
       setGameOver(false);
@@ -32,16 +31,24 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
 
   // ✅ auto-refresh when user wins
   useEffect(() => {
-    if (gameOver && score >= 30000) {
+    if (gameOver) {
+      const finalScore = score; // capture final score
+
       const timer = setTimeout(() => {
+        // ✅ notify Dashboard so it updates gamesLeft + totalScore
+        if (onGameOver) onGameOver(finalScore);
+
+        // ✅ then reset locally
         setScore(0);
         setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
         setGameOver(false);
-      }, 5000); // 5s
+      }, 5000);
 
-      return () => clearTimeout(timer); // cleanup
+      return () => clearTimeout(timer);
     }
-  }, [gameOver, score]);
+  }, [gameOver, score, onGameOver]);
+
+
 
 
   function generateEmptyBoard() {
