@@ -6,11 +6,11 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LeaderboardScreen({ user }) {
   const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(user);
   const navigate = useNavigate();
 
+  // Fetch leaderboard and current user if needed
   useEffect(() => {
-    if (!user) return;
-
     const fetchLeaderboard = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -19,6 +19,7 @@ export default function LeaderboardScreen({ user }) {
           return;
         }
 
+        // 1️⃣ Fetch leaderboard
         const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -29,9 +30,27 @@ export default function LeaderboardScreen({ user }) {
         }
 
         const data = await res.json();
-        setUsers(data || []);
+        const sortedUsers = Array.isArray(data)
+          ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
+          : [];
+
+        setUsers(sortedUsers);
+
+        // 2️⃣ Fetch current user details if not passed
+        if (!user) {
+          const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            setCurrentUser(meData);
+          } else {
+            navigate('/login', { replace: true });
+          }
+        }
       } catch (err) {
         console.error(err);
+        navigate('/login', { replace: true });
       }
     };
 
@@ -40,12 +59,18 @@ export default function LeaderboardScreen({ user }) {
 
   const getRankDisplay = (rank) => {
     switch (rank) {
-      case 1: return '👑🔥';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return rank;
+      case 1:
+        return '👑🔥';
+      case 2:
+        return '🥈';
+      case 3:
+        return '🥉';
+      default:
+        return rank;
     }
   };
+
+  if (!currentUser) return <p>Loading...</p>;
 
   return (
     <div className="leaderboard-page">
@@ -57,20 +82,21 @@ export default function LeaderboardScreen({ user }) {
       <div className="leaderboard-container">
         <ol>
           {users.map((u, idx) => {
-            const isCurrentUser = String(u._id) === String(user._id);
+            const isCurrentUser = String(u._id) === String(currentUser._id);
+            const avatarUrl =
+              u.photo ||
+              `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(
+                u.email || 'user'
+              )}.svg`;
+
             return (
               <li
                 key={u._id}
-                className={`leaderboard-item rank-${idx + 1} ${isCurrentUser ? 'current-user' : ''}`}
+                className={`leaderboard-item rank-${idx + 1} ${isCurrentUser ? 'current-user' : ''
+                  }`}
               >
                 <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
-                <img
-                  src={
-                    u.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(u.email)}.svg`
-                  }
-                  alt="Avatar"
-                  className="leaderboard-avatar"
-                />
+                <img src={avatarUrl} alt="Avatar" className="leaderboard-avatar" />
                 <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
                 <span className="leaderboard-score">{u.totalScore || 0}</span>
               </li>

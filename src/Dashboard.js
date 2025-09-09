@@ -18,8 +18,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(true);
-
-
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
@@ -177,7 +175,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAztecLetters([]);
     triggeredLettersRef.current = [];
     setHighlightLetters([]);
-    if (gameRef.current) gameRef.current.resetGame();
+    gameRef.current?.resetGame?.(); // optional chaining
+    gameRef.current?.resetBoard?.(); // optional, depending on Game2048
+  };
+
+  // --- Leaderboard navigation ---
+  const goToLeaderboard = () => {
+    navigate('/leaderboard', { replace: false });
   };
 
   // --- Logout ---
@@ -186,6 +190,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setAppUser(null);
     navigate('/login', { replace: true });
   };
+
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
 
@@ -209,10 +214,15 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       </div>
     );
   };
+
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
-  const avatarUrl = user.photo || `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email || 'user')}.svg`;
 
+  const avatarUrl =
+    user.photo ||
+    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(
+      user.email || 'user'
+    )}.svg`;
 
   return (
     <div className="dashboard-game-container">
@@ -224,8 +234,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <h2 className="sidebar-title">AZTEC 2048</h2>
           <div className="profile profile-row">
             <img src={avatarUrl} alt="Avatar" />
-
-
             <span>{user.displayName || user.username}</span>
           </div>
 
@@ -251,7 +259,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             </button>
           </div>
           <div className="stat-card">
-            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+            <button onClick={goToLeaderboard}>Leaderboard</button>
           </div>
           <div className="stat-card">
             <button onClick={logout}>Logout</button>
@@ -260,17 +268,17 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              className="topbar-left"
+              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            >
               <img
                 src={avatarUrl}
                 alt="Avatar"
                 style={{ width: '32px', height: '32px', borderRadius: '50%' }}
               />
-
-
               <div className="topbar-name">{user.displayName || user.username}</div>
 
-              {/* Mobile topbar stats */}
               <div className="topbar-stats">
                 <div className="stat-card small">
                   <h4>Games Left</h4>
@@ -283,26 +291,29 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               </div>
             </div>
 
-
             <div className="dropdown-wrapper" style={{ position: 'relative' }}>
               <button
                 ref={buttonRef}
                 className="hamburger-btn"
-                onClick={() => setShowDropdown(prev => !prev)}
+                onClick={() => setShowDropdown((prev) => !prev)}
                 aria-label="Menu"
                 aria-expanded={showDropdown}
               >
                 ☰
               </button>
 
-              <div ref={dropdownRef} className={`dropdown ${showDropdown ? 'show' : ''}`}>
-                <button onClick={handleReset} disabled={user.gamesLeft <= 0}>Reset Game</button>
-                <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
+              <div
+                ref={dropdownRef}
+                className={`dropdown ${showDropdown ? 'show' : ''}`}
+              >
+                <button onClick={handleReset} disabled={user.gamesLeft <= 0}>
+                  Reset Game
+                </button>
+                <button onClick={goToLeaderboard}>Leaderboard</button>
                 <button onClick={logout}>Logout</button>
               </div>
             </div>
           </div>
-
         </div>
       )}
 
@@ -318,8 +329,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           onGameOver={handleGameOver}
         />
       </div>
-
-
     </div>
   );
 }
