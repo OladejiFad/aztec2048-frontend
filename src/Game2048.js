@@ -213,8 +213,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
                 key={`${i}-${j}`}
                 className={`board-cell ${cell ? `tile-${cell}` : ''}`}
               >
+                {/* Tile number */}
                 {cell || ''}
+
+                {/* Watermark */}
+                <span className="tile-watermark">AZTEC</span>
               </div>
+
             ))
           )}
         </div>

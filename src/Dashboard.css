@@ -408,26 +408,3 @@ button:hover {
   }
 }
 
-/* --- Toast Notification --- */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100%);
-  background-color: rgba(0,0,0,0.85);
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-  z-index: 2000;
-}
-
-.toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-

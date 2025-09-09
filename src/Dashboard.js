@@ -24,10 +24,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-
-
   const gameRef = useRef(null);
   const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
@@ -119,10 +115,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const debounceTimer = useRef(null);
-  const DEBOUNCE_DELAY = 2000; // 2 seconds
-
-  const handleScoreChange = (score, isFinal = false) => {
+  // --- AZTEC letters ---
+  const handleScoreChange = (score) => {
     const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
       (m) => m.letter
     );
@@ -138,49 +132,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ...newLetters,
     ];
     setAztecLetters(letters);
-
-    // Local UI update
-    if (isFinal) {
-      setUser((prev) => ({
-        ...prev,
-        totalScore: (prev.totalScore ?? 0) + score,
-        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
-      }));
-      setAppUser((prev) => ({
-        ...prev,
-        totalScore: (prev.totalScore ?? 0) + score,
-        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
-      }));
-    }
-
-    // Debounced backend update
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(
-          `${BACKEND_URL}/auth/api/update-score/${user._id}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ score }),
-          }
-        );
-        const updatedData = await res.json();
-        const updatedUser = {
-          ...user,
-          totalScore: updatedData.totalScore ?? user.totalScore,
-          gamesLeft: updatedData.gamesLeft ?? user.gamesLeft,
-        };
-        setUser(updatedUser);
-        setAppUser(updatedUser);
-      } catch (err) {
-        console.error('Live score update failed:', err);
-      }
-    }, DEBOUNCE_DELAY);
   };
 
   useEffect(() => {
@@ -190,35 +141,45 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, [highlightLetters]);
 
   // --- Game over ---
-  const handleGameOver = (finalScore) => {
-    handleScoreChange(finalScore, true);
+  const handleGameOver = async (finalScore) => {
+    handleScoreChange(finalScore);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(
+        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ score: finalScore }),
+        }
+      );
+      const updatedData = await res.json();
+
+      const updatedUser = {
+        ...user,
+        totalScore: updatedData.totalScore ?? user.totalScore,
+        gamesLeft: updatedData.gamesLeft ?? user.gamesLeft,
+      };
+      setUser(updatedUser);
+      setAppUser(updatedUser);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // --- Game reset ---
   const handleReset = () => {
+    if (!hasGames) return;
     if (gameRef.current?.resetGame) {
       triggeredLettersRef.current = [];
       setAztecLetters([]);
       setHighlightLetters([]);
       gameRef.current.resetGame();
-
-      // Count as one game played
-      setUser((prev) => ({
-        ...prev,
-        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
-      }));
-      setAppUser((prev) => ({
-        ...prev,
-        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
-      }));
-
-      // Show toast notification
-      setToastMessage('Game Reset! 1 life used');
-      setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 2500);
     }
   };
-
 
   // --- Leaderboard navigation ---
   const goToLeaderboard = useCallback(() => {
@@ -261,11 +222,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
+  // ✅ RoboHash fallback avatar
   const avatarUrl =
     user.photo ||
-    `https://avatars.dicebear.com/v2/bottts/${encodeURIComponent(
-      user.email || 'user'
-    )}.svg`;
+    `https://robohash.org/${encodeURIComponent(user.email || 'user')}?set=set2&size=128x128`;
 
   return (
     <div className="dashboard-game-container">
@@ -297,11 +257,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>{userPosition || '-'}</p>
           </div>
           <div className="stat-card">
-            <button type="button" onClick={handleReset} disabled={gamesLeft <= 0}>
+            <button type="button" onClick={handleReset} disabled={!hasGames}>
               Reset Game
             </button>
           </div>
-
           <div className="stat-card">
             <button type="button" onClick={goToLeaderboard}>
               Leaderboard
@@ -361,7 +320,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 ref={dropdownRef}
                 className={`dropdown ${showDropdown ? 'show' : ''}`}
               >
-                <button type="button" onClick={handleReset} disabled={gamesLeft <= 0}>
+                <button type="button" onClick={handleReset} disabled={!hasGames}>
                   Reset Game
                 </button>
                 <button type="button" onClick={goToLeaderboard}>
@@ -395,11 +354,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>Come back later to play again.</p>
           </div>
         )}
-      </div>
-
-      {/* Toast */}
-      <div className={`toast ${toastVisible ? 'show' : ''}`}>
-        {toastMessage}
       </div>
     </div>
   );

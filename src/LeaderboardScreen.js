@@ -101,10 +101,7 @@ export default function LeaderboardScreen() {
             const isCurrentUser = String(u._id) === String(currentUser._id);
             const avatarUrl =
               u.photo ||
-              `https://avatars.dicebear.com/v2/bottts/${encodeURIComponent(
-                u.email || 'user'
-              )}.svg`;
-
+              `https://robohash.org/${encodeURIComponent(u.email || 'user')}?set=set2&size=64x64`;
 
             return (
               <li
