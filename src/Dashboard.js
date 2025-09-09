@@ -24,6 +24,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+
   const gameRef = useRef(null);
   const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
@@ -115,14 +119,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-
-
-
   const debounceTimer = useRef(null);
   const DEBOUNCE_DELAY = 2000; // 2 seconds
 
-  const handleScoreChange = (score) => {
-    // AZTEC letters logic (keep as is)
+  const handleScoreChange = (score, isFinal = false) => {
     const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
       (m) => m.letter
     );
@@ -139,7 +139,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     ];
     setAztecLetters(letters);
 
-    // ✅ Live totalScore update (debounced)
+    // Local UI update
+    if (isFinal) {
+      setUser((prev) => ({
+        ...prev,
+        totalScore: (prev.totalScore ?? 0) + score,
+        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
+      }));
+      setAppUser((prev) => ({
+        ...prev,
+        totalScore: (prev.totalScore ?? 0) + score,
+        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
+      }));
+    }
+
+    // Debounced backend update
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
       try {
@@ -152,7 +166,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ score }), // send current score
+            body: JSON.stringify({ score }),
           }
         );
         const updatedData = await res.json();
@@ -169,7 +183,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }, DEBOUNCE_DELAY);
   };
 
-
   useEffect(() => {
     if (highlightLetters.length === 0) return;
     const timeout = setTimeout(() => setHighlightLetters([]), 800);
@@ -178,27 +191,40 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Game over ---
   const handleGameOver = (finalScore) => {
-    handleScoreChange(finalScore);
+    handleScoreChange(finalScore, true);
   };
 
   // --- Game reset ---
   const handleReset = () => {
-    if (!hasGames) return;
     if (gameRef.current?.resetGame) {
       triggeredLettersRef.current = [];
       setAztecLetters([]);
       setHighlightLetters([]);
       gameRef.current.resetGame();
+
+      // Count as one game played
+      setUser((prev) => ({
+        ...prev,
+        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
+      }));
+      setAppUser((prev) => ({
+        ...prev,
+        gamesLeft: Math.max((prev.gamesLeft ?? 0) - 1, 0),
+      }));
+
+      // Show toast notification
+      setToastMessage('Game Reset! 1 life used');
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2500);
     }
   };
+
 
   // --- Leaderboard navigation ---
   const goToLeaderboard = useCallback(() => {
     setShowDropdown(false);
     navigate('/leaderboard');
   }, [navigate]);
-
-
 
   // --- Logout ---
   const logout = () => {
@@ -271,10 +297,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>{userPosition || '-'}</p>
           </div>
           <div className="stat-card">
-            <button type="button" onClick={handleReset} disabled={!hasGames}>
+            <button type="button" onClick={handleReset} disabled={gamesLeft <= 0}>
               Reset Game
             </button>
           </div>
+
           <div className="stat-card">
             <button type="button" onClick={goToLeaderboard}>
               Leaderboard
@@ -334,7 +361,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 ref={dropdownRef}
                 className={`dropdown ${showDropdown ? 'show' : ''}`}
               >
-                <button type="button" onClick={handleReset} disabled={!hasGames}>
+                <button type="button" onClick={handleReset} disabled={gamesLeft <= 0}>
                   Reset Game
                 </button>
                 <button type="button" onClick={goToLeaderboard}>
@@ -368,6 +395,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>Come back later to play again.</p>
           </div>
         )}
+      </div>
+
+      {/* Toast */}
+      <div className={`toast ${toastVisible ? 'show' : ''}`}>
+        {toastMessage}
       </div>
     </div>
   );
