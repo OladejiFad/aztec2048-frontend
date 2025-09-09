@@ -13,7 +13,7 @@ function PreDashboardScreen() {
       {/* Birds */}
       <FaDove className="bird-icon" style={{ top: '15%', left: '0%', color: '#ffffffc5' }} />
       <FaDove className="bird-icon" style={{ top: '25%', left: '10%', color: '#f950f3ff' }} />
-      <FaDove className="bird-icon" style={{ top: '35%', left: '5%', color: '#bbb' }} />
+      <FaDove className="bird-icon" style={{ top: '35%', left: '5%', color: '#ffffffff' }} />
 
       {/* Moon and Books wrapped together */}
       <div className="moon-and-books">

@@ -1,8 +1,8 @@
-/* PreDashboardScreen.css - Responsive version */
+/* PreDashboardScreen.css - Compact responsive buttons */
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden; /* completely disables scrolling */
+  overflow: hidden;
   height: 100%;
 }
 
@@ -10,8 +10,8 @@ html, body {
 .pre-dashboard {
   position: relative;
   width: 100vw;
-  height: 100vh;      /* fill viewport */
-  overflow: hidden;   /* prevent scrolling */
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -58,18 +58,14 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* keep moon at top */
-  margin-top: 5vh; /* distance from top */
+  justify-content: flex-start;
+  margin-top: 4vh;
   z-index: 3;
 }
 
-/* Moon inside the container */
+/* Moon */
 .moon {
   position: relative;
-  top: 0;
-  left: 0;
-  transform: none;
-  margin-bottom: 3vh;
   width: 12vw;
   max-width: 120px;
   height: 12vw;
@@ -77,15 +73,16 @@ html, body {
   background: radial-gradient(circle at 30% 30%, #fff 45%, rgba(255,255,255,0.1) 70%, transparent 100%);
   border-radius: 50%;
   box-shadow: 0 0 3vw rgba(255, 255, 255, 0.5);
-  animation: moonGlow 4s infinite alternate;
+  margin-bottom: 2vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: moonGlow 4s infinite alternate;
 }
 
 /* Moon text */
 .moon-text {
-  font-size: clamp(1rem, 1vw, 1rem);
+  font-size: clamp(0.55rem, 2.5vw, 1rem);
   font-weight: bold;
   color: #ffffff;
   text-shadow: 0 0 0.5vw rgba(255,255,255,0.7);
@@ -93,6 +90,8 @@ html, body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  transform: translateX(-10%);
+  text-align: center;
 }
 
 /* Books container */
@@ -101,185 +100,77 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 5vw;
-  margin-bottom: 5vh;
+  margin-bottom: 3vh;
   z-index: 3;
   filter: drop-shadow(0 0 1vw rgba(255,255,255,0.1));
 }
 
-/* Prevent shrinking on small screens */
-.moon, .books-container {
-  flex-shrink: 0;
-}
+/* Prevent shrinking */
+.moon, .books-container { flex-shrink: 0; }
 
 /* Books */
-.book {
-  width: 20vw;
-  max-width: 220px;
-  height: 10vw;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: 0.5vw;
-  transform-origin: bottom center;
-  box-shadow: 0 0.8vw 2vw rgba(0,0,0,0.5);
-  animation: sway 3s infinite alternate ease-in-out;
-}
+.book { width: 20vw; max-width: 220px; height: 10vw; max-height: 180px; object-fit: cover; border-radius: 0.5vw; transform-origin: bottom center; box-shadow: 0 0.8vw 2vw rgba(0,0,0,0.5); animation: sway 3s infinite alternate ease-in-out; }
+.book2 { transform: scale(1.05); }
 
-.book2 {
-  transform: scale(1.05);
-}
-
-@keyframes sway {
-  0% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-  100% { transform: rotate(-2deg); }
-}
+@keyframes sway { 0% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } 100% { transform: rotate(-2deg); } }
 
 /* Glowing orb */
-.glowing-orb {
-  position: absolute;
-  width: 3vw;
-  max-width: 30px;
-  height: 3vw;
-  max-height: 30px;
-  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: orbGlow 2s infinite alternate;
-}
+.glowing-orb { position: absolute; width: 3vw; max-width: 30px; height: 3vw; max-height: 30px; background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: orbGlow 2s infinite alternate; }
 
-@keyframes orbGlow {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-}
+@keyframes orbGlow { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } }
 
 /* Privacy message */
-.privacy-message {
-  text-align: center;
-  max-width: 90%;
-  margin-top: 2vh;
-  color: #f8f8ff;
-  text-shadow: 0 0 0.5vw rgba(255,255,255,0.5);
-  z-index: 3;
-  filter: drop-shadow(0 0 0.5vw rgba(255,255,255,0.05));
-}
+.privacy-message { text-align: center; max-width: 90%; margin-top: 2vh; color: #f8f8ff; text-shadow: 0 0 0.5vw rgba(255,255,255,0.5); z-index: 3; filter: drop-shadow(0 0 0.5vw rgba(255,255,255,0.05)); }
 
-.privacy-message h1 {
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
-  margin-bottom: 1.5vh;
-}
-
-.privacy-message .highlight,
-.glow {
-  background: linear-gradient(90deg, #9b30ff, #8a2be2);
-  padding: 0 0.8vw;
-  border-radius: 0.4vw;
-  box-shadow: 0 0 2vw rgba(155,48,255,0.7), 0 0 3vw rgba(138,43,226,0.5);
-  animation: glowPulse 2s infinite alternate;
-}
-
-@keyframes glowPulse {
-  0% { box-shadow: 0 0 1.5vw rgba(155,48,255,0.5), 0 0 2.5vw rgba(138,43,226,0.4); }
-  100% { box-shadow: 0 0 2.5vw rgba(155,48,255,0.8), 0 0 3.5vw rgba(138,43,226,0.6); }
-}
-
-.privacy-message p {
-  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-  line-height: 1.6;
-  margin: 0 auto;
-}
+.privacy-message h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); margin-bottom: 1.5vh; }
+.privacy-message .highlight, .glow { background: linear-gradient(90deg, #9b30ff, #8a2be2); padding: 0 0.8vw; border-radius: 0.4vw; box-shadow: 0 0 2vw rgba(155,48,255,0.7), 0 0 3vw rgba(138,43,226,0.5); animation: glowPulse 2s infinite alternate; }
+@keyframes glowPulse { 0% { box-shadow: 0 0 1.5vw rgba(155,48,255,0.5), 0 0 2.5vw rgba(138,43,226,0.4); } 100% { box-shadow: 0 0 2.5vw rgba(155,48,255,0.8), 0 0 3.5vw rgba(138,43,226,0.6); } }
+.privacy-message p { font-size: clamp(0.9rem, 1.5vw, 1.1rem); line-height: 1.6; margin: 0 auto; }
 
 /* Birds */
-.bird-icon {
-  position: absolute;
-  z-index: 10; /* in front of moon */
-  width: 3vw;       /* small size for realistic bird */
-  max-width: 40px;
-  height: auto;
-  animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite;
-}
-
-.bird-icon img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* FaDove birds style */
-.fa-dove {
-  font-size: clamp(16px, 2.5vw, 24px);
-  animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite;
-}
-
-/* Bird animation */
-@keyframes flyIcon {
-  0% { left: -10vw; }
-  25% { left: 25%; }
-  50% { left: 50%; }
-  75% { left: 75%; }
-  100% { left: 110vw; }
-}
-
-@keyframes flap {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(0.8); }
-}
+.bird-icon { position: absolute; z-index: 10; width: 3vw; max-width: 40px; height: auto; animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite; }
+.bird-icon img { width: 100%; height: auto; }
+.fa-dove { font-size: clamp(16px, 2.5vw, 24px); animation: flyIcon 8s linear infinite, flap 1s ease-in-out infinite; }
+@keyframes flyIcon { 0% { left: -10vw; } 25% { left: 25%; } 50% { left: 50%; } 75% { left: 75%; } 100% { left: 110vw; } }
+@keyframes flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.8); } }
 
 /* Action buttons container */
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2vw; 
-  margin-top: 4vh;
-  flex-wrap: wrap; 
-}
+.action-buttons { display: flex; justify-content: center; align-items: center; gap: 1.5vw; margin-top: 3vh; flex-wrap: wrap; width: 90%; max-width: 300px; }
 
+/* Compact login/register buttons */
 .btn-login,
 .btn-register {
-  padding: 1vh 3vw;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  color: #fff;
-  border: none;
-  border-radius: 0.5vw;
+  flex: 1 1 45%;
+  min-width: 90px;
+  max-width: 140px;
+  padding: 0.8vh 0;
+  font-size: clamp(0.75rem, 3vw, 0.95rem);
+  border-radius: 6px;
+  text-align: center;
   cursor: pointer;
-  box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.4);
+  box-shadow: 0 0.4vw 1vw rgba(0,0,0,0.4);
   transition: transform 0.2s, box-shadow 0.2s;
-  min-width: 120px; 
-  z-index: 3;
 }
 
-.btn-login {
-  background: linear-gradient(135deg, #9b30ff, #8a2be2);
-}
-.btn-login:hover {
-  transform: translateY(-0.3vw);
-  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
-}
+.btn-login { background: linear-gradient(135deg, #9b30ff, #8a2be2); }
+.btn-register { background: linear-gradient(135deg, #28a745, #20c997); }
+.btn-login:hover, .btn-register:hover { transform: translateY(-0.1vw); box-shadow: 0 0.6vw 1vw rgba(0,0,0,0.4); }
 
-.btn-register {
-  background: linear-gradient(135deg, #28a745, #20c997);
-}
-.btn-register:hover {
-  transform: translateY(-0.3vw);
-  box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
-}
-
-/* Responsive adjustments */
+/* Responsive tweaks */
 @media (max-width: 768px) {
-  .books-container { gap: 10vw; }
+  .books-container { gap: 8vw; }
   .book, .book2 { width: 25vw; height: 30vw; }
-  .privacy-message h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
-  .privacy-message p { font-size: clamp(0.9rem, 3.5vw, 1.1rem); }
+  .privacy-message h1 { font-size: clamp(1.4rem, 6vw, 2rem); }
+  .privacy-message p { font-size: clamp(0.8rem, 3.5vw, 1rem); }
   .bird-icon { width: 5vw; max-width: 30px; }
   .fa-dove { font-size: 5vw; }
 }
 
-@media (max-width: 600px) {
-  .action-buttons { flex-direction: column; gap: 2vh; width: 90%; margin: 4vh auto 0; }
-  .btn-login, .btn-register { width: 100%; font-size: 1rem; padding: 2.5vh 0; border-radius: 8px; }
-  .moon-and-books { margin-top: 8vh; }
-  .books-container { gap: 8vw; }
-  .book, .book2 { width: 28vw; height: 32vw; }
+@media (max-width: 400px) {
+  .moon-and-books { margin-top: 2vh; }
+  .books-container { gap: 5vw; margin-bottom: 1.5vh; }
+  .action-buttons { flex-direction: column; gap: 1vh; width: 80%; margin-top: 1vh; }
+  .btn-login, .btn-register { width: 100%; padding: 1vh 0; font-size: 0.8rem; min-width: 80px; max-width: 120px; }
+  .moon { width: 25vw; height: 25vw; max-width: 90px; max-height: 90px; margin-bottom: 1.5vh; }
+  .moon-text { font-size: 0.5rem; }
 }
