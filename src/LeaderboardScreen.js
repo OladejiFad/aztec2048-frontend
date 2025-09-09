@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './LeaderboardScreen.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 export default function LeaderboardScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
@@ -13,6 +14,7 @@ export default function LeaderboardScreen() {
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -20,10 +22,13 @@ export default function LeaderboardScreen() {
           return;
         }
 
-        // ✅ fetch leaderboard
-        const res = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // ✅ fetch leaderboard with query param so each reload triggers fresh data
+        const res = await fetch(
+          `${BACKEND_URL}/auth/leaderboard?${location.search}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!res.ok) {
           console.error('Failed to fetch leaderboard');
@@ -59,8 +64,9 @@ export default function LeaderboardScreen() {
       }
     };
 
+    // ✅ re-run whenever URL query (?reload=xxx) changes
     fetchLeaderboard();
-  }, [navigate]);
+  }, [navigate, location.search]);
 
   const getRankDisplay = (rank) => {
     switch (rank) {
@@ -110,9 +116,13 @@ export default function LeaderboardScreen() {
                 className={`leaderboard-item rank-${idx + 1} ${isCurrentUser ? 'current-user' : ''
                   }`}
               >
-                <span className="leaderboard-rank">{getRankDisplay(idx + 1)}</span>
+                <span className="leaderboard-rank">
+                  {getRankDisplay(idx + 1)}
+                </span>
                 <img src={avatarUrl} alt="Avatar" className="leaderboard-avatar" />
-                <span className="leaderboard-name">{u.displayName || 'Anonymous'}</span>
+                <span className="leaderboard-name">
+                  {u.displayName || 'Anonymous'}
+                </span>
                 <span className="leaderboard-score">{u.totalScore || 0}</span>
               </li>
             );

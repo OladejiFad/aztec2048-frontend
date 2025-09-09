@@ -30,6 +30,20 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
+  // ✅ auto-refresh when user wins
+  useEffect(() => {
+    if (gameOver && score >= 30000) {
+      const timer = setTimeout(() => {
+        setScore(0);
+        setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
+        setGameOver(false);
+      }, 5000); // 5s
+
+      return () => clearTimeout(timer); // cleanup
+    }
+  }, [gameOver, score]);
+
+
   function generateEmptyBoard() {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
   }

@@ -30,7 +30,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
-  // Derived: numeric gamesLeft to avoid string issues
   const gamesLeft = Number(user?.gamesLeft ?? 0);
   const hasGames = gamesLeft > 0;
 
@@ -61,7 +60,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         navigate('/login', { replace: true });
         return;
       }
-
       setUser(data);
       setAppUser(data);
     } catch (err) {
@@ -74,7 +72,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   }, [navigate, setAppUser]);
 
-  useEffect(() => { fetchUser(); }, [fetchUser]);
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   // --- Leaderboard position ---
   useEffect(() => {
@@ -117,13 +117,20 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- AZTEC letters ---
   const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map((m) => m.letter);
+    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
+      (m) => m.letter
+    );
 
-    const newLetters = letters.filter((l) => !triggeredLettersRef.current.includes(l));
+    const newLetters = letters.filter(
+      (l) => !triggeredLettersRef.current.includes(l)
+    );
     newLetters.forEach((letter) => playLetterSound(letter));
     if (newLetters.length > 0) setHighlightLetters(newLetters);
 
-    triggeredLettersRef.current = [...triggeredLettersRef.current, ...newLetters];
+    triggeredLettersRef.current = [
+      ...triggeredLettersRef.current,
+      ...newLetters,
+    ];
     setAztecLetters(letters);
   };
 
@@ -138,11 +145,17 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     handleScoreChange(finalScore);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ score: finalScore }),
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ score: finalScore }),
+        }
+      );
       const updatedData = await res.json();
 
       const updatedUser = {
@@ -159,7 +172,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Game reset ---
   const handleReset = () => {
-    if (!hasGames) return; // ✅ do nothing if gamesLeft === 0
+    if (!hasGames) return;
     if (gameRef.current?.resetGame) {
       triggeredLettersRef.current = [];
       setAztecLetters([]);
@@ -168,10 +181,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   };
 
-  // --- Leaderboard navigation (close dropdown first, then navigate) ---
+  // --- Leaderboard navigation ---
   const goToLeaderboard = useCallback(() => {
     setShowDropdown(false);
-    setTimeout(() => navigate('/leaderboard?reload=' + Date.now()), 0); // ✅ forces fresh load
+    navigate('/leaderboard?reload=' + Date.now(), { replace: false });
   }, [navigate]);
 
 
@@ -184,11 +197,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
-
     return (
       <div className="aztec-letters-container">
-        {aztecLetters.length > 0
-          ? aztecLetters.map((letter) => {
+        {aztecLetters.length > 0 ? (
+          aztecLetters.map((letter) => {
             const justFlashed = highlightLetters.includes(letter);
             return (
               <span
@@ -201,7 +213,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               </span>
             );
           })
-          : <span>-</span>}
+        ) : (
+          <span>-</span>
+        )}
       </div>
     );
   };
@@ -211,7 +225,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const avatarUrl =
     user.photo ||
-    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(user.email || 'user')}.svg`;
+    `https://avatars.dicebear.com/api/bottts/${encodeURIComponent(
+      user.email || 'user'
+    )}.svg`;
 
   return (
     <div className="dashboard-game-container">
@@ -248,18 +264,35 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             </button>
           </div>
           <div className="stat-card">
-            <button type="button" onClick={goToLeaderboard}>Leaderboard</button>
+            <button type="button" onClick={goToLeaderboard}>
+              Leaderboard
+            </button>
           </div>
           <div className="stat-card">
-            <button type="button" onClick={logout}>Logout</button>
+            <button type="button" onClick={logout}>
+              Logout
+            </button>
           </div>
         </div>
       ) : (
         <div className="topbar-container">
           <div className="topbar">
-            <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img src={avatarUrl} alt="Avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-              <div className="topbar-name">{user.displayName || user.username}</div>
+            <div
+              className="topbar-left"
+              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+            >
+              <img
+                src={avatarUrl}
+                alt="Avatar"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                }}
+              />
+              <div className="topbar-name">
+                {user.displayName || user.username}
+              </div>
 
               <div className="topbar-stats">
                 <div className="stat-card small">
@@ -285,7 +318,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 ☰
               </button>
 
-              <div ref={dropdownRef} className={`dropdown ${showDropdown ? 'show' : ''}`}>
+              <div
+                ref={dropdownRef}
+                className={`dropdown ${showDropdown ? 'show' : ''}`}
+              >
                 <button type="button" onClick={handleReset} disabled={!hasGames}>
                   Reset Game
                 </button>
@@ -308,8 +344,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         onTouchEnd={(e) => e.stopPropagation()}
       >
         {hasGames ? (
-          // key forces a clean re-mount whenever availability flips,
-          // ensuring Reset works and stale refs aren’t kept around
           <Game2048
             key="playable"
             ref={gameRef}
