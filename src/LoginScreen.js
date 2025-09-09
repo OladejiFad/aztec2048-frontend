@@ -60,15 +60,17 @@ export default function LoginScreen({ setUser }) {
         </button>
 
         {showInfo && (
-          <div className="airdrop-guide">
-            <h3>To position yourself strongly for a potential Aztec airdrop:</h3>
-            <ul>
-              <li>Run a Sequencer node and maintain steady uptime.</li>
-              <li>Engage with the Aztec ecosystem by using privacy features.</li>
-              <li>Join the community on Discord, earn contributor roles, and help others.</li>
-              <li>Stay tuned to official channels for updates.</li>
-            </ul>
-            <p className="note">🟡 Note: No airdrop has been officially announced. Participation doesn’t guarantee rewards.</p>
+          <div className="airdrop-guide-wrapper">
+            <div className="airdrop-guide">
+              <h3>To position yourself strongly for a potential Aztec airdrop:</h3>
+              <ul>
+                <li>Run a Sequencer node and maintain steady uptime.</li>
+                <li>Engage with the Aztec ecosystem by using privacy features.</li>
+                <li>Join the community on Discord, earn contributor roles, and help others.</li>
+                <li>Stay tuned to official channels for updates.</li>
+              </ul>
+              <p className="note">🟡 Note: No airdrop has been officially announced. Participation doesn’t guarantee rewards.</p>
+            </div>
           </div>
         )}
       </div>

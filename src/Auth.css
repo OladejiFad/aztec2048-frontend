@@ -3,14 +3,14 @@
 /* ------------------ */
 .auth-page {
   background-color: #4b0082; /* deep purple */
-  min-height: 100vh;
+  height: 100vh;            /* FIXED viewport height */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 2rem;
   color: white;
-  overflow-x: hidden;
+  overflow: hidden;         /* Prevent page scrolling */
 }
 
 /* ------------------ */
@@ -19,6 +19,7 @@
 .auth-logo {
   width: 120px;
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 /* ------------------ */
@@ -34,6 +35,8 @@
   max-width: 400px;
   text-align: center;
   margin-bottom: 2rem;
+  flex-shrink: 0;           /* Prevent card from shrinking */
+  overflow: hidden;
 }
 
 .auth-card h2 {
@@ -93,17 +96,21 @@
   max-width: 650px;
   text-align: left;
   color: white;
-  margin-top: 1rem;
   font-size: 1rem;
+  flex: 1;                   /* Take remaining space */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Prevents overflow on mobile */
+.airdrop-guide-wrapper {
+  overflow-y: auto;
+  flex: 1;                   /* Scrollable content area */
+}
+
 .airdrop-guide {
   background: rgba(255, 255, 255, 0.1);
   padding: 1rem;
   border-radius: 8px;
-  max-height: 250px;   /* limit height */
-  overflow-y: auto;    /* scroll if too long */
   line-height: 1.5;
 }
 
@@ -176,7 +183,7 @@
   }
 
   .airdrop-guide {
-    max-height: 200px;
+    max-height: none;  /* Let wrapper handle scrolling */
   }
 }
 
@@ -184,7 +191,7 @@
 @media (max-width: 480px) {
   .auth-page {
     padding: 1rem;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .auth-logo {
@@ -194,7 +201,7 @@
 
   .auth-card {
     padding: 15px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .auth-card h2 {
@@ -212,7 +219,7 @@
     line-height: 1.4;
   }
 
-  .airdrop-guide {
-    max-height: 180px;
+  .airdrop-guide-wrapper {
+    flex: 1;
   }
 }

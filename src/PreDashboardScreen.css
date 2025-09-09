@@ -1,69 +1,25 @@
 /* PreDashboardScreen.css - Responsive version */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 🔒 completely disables scrolling */
+  height: 100%;
+}
 
 /* Base screen - dark night */
 .pre-dashboard {
   position: relative;
   width: 100vw;
-  height: 100vh;
-  background: #0b0b1a; /* dark night */
+  height: 100vh;      /* fill viewport */
+  overflow: hidden;   /* prevent scrolling */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  background: #0b0b1a;
   color: #fff;
   font-family: 'Georgia', serif;
   z-index: 0;
-}
-
-/* Moon - shaded crescent */
-.moon {
-  position: absolute;
-  top: 10vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12vw;
-  max-width: 120px;
-  height: 12vw;
-  max-height: 120px;
-  background: radial-gradient(circle at 30% 30%, #fff 45%, rgba(255,255,255,0.1) 70%, transparent 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 3vw rgba(255, 255, 255, 0.5);
-  animation: moonGlow 4s infinite alternate;
-  z-index: 3;
-}
-
-/* Moonlight overlay - soft shade around moon */
-.moon-light {
-  position: absolute;
-  top: 10vh;
-  left: 50%;
-  width: 40vw;
-  max-width: 400px;
-  height: 40vw;
-  max-height: 400px;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.95) 80%);
-  border-radius: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Moonlight illumination for books and text */
-.moon-illumination {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 2;
-}
-
-@keyframes moonGlow {
-  0% { box-shadow: 0 0 2vw rgba(255, 255, 255, 0.3); }
-  100% { box-shadow: 0 0 3.5vw rgba(255, 255, 255, 0.7); }
 }
 
 /* Stars */
@@ -96,9 +52,36 @@
   100% { opacity: 1; }
 }
 
+/* Moon and books container */
+.moon-and-books {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* keep moon at top */
+  margin-top: 5vh; /* distance from top */
+  z-index: 3;
+}
+
+/* Moon inside the container */
+.moon {
+  position: relative; /* remove absolute positioning */
+  top: 0;
+  left: 0;
+  transform: none; /* no translateX */
+  margin-bottom: 3vh; /* spacing between moon and books */
+  width: 12vw;
+  max-width: 120px;
+  height: 12vw;
+  max-height: 120px;
+  background: radial-gradient(circle at 30% 30%, #fff 45%, rgba(255,255,255,0.1) 70%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 3vw rgba(255, 255, 255, 0.5);
+  animation: moonGlow 4s infinite alternate;
+}
+
 /* Books container */
 .books-container {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,6 +89,11 @@
   margin-bottom: 5vh;
   z-index: 3;
   filter: drop-shadow(0 0 1vw rgba(255,255,255,0.1));
+}
+
+/* Prevent shrinking on small screens */
+.moon, .books-container {
+  flex-shrink: 0;
 }
 
 /* Books */
@@ -151,18 +139,43 @@
   100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
 }
 
-/* Privacy text */
-.privacy-text {
-  font-size: clamp(1.2rem, 2.5vw, 2rem);
-  font-weight: bold;
+/* Privacy message */
+.privacy-message {
   text-align: center;
-  color: #f8f8ff;
-  text-shadow: 0 0 1vw rgba(255,255,255,0.6);
+  max-width: 90%;
   margin-top: 2vh;
+  color: #f8f8ff;
+  text-shadow: 0 0 0.5vw rgba(255,255,255,0.5);
   z-index: 3;
-  filter: drop-shadow(0 0 1vw rgba(255,255,255,0.1));
+  filter: drop-shadow(0 0 0.5vw rgba(255,255,255,0.05));
 }
 
+.privacy-message h1 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  margin-bottom: 1.5vh;
+}
+
+.privacy-message .highlight,
+.glow {
+  background: linear-gradient(90deg, #9b30ff, #8a2be2);
+  padding: 0 0.8vw;
+  border-radius: 0.4vw;
+  box-shadow: 0 0 2vw rgba(155,48,255,0.7), 0 0 3vw rgba(138,43,226,0.5);
+  animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 1.5vw rgba(155,48,255,0.5), 0 0 2.5vw rgba(138,43,226,0.4); }
+  100% { box-shadow: 0 0 2.5vw rgba(155,48,255,0.8), 0 0 3.5vw rgba(138,43,226,0.6); }
+}
+
+.privacy-message p {
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+/* Birds */
 .bird-icon {
   position: absolute;
   color: #fff;
@@ -188,110 +201,16 @@
   50% { transform: scaleY(0.8); }
 }
 
-/* Sparkling dust */
-@keyframes dust {
-  0% { opacity: 0.2; transform: translate(0,0) scale(1); }
-  50% { opacity: 0.8; transform: translate(-0.5vw,-0.5vw) scale(1.2); }
-  100% { opacity: 0.2; transform: translate(0,0) scale(1); }
-}
-
-.book::after, .book2::after {
-  content: '';
-  position: absolute;
-  width: 0.5vw;
-  max-width: 5px;
-  height: 0.5vw;
-  max-height: 5px;
-  background: #fff;
-  border-radius: 50%;
-  top: 10%;
-  left: 10%;
-  opacity: 0.3;
-  animation: dust 2s infinite alternate;
-}
-
-/* Privacy message */
-.privacy-message {
-  text-align: center;
-  max-width: 90%;
-  margin-top: 3vh;
-  color: #f8f8ff;
-  text-shadow: 0 0 0.5vw rgba(255,255,255,0.5);
-  z-index: 3;
-  filter: drop-shadow(0 0 0.5vw rgba(255,255,255,0.05));
-}
-
-.privacy-message h1 {
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
-  margin-bottom: 1.5vh;
-}
-
-.privacy-message .highlight {
-  background: linear-gradient(90deg, #9b30ff, #8a2be2);
-  padding: 0 1vw;
-  border-radius: 0.5vw;
-  box-shadow: 0 0 1vw rgba(138,43,226,0.5);
-}
-
-.privacy-message p {
-  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-  line-height: 1.6;
-  margin: 0 auto;
-}
-
-
-
-
-
-/* Highlighted words with glow */
-.glow {
-  background: linear-gradient(90deg, #9b30ff, #8a2be2);
-  padding: 0 0.8vw;
-  border-radius: 0.4vw;
-  box-shadow: 0 0 2vw rgba(155,48,255,0.7), 0 0 3vw rgba(138,43,226,0.5);
-  animation: glowPulse 2s infinite alternate;
-}
-
-@keyframes glowPulse {
-  0% { box-shadow: 0 0 1.5vw rgba(155,48,255,0.5), 0 0 2.5vw rgba(138,43,226,0.4); }
-  100% { box-shadow: 0 0 2.5vw rgba(155,48,255,0.8), 0 0 3.5vw rgba(138,43,226,0.6); }
-}
-
-/* Media queries for smaller screens */
-@media (max-width: 768px) {
-  .books-container {
-    gap: 10vw;
-  }
-  .book, .book2 {
-    width: 25vw;
-    height: 30vw;
-  }
-  .privacy-text {
-    font-size: clamp(1.2rem, 4vw, 2rem);
-  }
-  .privacy-message h1 {
-    font-size: clamp(1.5rem, 6vw, 2.2rem);
-  }
-  .privacy-message p {
-    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-  }
-  
-  .bird-icon {
-    font-size: 5vw;
-  }
-}
-
 /* Action buttons container */
 .action-buttons {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2vw; /* space between buttons */
+  gap: 2vw; 
   margin-top: 4vh;
-  flex-wrap: wrap; /* allows wrapping on small screens */
+  flex-wrap: wrap; 
 }
 
-/* Shared button styles */
 .btn-login,
 .btn-register {
   padding: 1vh 3vw;
@@ -302,11 +221,10 @@
   cursor: pointer;
   box-shadow: 0 0.6vw 1.5vw rgba(0,0,0,0.4);
   transition: transform 0.2s, box-shadow 0.2s;
-  min-width: 120px; /* ensures buttons don’t shrink too small */
+  min-width: 120px; 
   z-index: 3;
 }
 
-/* Purple gradient for Login */
 .btn-login {
   background: linear-gradient(135deg, #9b30ff, #8a2be2);
 }
@@ -315,7 +233,6 @@
   box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
 }
 
-/* Green gradient for Register */
 .btn-register {
   background: linear-gradient(135deg, #28a745, #20c997);
 }
@@ -324,20 +241,19 @@
   box-shadow: 0 1vw 2vw rgba(0,0,0,0.5);
 }
 
-/* 📱 Mobile responsive */
-@media (max-width: 600px) {
-  .action-buttons {
-    flex-direction: column;
-    gap: 2vh; /* vertical spacing when stacked */
-    width: 90%; /* keep them inside safe area */
-    margin: 4vh auto 0; /* center container */
-  }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .books-container { gap: 10vw; }
+  .book, .book2 { width: 25vw; height: 30vw; }
+  .privacy-message h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); }
+  .privacy-message p { font-size: clamp(0.9rem, 3.5vw, 1.1rem); }
+  .bird-icon { font-size: 5vw; }
+}
 
-  .btn-login,
-  .btn-register {
-    width: 100%; /* full width buttons */
-    font-size: 1rem;
-    padding: 2.5vh 0; /* taller buttons for touch devices */
-    border-radius: 8px; /* more rounded for mobile look */
-  }
+@media (max-width: 600px) {
+  .action-buttons { flex-direction: column; gap: 2vh; width: 90%; margin: 4vh auto 0; }
+  .btn-login, .btn-register { width: 100%; font-size: 1rem; padding: 2.5vh 0; border-radius: 8px; }
+  .moon-and-books { margin-top: 8vh; }
+  .books-container { gap: 8vw; }
+  .book, .book2 { width: 28vw; height: 32vw; }
 }

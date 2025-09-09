@@ -10,18 +10,19 @@ function PreDashboardScreen() {
 
   return (
     <div className="pre-dashboard">
-      <div className="moon"></div>
-
       {/* Birds */}
       <FaDove className="bird-icon" style={{ top: '15%', left: '0%' }} />
       <FaDove className="bird-icon" style={{ top: '25%', left: '10%' }} />
       <FaDove className="bird-icon" style={{ top: '35%', left: '5%' }} />
 
-      {/* Books with glowing orb */}
-      <div className="books-container">
-        <img src={book} alt="AZTEC Book" className="book box" />
-        <div className="glowing-orb"></div>
-        <img src={box} alt="Privacy Book" className="book book2" />
+      {/* Moon and Books wrapped together */}
+      <div className="moon-and-books">
+        <div className="moon"></div>
+        <div className="books-container">
+          <img src={book} alt="AZTEC Book" className="book box" />
+          <div className="glowing-orb"></div>
+          <img src={box} alt="Privacy Book" className="book book2" />
+        </div>
       </div>
 
       {/* Privacy message */}

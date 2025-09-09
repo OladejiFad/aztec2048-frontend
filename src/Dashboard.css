@@ -471,6 +471,7 @@ button:hover {
 
 
 @media screen and (max-width: 480px) {
+  /* Topbar & stats adjustments */
   .topbar-name { font-size: 14px; }
   .mobile-stats { font-size: 14px; gap: 4px; }
   .board { gap: 6px; }
@@ -478,9 +479,32 @@ button:hover {
   .tile-128, .tile-256, .tile-512 { font-size: 14px; }
   .tile-1024, .tile-2048 { font-size: 12px; }
 
-  /* ✅ shrink stat cards on tiny screens */
+  /* Shrink stat cards */
   .stat-card h4 { font-size: 12px; }
   .stat-card p { font-size: 14px; }
+
+  /* --- AZTEC Letters Mobile Adjustments --- */
+  .aztec-letter-badge {
+    background-color: transparent !important; /* remove badge background */
+    color: inherit; /* keep the letter color */
+    font-size: 14px; /* smaller font on mobile */
+    padding: 2px 4px; /* smaller padding */
+    border: none; /* remove any border */
+  }
+
+  /* AZTEC letters container scroll */
+  .aztec-letters-container {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+  }
+  .aztec-letters-container::-webkit-scrollbar { display: none; }
+  .aztec-letters-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
+
 
 
