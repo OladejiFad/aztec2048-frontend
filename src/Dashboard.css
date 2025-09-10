@@ -136,7 +136,9 @@ button:hover {
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap; /* allow wrapping on small screens */
+  min-width: 0;    /* prevent overflow */
 }
 
 .topbar-left img {
@@ -147,7 +149,10 @@ button:hover {
 
 .topbar-name {
   font-weight: bold;
-  font-size: 16px;
+  font-size: clamp(12px, 4vw, 16px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #fff;
 }
 
@@ -278,7 +283,7 @@ button:hover {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 450px; /* desktop cap */
+  max-width: 450px;
   margin: 0 auto;
   gap: 15px;
   padding: 10px;
@@ -290,11 +295,9 @@ button:hover {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   gap: 10px;
-
-  /* responsive width */
-  width: 90vw;        /* 90% of viewport width on mobile */
-  max-width: 400px;   /* cap for larger screens */
-  aspect-ratio: 1;    /* square board */
+  width: 90vw;
+  max-width: 400px;
+  aspect-ratio: 1;
   background-color: #f5f2e7;
   padding: 10px;
   border-radius: 12px;
@@ -310,14 +313,11 @@ button:hover {
   justify-content: center;
   align-items: center;
   font-weight: bold;
-
-  /* font scales with board width */
   font-size: calc(20px + 1vw);
   color: #776e65;
   position: relative;
   transition: all 0.2s ease;
 }
-
 
 .tile-label {
   position: absolute;
@@ -371,33 +371,37 @@ button:hover {
   background-color: #9f8b76;
 }
 
-/* --- Responsive --- */
+/* --- Responsive Sidebar --- */
 @media screen and (max-width: 1024px) {
   .sidebar { width: 200px; }
   .profile img { width: 60px; height: 60px; }
 }
 
+/* --- Media Queries for small screens --- */
 @media screen and (max-width: 768px) {
   .dashboard-game-container { flex-direction: column; }
   .sidebar { display: none; }
   .main-content { padding: 15px; }
-  .mobile-stats { display: flex; flex-direction: column; gap: 10px; background-color: #fff; padding: 12px; }
 }
 
 @media screen and (max-width: 480px) {
   /* Topbar and mobile stats */
-  .topbar-name { font-size: 14px; }
-  .mobile-stats { font-size: 14px; gap: 4px; }
+  .topbar-left { gap: 6px; }
+  .topbar-name { font-size: clamp(10px, 3.5vw, 14px); }
+  .topbar-stats { gap: 4px; }
+  .topbar-stats .stat-card.small {
+    min-width: 50px;
+    padding: 3px 6px;
+    font-size: 11px;
+  }
 
   /* 2048 Board responsive */
   .board {
-    width: 95vw;      /* almost full width on tiny phones */
-    gap: 6px;         /* smaller gaps */
+    width: 95vw;
+    gap: 6px;
   }
 
-  .board-cell {
-    font-size: 4.5vw; /* scale with viewport width */
-  }
+  .board-cell { font-size: 4.5vw; }
 
   .tile-128, .tile-256, .tile-512 { font-size: 3.5vw; }
   .tile-1024, .tile-2048 { font-size: 3vw; }
@@ -407,12 +411,20 @@ button:hover {
   .stat-card p { font-size: 14px; }
 
   /* AZTEC Letters */
-  .aztec-letters-container {
-    gap: 2px;
-    flex-wrap: nowrap;
-    overflow: visible;
-  }
+  .aztec-letters-container { gap: 2px; flex-wrap: nowrap; overflow: visible; }
   .aztec-letter-badge { padding: 5px 8px; border-radius: 4px; }
+}
+
+@media screen and (max-width: 360px) {
+  .topbar-name { font-size: 12px; }
+  .topbar-stats .stat-card.small {
+    min-width: 48px;
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+
+  .aztec-letters-container { gap: 1px; }
+  .aztec-letter-badge { font-size: 14px; padding: 3px 5px; }
 }
 
 /* Shared Avatar Styling */
@@ -424,15 +436,4 @@ button:hover {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #fff;
-}
-
-@media screen and (max-width: 360px) {
-  .aztec-letters-container {
-    gap: 1px;
-  }
-
-  .aztec-letter-badge {
-    font-size: 14px;
-    padding: 3px 5px;
-  }
 }
