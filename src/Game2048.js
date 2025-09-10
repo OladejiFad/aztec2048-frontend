@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, useCallback } from 'react';
-import './Dashboard.css';
+import './Game2048.css';
 
 const SIZE = 4;
 
@@ -9,9 +9,9 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   const [gameOver, setGameOver] = useState(false);
   const boardRef = useRef(null);
 
+  // ✅ ref for touch start positions
   const touchStartRef = useRef({ x: 0, y: 0 });
 
-  // --- Expose reset method to parent ---
   useImperativeHandle(ref, () => ({
     resetGame() {
       setScore(0);
@@ -19,6 +19,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       setGameOver(false);
     },
   }));
+
 
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
@@ -28,18 +29,27 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
+  // ✅ auto-refresh when user wins
   useEffect(() => {
     if (gameOver) {
-      const finalScore = score;
+      const finalScore = score; // capture final score
+
       const timer = setTimeout(() => {
+        // ✅ notify Dashboard so it updates gamesLeft + totalScore
         if (onGameOver) onGameOver(finalScore);
+
+        // ✅ then reset locally
         setScore(0);
         setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
         setGameOver(false);
       }, 5000);
+
       return () => clearTimeout(timer);
     }
   }, [gameOver, score, onGameOver]);
+
+
+
 
   function generateEmptyBoard() {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
@@ -50,6 +60,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE; j++)
         if (!b[i][j]) empty.push([i, j]);
+
     if (!empty.length) return b;
 
     const [x, y] = empty[Math.floor(Math.random() * empty.length)];
@@ -101,12 +112,15 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE; j++)
         if (!b[i][j]) return false;
+
     for (let i = 0; i < SIZE; i++)
       for (let j = 0; j < SIZE - 1; j++)
         if (b[i][j] === b[i][j + 1]) return false;
+
     for (let j = 0; j < SIZE; j++)
       for (let i = 0; i < SIZE - 1; i++)
         if (b[i][j] === b[i + 1][j]) return false;
+
     return true;
   }, []);
 
@@ -125,11 +139,13 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (!boardsEqual(board, newBoard)) {
       const updatedBoard = addRandomTile(newBoard);
       setBoard(updatedBoard);
-      if (score >= 30000 || checkGameOver(updatedBoard)) setGameOver(true);
+      if (score >= 30000 || checkGameOver(updatedBoard)) {
+        setGameOver(true);
+        if (onGameOver) onGameOver(score);
+      }
     }
-  }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver]);
+  }, [board, gameOver, score, moveUp, moveDown, moveLeft, moveRight, boardsEqual, checkGameOver, onGameOver]);
 
-  // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
@@ -144,15 +160,21 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // Mobile swipe detection
+  // ✅ Updated touch handling
   useEffect(() => {
     const handleTouchStart = (e) => {
-      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
     };
+
     const handleTouchEnd = (e) => {
+      e.preventDefault();
       const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
       const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
       const threshold = 20;
+
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
         dx > 0 ? handleMove('right') : handleMove('left');
       } else if (Math.abs(dy) > threshold) {
@@ -182,14 +204,22 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     <div className="game-2048-container">
       <div className={`score ${getScoreClass(board)}`}>Score: {score}</div>
 
+      {/* ✅ Hide board when game is over */}
       {!gameOver && (
         <div className="game-board" ref={boardRef}>
           {board.flatMap((row, i) =>
             row.map((cell, j) => (
-              <div key={`${i}-${j}`} className={`board-cell ${cell ? `tile-${cell}` : ''}`}>
+              <div
+                key={`${i}-${j}`}
+                className={`board-cell ${cell ? `tile-${cell}` : ''}`}
+              >
+                {/* Tile number */}
                 {cell || ''}
+
+                {/* Watermark */}
                 <span className="tile-watermark">AZTEC</span>
               </div>
+
             ))
           )}
         </div>
@@ -210,6 +240,7 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       )}
     </div>
   );
+
 });
 
 export default Game2048;
