@@ -23,6 +23,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [gameContainerWidth, setGameContainerWidth] = useState(0);
+  const [gameContainerHeight, setGameContainerHeight] = useState(0);
 
   const gameRef = useRef(null);
   const triggeredLettersRef = useRef([]);
@@ -33,12 +35,29 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const gamesLeft = Number(user?.gamesLeft ?? 0);
   const hasGames = gamesLeft > 0;
 
-  // --- Responsive ---
+  // --- Responsive detection ---
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // --- Dynamic game container sizing ---
+  useEffect(() => {
+    const resizeGame = () => {
+      const sidebarWidth = !isMobile ? 260 : 0; // desktop sidebar
+      const topbarHeight = isMobile ? 80 : 0;   // mobile topbar
+      const width = window.innerWidth - sidebarWidth - 40; // padding
+      const height = window.innerHeight - topbarHeight - 40; // padding
+      const size = Math.min(width, height); // square
+      setGameContainerWidth(size);
+      setGameContainerHeight(size);
+    };
+
+    resizeGame();
+    window.addEventListener('resize', resizeGame);
+    return () => window.removeEventListener('resize', resizeGame);
+  }, [isMobile]);
 
   // --- Fetch user info ---
   const fetchUser = useCallback(async () => {
@@ -197,7 +216,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
     return (
-      <div className="aztec-letters-container">
+      <div className="dashboard-aztec-letters-container">
         {aztecLetters.length > 0 ? (
           aztecLetters.map((letter) => {
             const justFlashed = highlightLetters.includes(letter);
@@ -205,7 +224,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               <span
                 key={letter}
                 aria-label={`Letter ${letter}`}
-                className={`aztec-letter-badge aztec-letter-${letter} ${justFlashed ? 'flash' : ''
+                className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${letter} ${justFlashed ? 'flash' : ''
                   } ${allLettersActive ? 'five-letters' : ''}`}
               >
                 {letter}
@@ -222,92 +241,86 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
-  // ✅ RoboHash fallback avatar
   const avatarUrl =
     user.photo ||
     `https://robohash.org/${encodeURIComponent(user.email || 'user')}?set=set2&size=128x128`;
 
   return (
-    <div className="dashboard-game-container">
+    <div className="dashboard dashboard-game-container">
       {!isMobile ? (
-        <div className="sidebar">
-          <div className="logo-container">
-            <img src={aztecLogo} alt="Aztec Logo" className="logo-img" />
+        <div className="dashboard-sidebar">
+          <div className="dashboard-logo-container">
+            <img src={aztecLogo} alt="Aztec Logo" className="dashboard-logo-img" />
           </div>
-          <h2 className="sidebar-title">AZTEC 2048</h2>
-          <div className="profile profile-row">
+          <h2 className="dashboard-sidebar-title">AZTEC 2048</h2>
+          <div className="dashboard-profile dashboard-profile-row">
             <img src={avatarUrl} alt="Avatar" />
-            <span>{user.displayName || user.username}</span>
+            <span title={user.displayName || user.username}>
+              {user.displayName || user.username}
+            </span>
           </div>
 
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <h4>Total Score</h4>
             <p>{user.totalScore}</p>
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <h4>Games Left</h4>
             <p>{gamesLeft}</p>
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <h4>AZTEC Letters</h4>
             {renderAztecLetters()}
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <h4>Your Position</h4>
             <p>{userPosition || '-'}</p>
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <button type="button" onClick={handleReset} disabled={!hasGames}>
-              Reset Game
+              Reset
             </button>
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <button type="button" onClick={goToLeaderboard}>
               Leaderboard
             </button>
           </div>
-          <div className="stat-card">
+          <div className="dashboard-stat-card">
             <button type="button" onClick={logout}>
               Logout
             </button>
           </div>
         </div>
       ) : (
-        <div className="topbar-container">
-          <div className="topbar">
-            <div
-              className="topbar-left"
-              style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-            >
+        <div className="dashboard-topbar-container">
+          <div className="dashboard-topbar">
+            <div className="dashboard-topbar-left">
               <img
                 src={avatarUrl}
                 alt="Avatar"
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                }}
+                className="dashboard-topbar-avatar"
               />
-              <div className="topbar-name">
+              <div className="dashboard-topbar-name" title={user.displayName || user.username}>
                 {user.displayName || user.username}
               </div>
 
-              <div className="topbar-stats">
-                <div className="stat-card small">
-                  <h4>Games Left</h4>
+              <div className="dashboard-topbar-stats">
+                <div className="dashboard-stat-card small">
+                  <h4>Games</h4>
                   <p>{gamesLeft}</p>
                 </div>
-                <div className="stat-card small">
-                  <h4>AZTEC Letters</h4>
+                <div className="dashboard-stat-card small">
+                  <h4>Letters</h4>
                   {renderAztecLetters()}
                 </div>
               </div>
             </div>
 
-            <div className="dropdown-wrapper" style={{ position: 'relative' }}>
+            <div className="dashboard-dropdown-wrapper">
               <button
                 ref={buttonRef}
-                className="hamburger-btn"
+                className="dashboard-hamburger-btn"
                 onClick={() => setShowDropdown((prev) => !prev)}
                 aria-label="Menu"
                 aria-expanded={showDropdown}
@@ -318,10 +331,10 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
               <div
                 ref={dropdownRef}
-                className={`dropdown ${showDropdown ? 'show' : ''}`}
+                className={`dashboard-dropdown ${showDropdown ? 'show' : ''}`}
               >
                 <button type="button" onClick={handleReset} disabled={!hasGames}>
-                  Reset Game
+                  Reset
                 </button>
                 <button type="button" onClick={goToLeaderboard}>
                   Leaderboard
@@ -336,25 +349,30 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       )}
 
       <div
-        className="main-content"
-        onTouchStart={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
+        className="dashboard-main-content"
+        style={{
+          overflow: 'hidden',
+          width: gameContainerWidth,
+          height: gameContainerHeight,
+        }}
       >
         {hasGames ? (
           <Game2048
             key="playable"
+            containerWidth={gameContainerWidth}
+            containerHeight={gameContainerHeight}
             ref={gameRef}
             onScoreChange={handleScoreChange}
             onGameOver={handleGameOver}
           />
         ) : (
-          <div className="no-games-left-message">
+          <div className="dashboard-no-games-left-message">
             <h2>No Games Left!</h2>
             <p>Come back later to play again.</p>
           </div>
         )}
       </div>
+
     </div>
   );
 }

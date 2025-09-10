@@ -1,467 +1,266 @@
-/* --- General --- */
-body, html {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f2f5;
-  overflow-x: hidden; /* prevent horizontal overflow */
-}
-
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 12px;
-  background-color: #6a0dad;
-  color: white;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background-color: #580b99;
-}
-
-/* --- Dashboard Container --- */
+/* --- Main container --- */
 .dashboard-game-container {
   display: flex;
-  flex-direction: row;
   min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden;
 }
 
 /* --- Sidebar (Desktop) --- */
-.sidebar {
-  width: 260px;
-  background-color: #6a0dad;
-  padding: 20px;
+.dashboard-sidebar {
+  width: 220px;
+  background-color: #2f3e46;
+  color: #fff;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  color: #fff;
+  padding: 15px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
-.logo-container {
-  display: flex;
-  justify-content: center;
+.dashboard-logo-container {
+  text-align: center;
   margin-bottom: 10px;
 }
 
-.logo-img {
-  width: 120px;
+.dashboard-logo-img {
+  width: 100%;
+  max-width: 100px;
   height: auto;
-  display: block;
-  margin: 0 auto 20px auto;
+  border-radius: 10px;
 }
 
-.sidebar-title {
+.dashboard-sidebar-title {
   text-align: center;
-  margin: 0;
-  color: #fff;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+  word-break: break-word;
 }
 
-.profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.profile img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 8px;
-  border: 2px solid #fff;
-}
-
-.sidebar .profile-row {
+.dashboard-profile-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-.sidebar .profile-row img {
+.dashboard-profile-row img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.stat-card {
-  background-color: rgba(255, 255, 255, 0.15);
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  color: #fff;
+.dashboard-profile-row span {
+  font-size: 0.9rem;
+  word-break: break-word;
 }
 
-.stat-card h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #e0d4f7;
-}
-
-.stat-card p {
-  margin: 5px 0 0 0;
-  font-weight: bold;
-  font-size: 16px;
-  color: #fff;
-}
-
-.stat-card button {
-  background-color: #fff;
-  color: #6a0dad;
-  font-weight: bold;
+/* --- Stat cards --- */
+.dashboard-stat-card {
+  background-color: #354f52;
+  padding: 10px;
+  margin-bottom: 10px;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
+  text-align: center;
+  word-break: break-word;
+  font-size: 0.85rem;
 }
 
-.stat-card button:hover {
-  background-color: #ddd;
+.dashboard-stat-card h4 {
+  margin: 0 0 3px;
+  font-size: 0.85rem;
 }
 
-/* --- Mobile Topbar --- */
-.topbar-container {
+.dashboard-stat-card p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.dashboard-stat-card button {
   width: 100%;
+  padding: 6px;
+  font-size: 0.85rem;
+  background-color: #52796f;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.topbar {
+.dashboard-stat-card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- AZTEC letters --- */
+.dashboard-aztec-letters-container {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.dashboard-aztec-letter-badge {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 50%;
+  background-color: #84a98c;
+  color: #fff;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.dashboard-aztec-letter-badge.flash {
+  transform: scale(1.4);
+}
+
+.dashboard-aztec-letter-A { background-color: #f94144; }
+.dashboard-aztec-letter-Z { background-color: #f3722c; }
+.dashboard-aztec-letter-T { background-color: #f9c74f; }
+.dashboard-aztec-letter-E { background-color: #90be6d; }
+.dashboard-aztec-letter-C { background-color: #43aa8b; }
+
+.dashboard-aztec-letters-container.five-letters .dashboard-aztec-letter-badge {
+  border: 2px solid #fff;
+}
+
+/* --- Topbar (Mobile) --- */
+.dashboard-topbar-container {
+  width: 100%;
+  background-color: #2f3e46;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.dashboard-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #6a0dad;
-  padding: 10px 15px;
-  border-bottom: 1px solid #ddd;
-  color: #fff;
+  padding: 6px 8px;
+  flex-wrap: wrap;
 }
 
-.topbar-left {
+.dashboard-topbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
-.topbar-left img {
-  width: 32px;
-  height: 32px;
+.dashboard-topbar-avatar {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.topbar-name {
+.dashboard-topbar-name {
   font-weight: bold;
-  font-size: 16px;
-  color: #fff;
+  word-break: break-word;
+  max-width: 100px;
+  font-size: 0.85rem;
 }
 
-.hamburger-btn {
-  font-size: 22px;
-  background: none;
-  color: #fff;
-}
-
-.topbar-stats {
+.dashboard-topbar-stats {
   display: flex;
-  gap: 8px;
-  margin-left: 10px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
-.topbar-stats .stat-card.small {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 12px;
-  min-width: 60px;
-}
-
-.topbar-stats .stat-card.small h4 {
-  font-size: 10px;
-  margin: 0;
-}
-
-.topbar-stats .stat-card.small p {
-  font-size: 12px;
-  margin: 0;
-  font-weight: bold;
-}
-
-/* --- Dropdown Menu --- */
-.dropdown-wrapper { position: relative; }
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px 0;
-  min-width: 140px;
-  max-width: 200px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  opacity: 0;
-  transform: translateY(-5px);
-  pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-}
-
-.dropdown.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.dropdown button {
-  background-color: #fff;
-  color: #6a0dad;
-  font-weight: bold;
-  padding: 10px 15px;
-  text-align: left;
-  border: none;
-  border-bottom: 1px solid #eee;
-  width: 100%;
-  transition: background-color 0.2s;
-}
-
-.dropdown button:last-child { border-bottom: none; }
-.dropdown button:hover { background-color: #f0f0f0; }
-
-/* --- Main Content --- */
-.main-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 20px;
-}
-
-/* --- AZTEC Letters --- */
-.aztec-letters-container {
-  display: flex;
-  gap: 2px; /* letters close together */
-  flex-wrap: nowrap;
-}
-
-.aztec-letter-badge {
-  display: inline-block;
-  padding: 5px 8px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 16px;
-  text-align: center;
-  color: #fff;
-  transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
-}
-
-/* Individual letter colors */
-.aztec-letter-A { background-color: #FF4C4C; }
-.aztec-letter-Z { background-color: #4C9AFF; }
-.aztec-letter-T { background-color: #FFD700; }
-.aztec-letter-E { background-color: #32CD32; }
-.aztec-letter-C { background-color: #FF69B4; }
-
-/* Optional smaller badge style */
-.aztec-letter-badge.five-letters {
-  font-size: 14px;
-  padding: 3px 6px;
-  border: 2px solid gold;
-}
-
-/* --- Game 2048 Board --- */
-.game-2048-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-  gap: 15px;
-  padding: 10px;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
-  background-color: #f5f2e7;
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-  touch-action: none;
-}
-
-.board-cell {
-  background-color: #eee4da;
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 24px;
-  color: #776e65;
+.dashboard-dropdown-wrapper {
   position: relative;
-  transition: all 0.2s ease;
 }
 
-.tile-label {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 10px;
-  color: rgba(0,0,0,0.2);
-  pointer-events: none;
-}
-
-.board-cell.merged { transform: scale(1.1); transition: transform 0.1s ease; }
-
-.game-over-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 12px;
-  color: #f9f6f2;
-  opacity: 0;
-  transform: scale(0.9);
-  animation: fadeIn 0.3s forwards;
-}
-
-.game-over-overlay h2 { font-size: 28px; margin: 0; }
-
-.game-over-overlay button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #8f7a66;
-  color: #f9f6f2;
+.dashboard-hamburger-btn {
+  background: none;
   border: none;
-  border-radius: 6px;
+  color: #fff;
+  font-size: 1.3rem;
   cursor: pointer;
 }
 
-.game-over-overlay button:hover { background-color: #9f8b76; }
-
-/* --- Responsive --- */
-@media screen and (max-width: 1024px) {
-  .sidebar { width: 200px; }
-  .profile img { width: 60px; height: 60px; }
+.dashboard-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 36px;
+  background-color: #354f52;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-direction: column;
+  z-index: 10;
+  min-width: 120px;
 }
 
-@media screen and (max-width: 768px) {
-  .dashboard-game-container { flex-direction: column; }
-  .sidebar { display: none; }
-  .main-content { padding: 15px; }
-  .mobile-stats { display: flex; flex-direction: column; gap: 10px; background-color: #fff; padding: 12px; }
+.dashboard-dropdown.show {
+  display: flex;
 }
 
-@media screen and (max-width: 480px) {
-  .topbar-name { font-size: 14px; }
-  .mobile-stats { font-size: 14px; gap: 4px; }
-  .board { gap: 6px; }
-  .board-cell { font-size: 16px; }
-  .tile-128, .tile-256, .tile-512 { font-size: 14px; }
-  .tile-1024, .tile-2048 { font-size: 12px; }
-
-  .stat-card h4 { font-size: 12px; }
-  .stat-card p { font-size: 14px; }
-
-  /* Letters stay colored, close together, no scroll */
-  .aztec-letters-container { gap: 2px; flex-wrap: nowrap; overflow: visible; }
-  .aztec-letter-badge { padding: 5px 8px; border-radius: 4px; }
+.dashboard-dropdown button {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-/* Shared Avatar Styling */
-.leaderboard-avatar,
-.profile img,
-.topbar-left img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
+.dashboard-dropdown button:hover {
+  background-color: #52796f;
 }
 
-@media screen and (max-width: 360px) {
-  .aztec-letters-container {
-    gap: 1px;       /* less gap */
-  }
+/* --- Main content --- */
+.dashboard-main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  min-width: 0;
 
-  .aztec-letter-badge {
-    font-size: 14px; /* slightly smaller text */
-    padding: 3px 5px; /* tighter padding */
-  }
-}
-
-/* --- Additional Responsive Tweaks for Dashboard --- */
-
-/* Ensure dashboard container fits all screens */
-.dashboard-game-container {
-  flex-wrap: wrap; /* allow wrapping for mobile */
-  justify-content: center; /* center content horizontally */
-}
-
-/* Main content should shrink for very small screens */
-.main-content {
-  max-width: 100%; /* prevent overflow */
-  padding: 10px;   /* slightly smaller padding on mobile */
+  max-width: 100%;
+  max-height: 100vh;
   box-sizing: border-box;
 }
 
-/* Sidebar items (desktop) should shrink proportionally */
-.sidebar {
-  min-width: 180px; /* allow shrinking on smaller desktops */
+.dashboard-no-games-left-message {
+  text-align: center;
+  word-break: break-word;
+  font-size: 0.9rem;
 }
 
-/* Topbar tweaks for tiny screens */
-.topbar-left {
-  flex-wrap: wrap; /* wrap items instead of overflow */
-}
-
-.topbar-stats {
-  flex-wrap: wrap; /* allow badges to wrap to next line */
-  gap: 4px;
-  overflow-x: visible; /* avoid scroll */
-}
-
-/* Reduce font and padding for very small devices */
-@media screen and (max-width: 360px) {
-  .topbar-name {
-    font-size: 12px;
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .dashboard-game-container {
+    flex-direction: column;
   }
 
-  .stat-card.small {
-    font-size: 10px;
-    min-width: 50px;
-    padding: 2px 4px;
+  .dashboard-stat-card {
+    flex: 1 1 45%;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
   }
 
-  .aztec-letter-badge {
-    font-size: 12px;
-    padding: 2px 4px;
+  .dashboard-aztec-letters-container {
+    justify-content: flex-start;
   }
 
-  .main-content {
-    padding: 5px;
+  .dashboard-main-content {
+    padding: 8px;
   }
-}
-
-/* Ensure no horizontal overflow anywhere */
-body, html, .dashboard-game-container, .main-content {
-  overflow-x: hidden;
 }

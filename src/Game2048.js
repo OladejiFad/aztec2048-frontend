@@ -3,13 +3,12 @@ import './Game2048.css';
 
 const SIZE = 4;
 
-const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
+const Game2048 = forwardRef(({ containerWidth = 400, containerHeight = 400, onScoreChange, onGameOver }, ref) => {
   const [score, setScore] = useState(0);
   const [board, setBoard] = useState(generateEmptyBoard());
   const [gameOver, setGameOver] = useState(false);
   const boardRef = useRef(null);
 
-  // ✅ ref for touch start positions
   const touchStartRef = useRef({ x: 0, y: 0 });
 
   useImperativeHandle(ref, () => ({
@@ -20,7 +19,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     },
   }));
 
-
   useEffect(() => {
     setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
   }, []);
@@ -29,27 +27,18 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     if (onScoreChange) onScoreChange(score);
   }, [score, onScoreChange]);
 
-  // ✅ auto-refresh when user wins
   useEffect(() => {
     if (gameOver) {
-      const finalScore = score; // capture final score
-
+      const finalScore = score;
       const timer = setTimeout(() => {
-        // ✅ notify Dashboard so it updates gamesLeft + totalScore
         if (onGameOver) onGameOver(finalScore);
-
-        // ✅ then reset locally
         setScore(0);
         setBoard(addRandomTile(addRandomTile(generateEmptyBoard())));
         setGameOver(false);
       }, 5000);
-
       return () => clearTimeout(timer);
     }
   }, [gameOver, score, onGameOver]);
-
-
-
 
   function generateEmptyBoard() {
     return Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
@@ -160,7 +149,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleMove]);
 
-  // ✅ Updated touch handling
   useEffect(() => {
     const handleTouchStart = (e) => {
       touchStartRef.current = {
@@ -201,25 +189,29 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
   }
 
   return (
-    <div className="game-2048-container">
+    <div className="game-2048-container" style={{ width: containerWidth, height: containerHeight }}>
       <div className={`score ${getScoreClass(board)}`}>Score: {score}</div>
 
-      {/* ✅ Hide board when game is over */}
       {!gameOver && (
-        <div className="game-board" ref={boardRef}>
+        <div
+          className="game2048-board"
+          ref={boardRef}
+          style={{
+            width: `${containerWidth}px`,
+            height: `${containerHeight}px`,
+            maxWidth: '100%',
+            maxHeight: '100%',
+          }}
+        >
           {board.flatMap((row, i) =>
             row.map((cell, j) => (
               <div
                 key={`${i}-${j}`}
                 className={`board-cell ${cell ? `tile-${cell}` : ''}`}
               >
-                {/* Tile number */}
                 {cell || ''}
-
-                {/* Watermark */}
                 <span className="tile-watermark">AZTEC</span>
               </div>
-
             ))
           )}
         </div>
@@ -240,7 +232,6 @@ const Game2048 = forwardRef(({ onScoreChange, onGameOver }, ref) => {
       )}
     </div>
   );
-
 });
 
 export default Game2048;
