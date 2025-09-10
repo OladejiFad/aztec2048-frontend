@@ -34,6 +34,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const touchEndRef = useRef({ x: 0, y: 0 });
+
   const SIZE = 4;
   const gamesLeft = Number(user?.gamesLeft ?? 0);
   const hasGames = gamesLeft > 0;
@@ -258,6 +261,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setBoard(b);
   }, [hasGames, emptyBoard, addRandomTile]);
 
+  // --- Keyboard controls ---
   const handleKeyDown = useCallback(
     (e) => {
       switch (e.key) {
@@ -271,12 +275,49 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     [move]
   );
 
+  // --- Touch controls ---
+  const handleTouchStart = useCallback((e) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    const touch = e.touches[0];
+    touchEndRef.current = { x: touch.clientX, y: touch.clientY };
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const deltaX = touchEndRef.current.x - touchStartRef.current.x;
+    const deltaY = touchEndRef.current.y - touchStartRef.current.y;
+
+    if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) return;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      deltaX > 0 ? move(1) : move(3); // right : left
+    } else {
+      deltaY > 0 ? move(2) : move(0); // down : up
+    }
+
+    touchStartRef.current = { x: 0, y: 0 };
+    touchEndRef.current = { x: 0, y: 0 };
+  }, [move]);
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
-    initGame();
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown, initGame]);
+    const container = document.querySelector('.game-2048-container');
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchmove', handleTouchMove);
+    container.addEventListener('touchend', handleTouchEnd);
 
+    initGame();
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleKeyDown, initGame, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   const handleReset = useCallback(() => initGame(), [initGame]);
   const goToLeaderboard = useCallback(() => { setShowDropdown(false); navigate('/leaderboard'); }, [navigate]);
@@ -377,13 +418,23 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ) : (
         <div className="dashboard-topbar">
           <div className="dashboard-topbar-left">
-            <img src={avatarUrl} alt="Avatar" />
-            <span>{user.displayName || user.username}</span>
+            <img src={avatarUrl || "logo.png"} alt="Profile" />
+            <div className="game-left">
+              Game Left: <span>{gamesLeft}</span>
+            </div>
+            <div className="dashboard-aztec-letters-container">
+              <span className="dashboard-aztec-letter-badge dashboard-aztec-letter-A">A</span>
+              <span className="dashboard-aztec-letter-badge dashboard-aztec-letter-Z">Z</span>
+              <span className="dashboard-aztec-letter-badge dashboard-aztec-letter-T">T</span>
+              <span className="dashboard-aztec-letter-badge dashboard-aztec-letter-E">E</span>
+              <span className="dashboard-aztec-letter-badge dashboard-aztec-letter-C">C</span>
+            </div>
           </div>
+
           <div className="dashboard-topbar-right">
-            <button ref={buttonRef} onClick={() => setShowDropdown(!showDropdown)}>☰</button>
+            <button onClick={() => setShowDropdown(!showDropdown)}>☰</button>
             {showDropdown && (
-              <div className="dashboard-dropdown" ref={dropdownRef}>
+              <div className="dashboard-dropdown">
                 <button onClick={handleReset} disabled={!hasGames}>Reset</button>
                 <button onClick={goToLeaderboard}>Leaderboard</button>
                 <button onClick={logout}>Logout</button>
@@ -391,6 +442,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             )}
           </div>
         </div>
+
       )}
       <div className="dashboard-main-content">{renderBoard()}</div>
     </div>
