@@ -348,20 +348,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         </div>
       )}
 
-      <div
-        className="dashboard-main-content"
-        style={{
-          overflow: 'hidden',
-          width: gameContainerWidth,
-          height: gameContainerHeight,
-        }}
-      >
+      <div className="dashboard-main-content">
         {hasGames ? (
           <Game2048
             key="playable"
-            containerWidth={gameContainerWidth}
-            containerHeight={gameContainerHeight}
             ref={gameRef}
+            containerWidth={gameContainerWidth}   // optional, for internal board sizing
+            containerHeight={gameContainerHeight} // optional
             onScoreChange={handleScoreChange}
             onGameOver={handleGameOver}
           />
@@ -372,6 +365,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
         )}
       </div>
+
 
     </div>
   );
