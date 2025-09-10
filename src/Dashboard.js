@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
-import Game2048 from './Game2048';
 import { playLetterSound } from './utils/letterSounds';
 import aztecLogo from './assets/azteclogo.jpg';
 
@@ -23,15 +22,17 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [gameContainerWidth, setGameContainerWidth] = useState(0);
-  const [gameContainerHeight, setGameContainerHeight] = useState(0);
 
-  const gameRef = useRef(null);
+  const [board, setBoard] = useState([]);
+  const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
+
   const triggeredLettersRef = useRef([]);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
+  const SIZE = 4;
   const gamesLeft = Number(user?.gamesLeft ?? 0);
   const hasGames = gamesLeft > 0;
 
@@ -42,23 +43,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- Dynamic game container sizing ---
-  useEffect(() => {
-    const resizeGame = () => {
-      const sidebarWidth = !isMobile ? 260 : 0; // desktop sidebar
-      const topbarHeight = isMobile ? 80 : 0;   // mobile topbar
-      const width = window.innerWidth - sidebarWidth - 40; // padding
-      const height = window.innerHeight - topbarHeight - 40; // padding
-      const size = Math.min(width, height); // square
-      setGameContainerWidth(size);
-      setGameContainerHeight(size);
-    };
-
-    resizeGame();
-    window.addEventListener('resize', resizeGame);
-    return () => window.removeEventListener('resize', resizeGame);
-  }, [isMobile]);
-
   // --- Fetch user info ---
   const fetchUser = useCallback(async () => {
     setLoading(true);
@@ -67,7 +51,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       navigate('/login', { replace: true });
       return;
     }
-
     try {
       const res = await fetch(`${BACKEND_URL}/auth/api/me`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -135,8 +118,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   }, []);
 
   // --- AZTEC letters ---
-  const handleScoreChange = (score) => {
-    const letters = AZTEC_MILESTONES.filter((m) => score >= m.score).map(
+  const handleScoreChange = useCallback((newScore) => {
+    setScore(newScore);
+    const letters = AZTEC_MILESTONES.filter((m) => newScore >= m.score).map(
       (m) => m.letter
     );
 
@@ -151,7 +135,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       ...newLetters,
     ];
     setAztecLetters(letters);
-  };
+  }, []);
 
   useEffect(() => {
     if (highlightLetters.length === 0) return;
@@ -159,24 +143,39 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => clearTimeout(timeout);
   }, [highlightLetters]);
 
-  // --- Game over ---
-  const handleGameOver = async (finalScore) => {
-    handleScoreChange(finalScore);
+  // --- Game logic ---
+  const emptyBoard = useCallback(
+    () => Array(SIZE).fill().map(() => Array(SIZE).fill(null)),
+    []
+  );
+
+  const addRandomTile = useCallback((b) => {
+    const empty = [];
+    b.forEach((row, i) =>
+      row.forEach((val, j) => {
+        if (val === null) empty.push([i, j]);
+      })
+    );
+    if (empty.length === 0) return b;
+    const [i, j] = empty[Math.floor(Math.random() * empty.length)];
+    const val = Math.random() < 0.9 ? 2 : 4;
+    const newBoard = b.map((r) => r.slice());
+    newBoard[i][j] = val;
+    return newBoard;
+  }, []);
+
+  const updateScoreBackend = useCallback(async (finalScore) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(
-        `${BACKEND_URL}/auth/api/update-score/${user._id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ score: finalScore }),
-        }
-      );
+      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ score: finalScore }),
+      });
       const updatedData = await res.json();
-
       const updatedUser = {
         ...user,
         totalScore: updatedData.totalScore ?? user.totalScore,
@@ -187,31 +186,95 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [user, setAppUser]);
 
-  // --- Game reset ---
-  const handleReset = () => {
+  const canMove = useCallback((b) => {
+    for (let i = 0; i < SIZE; i++)
+      for (let j = 0; j < SIZE; j++) {
+        if (b[i][j] === null) return true;
+        if (i < SIZE - 1 && b[i][j] === b[i + 1][j]) return true;
+        if (j < SIZE - 1 && b[i][j] === b[i][j + 1]) return true;
+      }
+    return false;
+  }, []);
+
+  const move = useCallback(
+    (dir) => {
+      if (gameOver) return;
+      let rotated = board.map((r) => r.slice());
+
+      const rotate = (b) => {
+        const res = emptyBoard();
+        for (let i = 0; i < SIZE; i++)
+          for (let j = 0; j < SIZE; j++) res[i][j] = b[j][SIZE - 1 - i];
+        return res;
+      };
+
+      const slideRow = (row) => {
+        let newRow = row.filter((v) => v !== null);
+        for (let i = 0; i < newRow.length - 1; i++) {
+          if (newRow[i] === newRow[i + 1]) {
+            newRow[i] *= 2;
+            newRow[i + 1] = null;
+            handleScoreChange(score + newRow[i]);
+          }
+        }
+        newRow = newRow.filter((v) => v !== null);
+        while (newRow.length < SIZE) newRow.push(null);
+        return newRow;
+      };
+
+      for (let i = 0; i < dir; i++) rotated = rotate(rotated);
+
+      const newBoard = rotated.map(slideRow);
+
+      for (let i = 0; i < (4 - dir) % 4; i++) rotated = rotate(newBoard);
+      const boardWithTile = addRandomTile(rotated);
+      setBoard(boardWithTile);
+
+      if (!canMove(boardWithTile)) {
+        setGameOver(true);
+        updateScoreBackend(score);
+      }
+    },
+    [board, gameOver, score, emptyBoard, addRandomTile, canMove, handleScoreChange, updateScoreBackend]
+  );
+
+  const initGame = useCallback(() => {
     if (!hasGames) return;
-    if (gameRef.current?.resetGame) {
-      triggeredLettersRef.current = [];
-      setAztecLetters([]);
-      setHighlightLetters([]);
-      gameRef.current.resetGame();
-    }
-  };
+    triggeredLettersRef.current = [];
+    setAztecLetters([]);
+    setHighlightLetters([]);
+    setScore(0);
+    setGameOver(false);
+    let b = emptyBoard();
+    b = addRandomTile(b);
+    b = addRandomTile(b);
+    setBoard(b);
+  }, [hasGames, emptyBoard, addRandomTile]);
 
-  // --- Leaderboard navigation ---
-  const goToLeaderboard = useCallback(() => {
-    setShowDropdown(false);
-    navigate('/leaderboard');
-  }, [navigate]);
+  const handleKeyDown = useCallback(
+    (e) => {
+      switch (e.key) {
+        case 'ArrowUp': move(0); break;
+        case 'ArrowRight': move(1); break;
+        case 'ArrowDown': move(2); break;
+        case 'ArrowLeft': move(3); break;
+        default: break;
+      }
+    },
+    [move]
+  );
 
-  // --- Logout ---
-  const logout = () => {
-    localStorage.removeItem('token');
-    setAppUser(null);
-    navigate('/login', { replace: true });
-  };
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    initGame();
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown, initGame]);
+
+  const handleReset = useCallback(() => initGame(), [initGame]);
+  const goToLeaderboard = useCallback(() => { setShowDropdown(false); navigate('/leaderboard'); }, [navigate]);
+  const logout = () => { localStorage.removeItem('token'); setAppUser(null); navigate('/login', { replace: true }); };
 
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
@@ -224,19 +287,40 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               <span
                 key={letter}
                 aria-label={`Letter ${letter}`}
-                className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${letter} ${justFlashed ? 'flash' : ''
-                  } ${allLettersActive ? 'five-letters' : ''}`}
+                className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${letter} ${justFlashed ? 'flash' : ''} ${allLettersActive ? 'five-letters' : ''}`}
               >
                 {letter}
               </span>
             );
           })
-        ) : (
-          <span>-</span>
-        )}
+        ) : (<span>-</span>)}
       </div>
     );
   };
+
+  const renderBoard = () => (
+    <div className="game-2048-container">
+      <div className="score score-default">{score}</div>
+      <div className="game-board">
+        {board.map((row, i) =>
+          row.map((val, j) => (
+            <div key={`${i}-${j}`} className={`board-cell tile-${val ?? 0}`}>
+              {val && <div>{val}</div>}
+              {val && <div className="tile-watermark">AZTEC</div>}
+            </div>
+          ))
+        )}
+      </div>
+      {gameOver && (
+        <div className="game-over-overlay">
+          <h2>Game Over</h2>
+          <h4>Your Score: {score}</h4>
+          <p>{gamesLeft === 0 ? "No Games Left!" : "Try Again!"}</p>
+          <button onClick={handleReset} disabled={!hasGames}>Restart</button>
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) return <p>Loading...</p>;
   if (!user) return null;
@@ -255,9 +339,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <h2 className="dashboard-sidebar-title">AZTEC 2048</h2>
           <div className="dashboard-profile dashboard-profile-row">
             <img src={avatarUrl} alt="Avatar" />
-            <span title={user.displayName || user.username}>
-              {user.displayName || user.username}
-            </span>
+            <span title={user.displayName || user.username}>{user.displayName || user.username}</span>
           </div>
 
           <div className="dashboard-stat-card">
@@ -277,99 +359,34 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>{userPosition || '-'}</p>
           </div>
           <div className="dashboard-stat-card">
-            <button type="button" onClick={handleReset} disabled={!hasGames}>
-              Reset
-            </button>
+            <button type="button" onClick={handleReset} disabled={!hasGames}>Reset</button>
           </div>
           <div className="dashboard-stat-card">
-            <button type="button" onClick={goToLeaderboard}>
-              Leaderboard
-            </button>
+            <button type="button" onClick={goToLeaderboard}>Leaderboard</button>
           </div>
           <div className="dashboard-stat-card">
-            <button type="button" onClick={logout}>
-              Logout
-            </button>
+            <button type="button" onClick={logout}>Logout</button>
           </div>
         </div>
       ) : (
-        <div className="dashboard-topbar-container">
-          <div className="dashboard-topbar">
-            <div className="dashboard-topbar-left">
-              <img
-                src={avatarUrl}
-                alt="Avatar"
-                className="dashboard-topbar-avatar"
-              />
-              <div className="dashboard-topbar-name" title={user.displayName || user.username}>
-                {user.displayName || user.username}
+        <div className="dashboard-topbar">
+          <div className="dashboard-topbar-left">
+            <img src={avatarUrl} alt="Avatar" />
+            <span>{user.displayName || user.username}</span>
+          </div>
+          <div className="dashboard-topbar-right">
+            <button ref={buttonRef} onClick={() => setShowDropdown(!showDropdown)}>☰</button>
+            {showDropdown && (
+              <div className="dashboard-dropdown" ref={dropdownRef}>
+                <button onClick={handleReset} disabled={!hasGames}>Reset</button>
+                <button onClick={goToLeaderboard}>Leaderboard</button>
+                <button onClick={logout}>Logout</button>
               </div>
-
-              <div className="dashboard-topbar-stats">
-                <div className="dashboard-stat-card small">
-                  <h4>Games</h4>
-                  <p>{gamesLeft}</p>
-                </div>
-                <div className="dashboard-stat-card small">
-                  <h4>Letters</h4>
-                  {renderAztecLetters()}
-                </div>
-              </div>
-            </div>
-
-            <div className="dashboard-dropdown-wrapper">
-              <button
-                ref={buttonRef}
-                className="dashboard-hamburger-btn"
-                onClick={() => setShowDropdown((prev) => !prev)}
-                aria-label="Menu"
-                aria-expanded={showDropdown}
-                type="button"
-              >
-                ☰
-              </button>
-
-              <div
-                ref={dropdownRef}
-                className={`dashboard-dropdown ${showDropdown ? 'show' : ''}`}
-              >
-                <button type="button" onClick={handleReset} disabled={!hasGames}>
-                  Reset
-                </button>
-                <button type="button" onClick={goToLeaderboard}>
-                  Leaderboard
-                </button>
-                <button type="button" onClick={logout}>
-                  Logout
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       )}
-
-      <div className="dashboard-main-content">
-        <div className="dashboard-game-wrapper">
-          {hasGames ? (
-            <Game2048
-              key="playable"
-              ref={gameRef}
-              containerWidth={gameContainerWidth}
-              containerHeight={gameContainerHeight}
-              onScoreChange={handleScoreChange}
-              onGameOver={handleGameOver}
-            />
-          ) : (
-            <div className="dashboard-no-games-left-message">
-              <h2>No Games Left!</h2>
-              <p>Come back later to play again.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-
-
+      <div className="dashboard-main-content">{renderBoard()}</div>
     </div>
   );
 }
