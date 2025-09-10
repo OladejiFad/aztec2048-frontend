@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect, useRef, useCallback } from 'react';
-import './Game2048.css';
+import './Dashboard.css';
 
 const SIZE = 4;
 
