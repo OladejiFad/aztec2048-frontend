@@ -349,22 +349,25 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       )}
 
       <div className="dashboard-main-content">
-        {hasGames ? (
-          <Game2048
-            key="playable"
-            ref={gameRef}
-            containerWidth={gameContainerWidth}   // optional, for internal board sizing
-            containerHeight={gameContainerHeight} // optional
-            onScoreChange={handleScoreChange}
-            onGameOver={handleGameOver}
-          />
-        ) : (
-          <div className="dashboard-no-games-left-message">
-            <h2>No Games Left!</h2>
-            <p>Come back later to play again.</p>
-          </div>
-        )}
+        <div className="dashboard-game-wrapper">
+          {hasGames ? (
+            <Game2048
+              key="playable"
+              ref={gameRef}
+              containerWidth={gameContainerWidth}
+              containerHeight={gameContainerHeight}
+              onScoreChange={handleScoreChange}
+              onGameOver={handleGameOver}
+            />
+          ) : (
+            <div className="dashboard-no-games-left-message">
+              <h2>No Games Left!</h2>
+              <p>Come back later to play again.</p>
+            </div>
+          )}
+        </div>
       </div>
+
 
 
     </div>
