@@ -408,3 +408,60 @@ button:hover {
   }
 }
 
+/* --- Additional Responsive Tweaks for Dashboard --- */
+
+/* Ensure dashboard container fits all screens */
+.dashboard-game-container {
+  flex-wrap: wrap; /* allow wrapping for mobile */
+  justify-content: center; /* center content horizontally */
+}
+
+/* Main content should shrink for very small screens */
+.main-content {
+  max-width: 100%; /* prevent overflow */
+  padding: 10px;   /* slightly smaller padding on mobile */
+  box-sizing: border-box;
+}
+
+/* Sidebar items (desktop) should shrink proportionally */
+.sidebar {
+  min-width: 180px; /* allow shrinking on smaller desktops */
+}
+
+/* Topbar tweaks for tiny screens */
+.topbar-left {
+  flex-wrap: wrap; /* wrap items instead of overflow */
+}
+
+.topbar-stats {
+  flex-wrap: wrap; /* allow badges to wrap to next line */
+  gap: 4px;
+  overflow-x: visible; /* avoid scroll */
+}
+
+/* Reduce font and padding for very small devices */
+@media screen and (max-width: 360px) {
+  .topbar-name {
+    font-size: 12px;
+  }
+
+  .stat-card.small {
+    font-size: 10px;
+    min-width: 50px;
+    padding: 2px 4px;
+  }
+
+  .aztec-letter-badge {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+
+  .main-content {
+    padding: 5px;
+  }
+}
+
+/* Ensure no horizontal overflow anywhere */
+body, html, .dashboard-game-container, .main-content {
+  overflow-x: hidden;
+}

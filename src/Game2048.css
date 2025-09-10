@@ -1,3 +1,279 @@
+/* --- General --- */
+body, html {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f2f5;
+  overflow-x: hidden; /* prevent horizontal overflow */
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  background-color: #6a0dad;
+  color: white;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #580b99;
+}
+
+/* --- Dashboard Container --- */
+.dashboard-game-container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+/* --- Sidebar (Desktop) --- */
+.sidebar {
+  width: 260px;
+  background-color: #6a0dad;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: #fff;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.logo-img {
+  width: 120px;
+  height: auto;
+  display: block;
+  margin: 0 auto 20px auto;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin: 0;
+  color: #fff;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+  border: 2px solid #fff;
+}
+
+.sidebar .profile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar .profile-row img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.stat-card {
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  color: #fff;
+}
+
+.stat-card h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #e0d4f7;
+}
+
+.stat-card p {
+  margin: 5px 0 0 0;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+.stat-card button {
+  background-color: #fff;
+  color: #6a0dad;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.stat-card button:hover {
+  background-color: #ddd;
+}
+
+/* --- Mobile Topbar --- */
+.topbar-container {
+  width: 100%;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #6a0dad;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+  color: #fff;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-left img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.topbar-name {
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+.hamburger-btn {
+  font-size: 22px;
+  background: none;
+  color: #fff;
+}
+
+.topbar-stats {
+  display: flex;
+  gap: 8px;
+  margin-left: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.topbar-stats .stat-card.small {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 12px;
+  min-width: 60px;
+}
+
+.topbar-stats .stat-card.small h4 {
+  font-size: 10px;
+  margin: 0;
+}
+
+.topbar-stats .stat-card.small p {
+  font-size: 12px;
+  margin: 0;
+  font-weight: bold;
+}
+
+/* --- Dropdown Menu --- */
+.dropdown-wrapper { position: relative; }
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 140px;
+  max-width: 200px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.dropdown button {
+  background-color: #fff;
+  color: #6a0dad;
+  font-weight: bold;
+  padding: 10px 15px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.dropdown button:last-child { border-bottom: none; }
+.dropdown button:hover { background-color: #f0f0f0; }
+
+/* --- Main Content --- */
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+/* --- AZTEC Letters --- */
+.aztec-letters-container {
+  display: flex;
+  gap: 2px; /* letters close together */
+  flex-wrap: nowrap;
+}
+
+.aztec-letter-badge {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  color: #fff;
+  transition: transform 0.3s, background-color 0.3s, opacity 0.3s;
+}
+
+/* Individual letter colors */
+.aztec-letter-A { background-color: #FF4C4C; }
+.aztec-letter-Z { background-color: #4C9AFF; }
+.aztec-letter-T { background-color: #FFD700; }
+.aztec-letter-E { background-color: #32CD32; }
+.aztec-letter-C { background-color: #FF69B4; }
+
+/* Optional smaller badge style */
+.aztec-letter-badge.five-letters {
+  font-size: 14px;
+  padding: 3px 6px;
+  border: 2px solid gold;
+}
+
+/* --- Game 2048 Container --- */
 .game-2048-container {
   display: flex;
   flex-direction: column;
@@ -8,6 +284,7 @@
   margin: 0 auto;
   padding: 10px;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* Score Badge */
@@ -39,7 +316,7 @@
   box-shadow: 0 4px 20px rgba(255, 204, 0, 0.6);
 }
 
-/* Game Board */
+/* --- Game Board --- */
 .game-board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -52,12 +329,12 @@
   border-radius: 10px;
   box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
   touch-action: none;
+  box-sizing: border-box;
 }
 
 /* Tiles */
-/* --- Tiles --- */
 .game-board .board-cell {
-  position: relative;             /* ✅ allows watermark positioning */
+  position: relative;             /* allows watermark positioning */
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -68,22 +345,21 @@
   color: #000;                     /* black numbers */
 }
 
-/* --- AZTEC Watermark --- */
+/* Watermark */
 .tile-watermark {
   position: absolute;
   top: 4px;
   left: 4px;
-  font-size: 10px;                 /* small watermark */
-  color: rgba(0,0,0,0.2);          /* subtle/faded */
-  pointer-events: none;             /* won't block touches or clicks */
-  user-select: none;                /* non-selectable text */
+  font-size: 10px;                 
+  color: rgba(0,0,0,0.2);          
+  pointer-events: none;             
+  user-select: none;                
   font-weight: bold;
-  transform: rotate(-20deg);        /* optional stylish tilt */
-  z-index: 1;                       /* stays behind tile number if needed */
+  transform: rotate(-20deg);        
+  z-index: 1;                       
 }
 
-
-/* Tile colors and scaling for bigger tiles */
+/* Tile colors and scaling */
 .tile-2    { background-color: #eee4da; }
 .tile-4    { background-color: #ede0c8; }
 .tile-8    { background-color: #f2b179; }
@@ -93,7 +369,7 @@
 .tile-128  { background-color: #17bc14b2; font-size: clamp(1rem, 4.5vw, 2rem); }
 .tile-256  { background-color: #6d61ed; font-size: clamp(1rem, 4.5vw, 2rem); }
 .tile-512  { background-color: #6aed50; font-size: clamp(1rem, 4.5vw, 2rem); }
-.tile-1024 { background-color: #ed3fb6; font-size: clamp(0.9rem, 3.8vw, 1.8rem); } /* slightly smaller */
+.tile-1024 { background-color: #ed3fb6; font-size: clamp(0.9rem, 3.8vw, 1.8rem); }
 .tile-2048 { background-color: #ca2eed; font-size: clamp(0.9rem, 3.8vw, 1.8rem); }
 .tile-4096 { background-color: #ff6f61; font-size: clamp(0.8rem, 3.5vw, 1.6rem); }
 .tile-8192 { background-color: #ffd700; font-size: clamp(0.8rem, 3.5vw, 1.6rem); }
@@ -110,7 +386,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center; /* ✅ center all text */
+  text-align: center; 
   gap: 15px;
   padding: 20px;
   border-radius: 12px;
@@ -126,7 +402,7 @@
 .game-over-overlay h2 {
   font-size: 28px;
   font-weight: bold;
-  color: #FFD700; /* Gold for 🎉 */
+  color: #FFD700;
   margin: 0;
   text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
 }
@@ -160,16 +436,84 @@
   background-color: #9f8b76;
 }
 
+/* --- Responsive Tweaks for Game 2048 --- */
 
-/* Extra Small Screens */
-@media (max-width: 340px) {
-  .game-2048-container { max-width: 95%; padding: 5px; }
-  .game-board .board-cell { font-size: clamp(1rem, 6vw, 2.2rem); border-radius: 6px; } /* bigger on tiny screens */
-  .tile-1024 { font-size: clamp(0.8rem, 5vw, 1.6rem); }
-  .tile-2048 { font-size: clamp(0.8rem, 5vw, 1.6rem); }
-  .tile-4096 { font-size: clamp(0.7rem, 4.5vw, 1.4rem); }
-  .tile-8192 { font-size: clamp(0.7rem, 4.5vw, 1.4rem); }
+/* Adapt game container */
+.game-2048-container {
+  width: 100%;
+  max-width: 95vw;
+  margin: 0 auto;
+  padding: 5px;
+}
 
-  .game-over-overlay h2 { font-size: clamp(1.5rem, 5vw, 2rem); text-align: center; }
-  .game-over-overlay h4 { font-size: clamp(1rem, 3.5vw, 1.2rem); text-align: center; }
+/* Board square and shrink */
+.game-board {
+  width: 100%;
+  max-width: 95vw;
+  aspect-ratio: 1;
+  gap: 6px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+/* Adjust tiles */
+.board-cell {
+  font-size: 18px;
+  padding: 0;
+}
+
+/* Bigger tiles scale down */
+.tile-128, .tile-256, .tile-512 { font-size: 16px; }
+.tile-1024, .tile-2048 { font-size: 14px; }
+
+/* Game over overlay scaling */
+.game-over-overlay {
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* Extra small screens <360px */
+@media screen and (max-width: 360px) {
+  .board-cell { font-size: 14px; }
+  .tile-128, .tile-256, .tile-512 { font-size: 12px; }
+  .tile-1024, .tile-2048 { font-size: 10px; }
+
+  .game-over-overlay h2 { font-size: 20px; }
+  .game-over-overlay h4 { font-size: 14px; }
+  .game-over-overlay p  { font-size: 12px; }
+}
+
+/* Shared Avatar Styling */
+.leaderboard-avatar,
+.profile img,
+.topbar-left img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+/* Additional responsive tweaks for dashboard */
+.dashboard-game-container {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.main-content {
+  max-width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.sidebar { min-width: 180px; }
+.topbar-left { flex-wrap: wrap; }
+.topbar-stats { flex-wrap: wrap; gap: 4px; overflow-x: visible; }
+
+@media screen and (max-width: 360px) {
+  .topbar-name { font-size: 12px; }
+  .stat-card.small { font-size: 10px; min-width: 50px; padding: 2px 4px; }
+  .aztec-letter-badge { font-size: 12px; padding: 2px 4px; }
+  .main-content { padding: 5px; }
+  .aztec-letters-container { gap: 1px; }
 }
