@@ -1,7 +1,7 @@
-
 /* --- Dashboard Base --- */
 .dashboard {
   display: flex;
+  flex-direction: row;
   min-height: 100vh;
   background: #f3f4f6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -10,39 +10,52 @@
 /* --- Sidebar --- */
 .dashboard-sidebar {
   width: 280px;
+  max-height: 100vh;
+  overflow-y: auto;
   background: #6b46c1;
   color: #fff;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: 100vh; /* Fix: Constrain sidebar height to viewport */
-  overflow-y: auto; /* Fix: Allow scrolling for overflow content */
-  box-sizing: border-box; /* Fix: Ensure padding doesn't increase height */
+  gap: 15px;
+  box-sizing: border-box;
 }
 
+/* Scrollbar for sidebar */
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+/* Logo */
 .dashboard-logo-container {
   text-align: center;
   margin-bottom: 10px;
 }
 
 .dashboard-logo-img {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   border-radius: 50%;
 }
 
+/* Title */
 .dashboard-sidebar-title {
   text-align: center;
   font-size: 1.5rem;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
+/* Profile */
 .dashboard-profile {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .dashboard-profile img {
@@ -52,27 +65,19 @@
   object-fit: cover;
 }
 
-/* Stat Cards & Buttons */
+/* Stat Cards */
 .dashboard-stat-card {
   background: #374151;
-  padding: 15px;
+  padding: 12px;
   border-radius: 10px;
   text-align: center;
+  flex-shrink: 0;
 }
 
-.dashboard-stat-card h4 {
-  font-size: 1rem;
-  margin-bottom: 5px;
-}
-
-.dashboard-stat-card p {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
+/* Buttons */
 .dashboard-stat-card button {
   margin-top: 5px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   font-size: 0.9rem;
   border: none;
   border-radius: 6px;
@@ -81,15 +86,8 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-
-.dashboard-stat-card button:hover:not(:disabled) {
-  background: #805ad5;
-}
-
-.dashboard-stat-card button:disabled {
-  background: #d6bcfa;
-  cursor: not-allowed;
-}
+.dashboard-stat-card button:hover:not(:disabled) { background: #805ad5; }
+.dashboard-stat-card button:disabled { background: #d6bcfa; cursor: not-allowed; }
 
 /* --- Topbar for Mobile --- */
 .dashboard-topbar {
@@ -100,9 +98,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed; /* Fix: Ensure topbar stays at top */
-  top: 0;
-  z-index: 1000;
+  position: relative;
 }
 
 .dashboard-topbar-left {
@@ -126,11 +122,11 @@
   cursor: pointer;
 }
 
-/* --- Dropdown --- */
+/* Dropdown */
 .dashboard-dropdown {
   position: absolute;
-  right: 15px;
-  top: 60px; /* Adjust based on topbar height */
+  right: 10px;
+  top: 50px;
   background: #805ad5;
   border-radius: 10px;
   display: flex;
@@ -138,7 +134,6 @@
   overflow: hidden;
   z-index: 100;
 }
-
 .dashboard-dropdown button {
   padding: 10px 15px;
   font-size: 1rem;
@@ -149,10 +144,7 @@
   text-align: left;
   transition: background 0.2s;
 }
-
-.dashboard-dropdown button:hover {
-  background: #9f7aea;
-}
+.dashboard-dropdown button:hover { background: #9f7aea; }
 
 /* --- AZTEC Letters --- */
 .dashboard-aztec-letters-container {
@@ -164,22 +156,30 @@
 
 .dashboard-aztec-letter-badge {
   display: inline-block;
-  padding: 5px 8px;
+  padding: 4px 7px;
   border-radius: 4px;
   font-weight: bold;
   background: #6b7280;
   color: #fff;
   transition: transform 0.2s, background 0.2s;
 }
-
 .dashboard-aztec-letter-A { background: #f87171; }
 .dashboard-aztec-letter-Z { background: #fbbf24; }
 .dashboard-aztec-letter-T { background: #34d399; }
 .dashboard-aztec-letter-E { background: #60a5fa; }
 .dashboard-aztec-letter-C { background: #a78bfa; }
-
-.flash { transform: scale(1.1); } /* Fix: Reduce scale to minimize "jumping" effect */
+.flash { transform: scale(1.3); }
 .five-letters { border: 2px solid #fff; }
+
+/* --- Main content --- */
+.dashboard-main-content {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  padding: 15px;
+  overflow-x: auto;
+}
 
 /* --- 2048 Container --- */
 .game-2048-container {
@@ -187,9 +187,8 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  width: 95%;
+  width: 100%;
   max-width: 420px;
-  margin: 0 auto;
   padding: 10px;
   position: relative;
 }
@@ -198,37 +197,33 @@
 .game-board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-gap: 10px;
+  grid-gap: 8px;
   width: 100%;
 }
-
 .board-cell {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* Square cells */
+  padding-top: 100%;
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(1.2rem, 5vw, 2.2rem); /* Fix: Increase min font size for better visibility */
+  font-size: clamp(1rem, 5vw, 2rem);
   transition: all 0.2s ease;
   color: #000;
   background: #ccc;
 }
-
 .board-cell > div:first-child {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
 }
-
 .tile-watermark {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  font-size: 10px;
+  top: 2px;
+  left: 2px;
+  font-size: 8px;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
   user-select: none;
@@ -236,26 +231,31 @@
   transform: rotate(-20deg);
   z-index: 1;
 }
-
-/* Tile Colors */
-.tile-0    { background-color: #ccc; }
+/* --- Tile Colors for 2048 --- */
 .tile-2    { background-color: #eee4da; }
 .tile-4    { background-color: #ede0c8; }
 .tile-8    { background-color: #f2b179; }
-.tile-16   { background-color: #0cb689; color: #fff; }
-.tile-32   { background-color: #37cbe1bc; color: #fff; }
-.tile-64   { background-color: #f65e3b; color: #fff; }
-.tile-128  { background-color: #17bc14b2; color: #fff; }
-.tile-256  { background-color: #6d61ed; color: #fff; }
-.tile-512  { background-color: #6aed50; color: #fff; }
-.tile-1024 { background-color: #ed3fb6; color: #fff; }
-.tile-2048 { background-color: #ca2eed; color: #fff; }
-.tile-4096 { background-color: #ff6f61; color: #fff; }
-.tile-8192 { background-color: #ffd700; color: #000; }
+.tile-16   { background-color: #0cb689; }
+.tile-32   { background-color: #37cbe1bc; }
+.tile-64   { background-color: #f65e3b; }
+.tile-128  { background-color: #17bc14b2; }
+.tile-256  { background-color: #6d61ed; }
+.tile-512  { background-color: #6aed50; }
+.tile-1024 { background-color: #ed3fb6; }
+.tile-2048 { background-color: #ca2eed; }
+.tile-4096 { background-color: #ff6f61; }
+.tile-8192 { background-color: #ffd700; }
+
+/* Optional: Make sure text remains visible */
+.board-cell div:first-child {
+  color: #000;
+  font-weight: bold;
+}
+
 
 /* --- Score Badge --- */
 .score {
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 30px;
   font-weight: bold;
   font-size: clamp(1rem, 3.5vw, 1.3rem);
@@ -264,179 +264,33 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   color: #fff;
   background: linear-gradient(135deg, #ff8a00, #e52e71);
-  box-shadow: 0 4px 15px rgba(229, 46, 113, 0.5);
+  box-shadow: 0 4px 12px rgba(229, 46, 113, 0.4);
 }
 
 /* --- Game Over Overlay --- */
 .game-over-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.65);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  gap: 15px;
-  padding: 20px;
-  border-radius: 12px;
-  z-index: 1000;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center; gap: 12px; padding: 20px;
+  border-radius: 12px; z-index: 1000;
   animation: fadeIn 0.3s forwards;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
+.game-over-overlay h2 { font-size: 24px; color: #FFD700; margin:0; }
+.game-over-overlay h4 { font-size: 18px; color: #fff; margin:0; }
+.game-over-overlay p { font-size: 14px; color: #e0e0e0; margin:0; }
+.game-over-overlay button { padding: 8px 18px; font-size: 14px; border-radius:6px; }
 
-.game-over-overlay h2 {
-  font-size: 28px;
-  font-weight: bold;
-  color: #FFD700;
-  margin: 0;
-  text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
-}
-
-.game-over-overlay h4 {
-  font-size: 20px;
-  font-style: italic;
-  color: #fff;
-  margin: 0;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-}
-
-.game-over-overlay p {
-  font-size: 16px;
-  color: #e0e0e0;
-  margin: 5px 0 0;
-}
-
-.game-over-overlay button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #8f7a66;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.game-over-overlay button:hover {
-  background-color: #9f8b76;
-}
-
-/* --- Main Content --- */
-.dashboard-main-content {
-  flex: 1;
-  margin-left: 280px; /* Fix: Match sidebar width on desktop */
-  margin-top: 0; /* Fix: No top margin on desktop */
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh; /* Fix: Ensure content fills viewport */
-}
-
-/* --- Responsive Adjustments --- */
+/* --- Media Queries --- */
 @media (max-width: 768px) {
-  .dashboard-sidebar {
-    display: none; /* Hide sidebar on mobile */
-  }
-
-  .dashboard-main-content {
-    margin-left: 0; /* Fix: Remove sidebar margin on mobile */
-    margin-top: 60px; /* Fix: Account for topbar height */
-    min-height: calc(100vh - 60px); /* Fix: Adjust for topbar */
-  }
-
-  .game-2048-container {
-    max-width: 90%; /* Fix: Slightly smaller for better fit */
-    padding: 10px;
-  }
-
-  .board-cell {
-    font-size: clamp(1.1rem, 4.5vw, 2rem); /* Fix: Adjust font size for mobile */
-  }
-
-  .dashboard-topbar {
-    padding: 8px 12px; /* Fix: Slightly reduce padding for smaller screens */
-  }
-
-  .dashboard-topbar-left span {
-    font-size: 0.9rem; /* Fix: Smaller text for mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .game-2048-container {
-    max-width: 95%;
-    padding: 5px;
-  }
-
-  .board-cell {
-    font-size: clamp(1rem, 4vw, 1.8rem); /* Fix: Ensure readability on small screens */
-    border-radius: 6px;
-  }
-
-  .tile-1024, .tile-2048 {
-    font-size: clamp(0.9rem, 3.5vw, 1.5rem);
-  }
-
-  .tile-4096, .tile-8192 {
-    font-size: clamp(0.8rem, 3vw, 1.3rem);
-  }
-
-  .game-over-overlay h2 {
-    font-size: clamp(1.4rem, 4.5vw, 1.8rem);
-  }
-
-  .game-over-overlay h4 {
-    font-size: clamp(1rem, 3vw, 1.1rem);
-  }
-
-  .dashboard-topbar-left img {
-    width: 30px;
-    height: 30px;
-  }
-
-  .dashboard-topbar-right button {
-    font-size: 1.2rem;
-  }
-
-  .dashboard-dropdown {
-    top: 50px; /* Fix: Adjust for smaller topbar height */
-    right: 10px;
-  }
-}
-
-@media (max-width: 340px) {
-  .game-2048-container {
-    max-width: 95%;
-    padding: 5px;
-  }
-
-  .board-cell {
-    font-size: clamp(0.9rem, 3.5vw, 1.6rem);
-    border-radius: 6px;
-  }
-
-  .tile-1024, .tile-2048 {
-    font-size: clamp(0.8rem, 3vw, 1.4rem);
-  }
-
-  .tile-4096, .tile-8192 {
-    font-size: clamp(0.7rem, 2.5vw, 1.2rem);
-  }
-
-  .game-over-overlay h2 {
-    font-size: clamp(1.3rem, 4vw, 1.6rem);
-  }
-
-  .game-over-overlay h4 {
-    font-size: clamp(0.9rem, 2.5vw, 1rem);
-  }
+  .dashboard { flex-direction: column; }
+  .dashboard-main-content { padding: 10px; }
+  .dashboard-sidebar { width: 100%; max-height: unset; overflow: visible; flex-direction: row; flex-wrap: wrap; gap: 10px; justify-content: center; }
 }

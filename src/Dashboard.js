@@ -22,34 +22,30 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
+
   const [board, setBoard] = useState([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
   const triggeredLettersRef = useRef([]);
+  const boardRef = useRef([]);
+  const scoreRef = useRef(0);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
-  const touchStartRef = useRef(null);
 
   const SIZE = 4;
   const gamesLeft = Number(user?.gamesLeft ?? 0);
   const hasGames = gamesLeft > 0;
 
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
-
+  // --- Responsive detection ---
   useEffect(() => {
-    const handleResize = debounce(() => setIsMobile(window.innerWidth <= 768), 100);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // --- Fetch user info ---
   const fetchUser = useCallback(async () => {
     setLoading(true);
     const token = localStorage.getItem('token');
@@ -80,10 +76,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   }, [navigate, setAppUser]);
 
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  useEffect(() => { fetchUser(); }, [fetchUser]);
 
+  // --- Leaderboard position ---
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
       if (!user) return;
@@ -106,6 +101,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     fetchLeaderboardPosition();
   }, [user]);
 
+  // --- Close dropdown on outside click ---
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -121,16 +117,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- AZTEC letters ---
   const handleScoreChange = useCallback((newScore) => {
     setScore(newScore);
+    scoreRef.current = newScore;
+
     const letters = AZTEC_MILESTONES.filter((m) => newScore >= m.score).map(
       (m) => m.letter
     );
+
     const newLetters = letters.filter(
       (l) => !triggeredLettersRef.current.includes(l)
     );
     newLetters.forEach((letter) => playLetterSound(letter));
     if (newLetters.length > 0) setHighlightLetters(newLetters);
+
     triggeredLettersRef.current = [
       ...triggeredLettersRef.current,
       ...newLetters,
@@ -144,6 +145,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => clearTimeout(timeout);
   }, [highlightLetters]);
 
+  // --- Game logic ---
   const emptyBoard = useCallback(
     () => Array(SIZE).fill().map(() => Array(SIZE).fill(null)),
     []
@@ -198,102 +200,72 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return false;
   }, []);
 
-  // ---- MOVE function ----
   const move = useCallback(
     (dir) => {
       if (gameOver) return;
-      let rotated = board.map((r) => r.slice());
+
+      let rotated = boardRef.current.map(r => r.slice());
+
       const rotate = (b) => {
         const res = emptyBoard();
         for (let i = 0; i < SIZE; i++)
           for (let j = 0; j < SIZE; j++) res[i][j] = b[j][SIZE - 1 - i];
         return res;
       };
+
       const slideRow = (row) => {
         let newRow = row.filter((v) => v !== null);
         for (let i = 0; i < newRow.length - 1; i++) {
           if (newRow[i] === newRow[i + 1]) {
             newRow[i] *= 2;
             newRow[i + 1] = null;
-            handleScoreChange(score + newRow[i]);
+            handleScoreChange(scoreRef.current + newRow[i]);
           }
         }
         newRow = newRow.filter((v) => v !== null);
         while (newRow.length < SIZE) newRow.push(null);
         return newRow;
       };
+
       for (let i = 0; i < dir; i++) rotated = rotate(rotated);
       const newBoard = rotated.map(slideRow);
       for (let i = 0; i < (4 - dir) % 4; i++) rotated = rotate(newBoard);
+
       const boardWithTile = addRandomTile(rotated);
+      boardRef.current = boardWithTile;
       setBoard(boardWithTile);
+
       if (!canMove(boardWithTile)) {
         setGameOver(true);
-        updateScoreBackend(score);
+        updateScoreBackend(scoreRef.current);
       }
     },
-    [board, gameOver, score, emptyBoard, addRandomTile, canMove, handleScoreChange, updateScoreBackend]
+    [gameOver, emptyBoard, addRandomTile, canMove, handleScoreChange, updateScoreBackend]
   );
 
-  // --- TOUCH USEEFFECT (moved here AFTER move) ---
-  useEffect(() => {
-    const handleTouchStart = (e) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    };
-    const handleTouchEnd = (e) => {
-      if (!touchStartRef.current) return;
-      const touch = e.changedTouches[0];
-      const deltaX = touch.clientX - touchStartRef.current.x;
-      const deltaY = touch.clientY - touchStartRef.current.y;
-      const minSwipe = 30;
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > minSwipe) move(1);
-        else if (deltaX < -minSwipe) move(3);
-      } else {
-        if (deltaY > minSwipe) move(2);
-        else if (deltaY < -minSwipe) move(0);
-      }
-      touchStartRef.current = null;
-    };
-    const gameContainer = document.querySelector('.game-2048-container');
-    if (gameContainer) {
-      gameContainer.addEventListener('touchstart', handleTouchStart);
-      gameContainer.addEventListener('touchend', handleTouchEnd);
-    }
-    return () => {
-      if (gameContainer) {
-        gameContainer.removeEventListener('touchstart', handleTouchStart);
-        gameContainer.removeEventListener('touchend', handleTouchEnd);
-      }
-    };
-  }, [move]);
-
-  // --- the rest of your code remains unchanged ---
   const initGame = useCallback(() => {
     if (!hasGames) return;
     triggeredLettersRef.current = [];
     setAztecLetters([]);
     setHighlightLetters([]);
     setScore(0);
+    scoreRef.current = 0;
     setGameOver(false);
     let b = emptyBoard();
     b = addRandomTile(b);
     b = addRandomTile(b);
+    boardRef.current = b;
     setBoard(b);
   }, [hasGames, emptyBoard, addRandomTile]);
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'].includes(e.key)) {
-        e.preventDefault();
-        switch (e.key) {
-          case 'ArrowUp': move(0); break;
-          case 'ArrowRight': move(1); break;
-          case 'ArrowDown': move(2); break;
-          case 'ArrowLeft': move(3); break;
-          default: break;
-        }
+      switch (e.key) {
+        case 'ArrowUp': move(0); break;
+        case 'ArrowRight': move(1); break;
+        case 'ArrowDown': move(2); break;
+        case 'ArrowLeft': move(3); break;
+        default: break;
       }
     },
     [move]
@@ -305,11 +277,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown, initGame]);
 
+
   const handleReset = useCallback(() => initGame(), [initGame]);
   const goToLeaderboard = useCallback(() => { setShowDropdown(false); navigate('/leaderboard'); }, [navigate]);
   const logout = () => { localStorage.removeItem('token'); setAppUser(null); navigate('/login', { replace: true }); };
 
-  // --- render functions and return remain unchanged ---
   const renderAztecLetters = () => {
     const allLettersActive = aztecLetters.length === AZTEC_MILESTONES.length;
     return (
@@ -375,6 +347,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <img src={avatarUrl} alt="Avatar" />
             <span title={user.displayName || user.username}>{user.displayName || user.username}</span>
           </div>
+
           <div className="dashboard-stat-card">
             <h4>Total Score</h4>
             <p>{user.totalScore}</p>
