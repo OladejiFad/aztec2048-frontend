@@ -19,6 +19,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
   // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line no-unused-vars
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -317,11 +318,15 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               {['A', 'Z', 'T', 'E', 'C'].map((l) => (
                 <span
                   key={l}
-                  className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}
+                  className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''
+                    } ${triggeredLettersRef.current.includes(l) ? 'active' : ''}`}
                 >
                   {l}
                 </span>
               ))}
+
+
+
             </div>
             <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
             <button onClick={initGame}>Restart</button>
@@ -358,11 +363,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           {['A', 'Z', 'T', 'E', 'C'].map((l) => (
             <span
               key={l}
-              className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}
+              className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''
+                } ${triggeredLettersRef.current.includes(l) ? 'active' : ''}`}
             >
               {l}
             </span>
           ))}
+
         </div>
 
         <div className="game-2048-container">
