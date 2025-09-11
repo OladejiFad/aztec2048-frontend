@@ -121,19 +121,34 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setScore(newScore);
     scoreRef.current = newScore;
 
-    const letters = AZTEC_MILESTONES.filter((m) => newScore >= m.score).map((m) => m.letter);
-    const newLetters = letters.filter((l) => !triggeredLettersRef.current.includes(l));
-    newLetters.forEach(playLetterSound);
-    if (newLetters.length) setHighlightLetters(newLetters);
-    triggeredLettersRef.current.push(...newLetters);
-    setAztecLetters(letters);
+    // Letters that should now be active
+    const earnedLetters = AZTEC_MILESTONES
+      .filter((m) => newScore >= m.score)
+      .map((m) => m.letter);
 
-    if (letters.length === 5) {
+    // Letters that are newly earned for flashing
+    const newLetters = earnedLetters.filter(l => !triggeredLettersRef.current.includes(l));
+
+    // Flash and play sound only for new letters
+    if (newLetters.length) {
+      newLetters.forEach(playLetterSound);
+      setHighlightLetters(newLetters);
+    }
+
+    // Update triggered letters (so they stay colored)
+    triggeredLettersRef.current.push(...newLetters);
+
+    // Update only letters that should appear colored
+    setAztecLetters([...triggeredLettersRef.current]);
+
+    // Check for full AZTEC completion
+    if (triggeredLettersRef.current.length === 5) {
       alert("🎉 Congratulations! You completed AZTEC. Game Over!");
       setGameOver(true);
-      saveScore();   // 🔥 Save score when AZTEC completed
+      saveScore();
     }
   }, [saveScore]);
+
 
   useEffect(() => {
     if (!highlightLetters.length) return;
@@ -249,8 +264,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         if (dx > 20) move('right');
         else if (dx < -20) move('left');
       } else {
-        if (dy > 20) move('up');       // ✅ fixed (swipe down moves tiles up)
-        else if (dy < -20) move('down'); // ✅ fixed (swipe up moves tiles down)
+        if (dy > 20) move('down');       // ✅ fixed (swipe down moves tiles up)
+        else if (dy < -20) move('up'); // ✅ fixed (swipe up moves tiles down)
       }
     };
 
