@@ -139,9 +139,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     // Update triggered letters (so they stay colored)
     triggeredLettersRef.current.push(...newLetters);
 
-    // Update only letters that should appear colored
-    setAztecLetters([...triggeredLettersRef.current]);
-
     // Check for full AZTEC completion
     if (triggeredLettersRef.current.length === 5) {
       alert("🎉 Congratulations! You completed AZTEC. Game Over!");
