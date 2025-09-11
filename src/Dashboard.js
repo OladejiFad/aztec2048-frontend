@@ -397,8 +397,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
         ) : (
           <div className="no-games-left-message">
-            <h3>No Games Left 😔</h3>
-            <p>Please wait for daily reset or check your progress!</p>
+            <h3>No Games Left ♣</h3>
+            <p>Please wait for weekly reset or check your progress!</p>
           </div>
         )}
 
