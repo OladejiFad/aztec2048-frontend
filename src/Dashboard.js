@@ -17,6 +17,7 @@ const SIZE = 4;
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
@@ -90,6 +91,31 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // --- Save score to backend ---
+  const saveScore = useCallback(async () => {
+    if (!user?._id || score <= 0) return;
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/api/update-score/${user._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ score }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Refresh user data (gamesLeft, totalScore)
+        await fetchUser();
+      } else {
+        console.error("Failed to save score:", data.error);
+      }
+    } catch (err) {
+      console.error("Error saving score:", err);
+    }
+  }, [user?._id, score, fetchUser]);
+
   // --- AZTEC letters ---
   const handleScoreChange = useCallback((newScore) => {
     setScore(newScore);
@@ -105,8 +131,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     if (letters.length === 5) {
       alert("🎉 Congratulations! You completed AZTEC. Game Over!");
       setGameOver(true);
+      saveScore();   // 🔥 Save score when AZTEC completed
     }
-  }, []);
+  }, [saveScore]);
 
   useEffect(() => {
     if (!highlightLetters.length) return;
@@ -168,7 +195,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
     let newBoard = boardRef.current.map(r => r.slice());
     let moved = false, scoreGain = 0;
-    const rotateTimes = { up: 1, right: 2, down: 3, left: 0 }[dir];
+    const rotateTimes = { up: 3, right: 2, down: 1, left: 0 }[dir];
+
     newBoard = rotateBoard(newBoard, rotateTimes);
 
     const newRows = newBoard.map(row => {
@@ -187,8 +215,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       handleScoreChange(scoreRef.current + scoreGain);
     }
 
-    if (!canMove(newBoard)) setGameOver(true);
-  }, [addRandomTile, canMove, handleScoreChange, gameOver, rotateBoard, slideAndMerge]);
+    if (!canMove(newBoard)) {
+      setGameOver(true);
+      saveScore();   // 🔥 Save score on normal game over
+    }
+  }, [addRandomTile, canMove, handleScoreChange, gameOver, rotateBoard, slideAndMerge, saveScore]);
 
   const initGame = useCallback(() => {
     const b = addRandomTile(addRandomTile(emptyBoard()));
@@ -213,12 +244,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     const handleTouchEnd = () => {
       const dx = touchEndRef.current.x - touchStartRef.current.x;
       const dy = touchEndRef.current.y - touchStartRef.current.y;
+
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 20) move('right'); else if (dx < -20) move('left');
+        if (dx > 20) move('right');
+        else if (dx < -20) move('left');
       } else {
-        if (dy > 20) move('down'); else if (dy < -20) move('up');
+        if (dy > 20) move('up');       // ✅ fixed (swipe down moves tiles up)
+        else if (dy < -20) move('down'); // ✅ fixed (swipe up moves tiles down)
       }
     };
+
     container.addEventListener('touchstart', handleTouchStart);
     container.addEventListener('touchmove', handleTouchMove);
     container.addEventListener('touchend', handleTouchEnd);
@@ -267,7 +302,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               {['A', 'Z', 'T', 'E', 'C'].map((l) => (
                 <span
                   key={l}
-                  className={`dashboard-aztec-letter-badge ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}>
+                  className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}
+                >
                   {l}
                 </span>
               ))}
@@ -307,7 +343,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           {['A', 'Z', 'T', 'E', 'C'].map((l) => (
             <span
               key={l}
-              className={`dashboard-aztec-letter-badge ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}>
+              className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}
+            >
               {l}
             </span>
           ))}
@@ -325,15 +362,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               ))
             )}
           </div>
-
-          {!isMobile && (
-            <div className="arrow-controls">
-              <button onClick={() => move('up')}>↑</button>
-              <button onClick={() => move('left')}>←</button>
-              <button onClick={() => move('down')}>↓</button>
-              <button onClick={() => move('right')}>→</button>
-            </div>
-          )}
 
           {gameOver && (
             <div className="game-over-overlay">
