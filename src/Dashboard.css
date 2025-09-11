@@ -125,6 +125,41 @@
   font-weight: bold;
 }
 
+/* --- Extra fields in sidebar profile/stat cards --- */
+.dashboard-profile span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f9fafb;
+}
+
+/* Ensure stat values display nicely */
+.dashboard-stat-card span {
+  display: block;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  margin-bottom: 4px;
+}
+
+/* --- Extra fields in mobile topbar --- */
+.dashboard-topbar-left span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #f9fafb;
+}
+
+/* Dropdown spans (Games Left, Position) */
+.dashboard-dropdown span {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #f3f4f6;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.dashboard-dropdown span:last-child {
+  border-bottom: none;
+}
+
+
 /* --- Topbar Right --- */
 .dashboard-topbar-right button {
   font-size: 1.5rem;

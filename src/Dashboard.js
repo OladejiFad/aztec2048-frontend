@@ -17,11 +17,9 @@ const SIZE = 4;
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
-  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const [aztecLetters, setAztecLetters] = useState([]);
   const [highlightLetters, setHighlightLetters] = useState([]);
-  const [userPosition, setUserPosition] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
   const [board, setBoard] = useState([]);
@@ -79,28 +77,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   useEffect(() => { fetchUser(); }, [fetchUser]);
 
-  // --- Fetch Leaderboard ---
-  const fetchLeaderboard = useCallback(async (currentUser) => {
-    if (!currentUser) return;
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BACKEND_URL}/auth/leaderboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      const sorted = Array.isArray(data)
-        ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
-        : [];
-      const pos = sorted.findIndex((u) => String(u._id) === String(currentUser._id)) + 1;
-      setUserPosition(pos > 0 ? pos : '-');
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
-  useEffect(() => { if (user) fetchLeaderboard(user); }, [user, fetchLeaderboard]);
-
-  // --- Dropdown ---
+  // --- Dropdown close ---
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && buttonRef.current &&
@@ -124,6 +101,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     if (newLetters.length) setHighlightLetters(newLetters);
     triggeredLettersRef.current.push(...newLetters);
     setAztecLetters(letters);
+
+    if (letters.length === 5) {
+      alert("🎉 Congratulations! You completed AZTEC. Game Over!");
+      setGameOver(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -215,6 +197,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     setScore(0);
     scoreRef.current = 0;
     setGameOver(false);
+    triggeredLettersRef.current = [];
+    setAztecLetters([]);
   }, [addRandomTile, emptyBoard]);
 
   useEffect(() => { initGame(); }, [initGame]);
@@ -224,7 +208,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     const container = document.querySelector('.game-2048-container');
     if (!container) return;
 
-    // --- Touch ---
     const handleTouchStart = e => touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     const handleTouchMove = e => touchEndRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     const handleTouchEnd = () => {
@@ -240,7 +223,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     container.addEventListener('touchmove', handleTouchMove);
     container.addEventListener('touchend', handleTouchEnd);
 
-    // --- Keyboard ---
     const handleKey = e => {
       if (e.key === 'ArrowUp') move('up');
       else if (e.key === 'ArrowDown') move('down');
@@ -264,7 +246,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     navigate('/login', { replace: true });
   };
 
-  // --- Render ---
   return (
     <div className="dashboard">
       {/* --- Sidebar --- */}
@@ -276,15 +257,23 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           </div>
           <div className="dashboard-profile">
             <img src={user?.photo || aztecLogo} alt="User" />
-            <span>{user?.name}</span>
+            <span>{user?.displayName}</span>
           </div>
           <div className="dashboard-stat-card">
-            <span>Score: {score}</span>
-            <span>Position: {userPosition}</span>
+            <span>Total Score: {user?.totalScore ?? 0}</span>
+            <span>Position: {user?.position ?? '-'}</span>
             <span>Games Left: {gamesLeft}</span>
+            <div className="dashboard-aztec-letters-container">
+              {['A', 'Z', 'T', 'E', 'C'].map((l) => (
+                <span
+                  key={l}
+                  className={`dashboard-aztec-letter-badge ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}>
+                  {l}
+                </span>
+              ))}
+            </div>
+            <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
             <button onClick={initGame}>Restart</button>
-          </div>
-          <div className="dashboard-sidebar-buttons">
             <button onClick={logout}>Logout</button>
           </div>
         </div>
@@ -296,12 +285,16 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           <div className="dashboard-topbar">
             <div className="dashboard-topbar-left">
               <img src={user?.photo || aztecLogo} alt="User" />
-              <span className="game-left">{user?.name}</span>
+              <span>{user?.displayName}</span>
+              <span>Total: {user?.totalScore ?? 0}</span>
             </div>
             <div className="dashboard-topbar-right">
               <button ref={buttonRef} onClick={() => setShowDropdown(!showDropdown)}>☰</button>
               {showDropdown && (
                 <div className="dashboard-dropdown" ref={dropdownRef}>
+                  <span>Games Left: {gamesLeft}</span>
+                  <span>Position: {user?.position ?? '-'}</span>
+                  <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
                   <button onClick={initGame}>Restart</button>
                   <button onClick={logout}>Logout</button>
                 </div>
@@ -314,7 +307,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           {['A', 'Z', 'T', 'E', 'C'].map((l) => (
             <span
               key={l}
-              className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) && aztecLetters.length === 5 ? 'five-letters' : ''}`}>
+              className={`dashboard-aztec-letter-badge ${highlightLetters.includes(l) ? 'flash' : ''} ${aztecLetters.includes(l) ? 'active' : ''}`}>
               {l}
             </span>
           ))}
