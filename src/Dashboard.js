@@ -262,8 +262,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
         if (dx > 20) move('right');
         else if (dx < -20) move('left');
       } else {
-        if (dy > 20) move('down');       // ✅ fixed (swipe down moves tiles up)
-        else if (dy < -20) move('up'); // ✅ fixed (swipe up moves tiles down)
+        if (dy > 20) move('down');       // ✅ fixed (swipe down moves tiles down)
+        else if (dy < -20) move('up'); // ✅ fixed (swipe up moves tiles up)
       }
     };
 
@@ -315,11 +315,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
               {['A', 'Z', 'T', 'E', 'C'].map((l) => (
                 <span
                   key={l}
-                  className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''
-                    } ${triggeredLettersRef.current.includes(l) ? 'active' : ''}`}
+                  className={`dashboard-aztec-letter-badge
+    ${triggeredLettersRef.current.includes(l) ? `dashboard-aztec-letter-${l}` : ''}
+    ${highlightLetters.includes(l) ? 'flash' : ''}`}
                 >
                   {l}
                 </span>
+
               ))}
 
 
@@ -360,36 +362,47 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           {['A', 'Z', 'T', 'E', 'C'].map((l) => (
             <span
               key={l}
-              className={`dashboard-aztec-letter-badge dashboard-aztec-letter-${l} ${highlightLetters.includes(l) ? 'flash' : ''
-                } ${triggeredLettersRef.current.includes(l) ? 'active' : ''}`}
+              className={`dashboard-aztec-letter-badge
+                ${triggeredLettersRef.current.includes(l) ? `dashboard-aztec-letter-${l}` : ''}
+                 ${highlightLetters.includes(l) ? 'flash' : ''}`}
             >
               {l}
             </span>
+
           ))}
 
         </div>
+        {/* --- Game 2048 Container --- */}
+        {gamesLeft > 0 ? (
+          <div className="game-2048-container">
+            <div className="score">Score: {score}</div>
+            <div className="game-board">
+              {board.map((row, i) =>
+                row.map((cell, j) => (
+                  <div key={`${i}-${j}`} className={`board-cell tile-${cell || 0}`}>
+                    {cell && <div>{cell}</div>}
+                    <div className="tile-watermark">AZTEC</div>
+                  </div>
+                ))
+              )}
+            </div>
 
-        <div className="game-2048-container">
-          <div className="score">Score: {score}</div>
-          <div className="game-board">
-            {board.map((row, i) =>
-              row.map((cell, j) => (
-                <div key={`${i}-${j}`} className={`board-cell tile-${cell || 0}`}>
-                  {cell && <div>{cell}</div>}
-                  <div className="tile-watermark">AZTEC</div>
-                </div>
-              ))
+            {gameOver && (
+              <div className="game-over-overlay">
+                <h2>Game Over</h2>
+                <h4>Score: {score}</h4>
+                <button onClick={initGame}>Restart</button>
+              </div>
             )}
           </div>
+        ) : (
+          <div className="no-games-left-message">
+            <h3>No Games Left 😔</h3>
+            <p>Please wait for daily reset or check your progress!</p>
+          </div>
+        )}
 
-          {gameOver && (
-            <div className="game-over-overlay">
-              <h2>Game Over</h2>
-              <h4>Score: {score}</h4>
-              <button onClick={initGame}>Restart</button>
-            </div>
-          )}
-        </div>
+
       </div>
     </div>
   );

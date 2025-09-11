@@ -347,6 +347,14 @@
 .tile-4096 { background-color: #ff6f61; }
 .tile-8192 { background-color: #ffd700; }
 
+.no-games-left-message {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 1.1rem;
+  color: #374151;
+}
+
+
 /* --- Media Queries for Devices --- */
 /* Extra small phones: iPhone 5/SE */
 @media (max-width: 320px) {
