@@ -97,7 +97,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 10px 8px; /* tighter spacing */
+  padding: 10px 8px;
   border-bottom: 1px solid #eee;
   gap: 12px;
   transition: all 0.25s ease;
@@ -182,20 +182,26 @@
   }
 
   .leaderboard-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    gap: 8px;
+    padding: 8px 6px;
   }
 
-  .leaderboard-rank,
-  .leaderboard-score {
-    text-align: left;
+  .leaderboard-rank {
+    width: 35px;
+    font-size: 0.9rem;
   }
 
   .leaderboard-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .leaderboard-name {
+    font-size: 0.9rem;
+  }
+
+  .leaderboard-score {
+    font-size: 0.9rem;
+    min-width: 50px;
   }
 }

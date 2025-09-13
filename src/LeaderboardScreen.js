@@ -34,7 +34,9 @@ export default function LeaderboardScreen() {
         const sortedUsers = Array.isArray(data)
           ? data.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
           : [];
-        setUsers(sortedUsers);
+
+        // ✅ only top 100
+        setUsers(sortedUsers.slice(0, 100));
 
         const meRes = await fetch(`${BACKEND_URL}/auth/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
