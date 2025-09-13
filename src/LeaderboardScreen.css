@@ -17,6 +17,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  position: fixed;   /* fixed at top */
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .leaderboard-header h2 {
@@ -39,34 +44,24 @@
   background: #ddd;
 }
 
-/* --- Container --- */
-.leaderboard-container {
-  width: 100%;
-  max-width: 700px;
-  margin: 20px auto;
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.leaderboard-container ol {
-  padding-left: 0;
-  list-style: none;
-  margin: 0;
-}
-
 /* --- Current User Highlight Card --- */
 .current-user-rank-card {
   background: #f3e8ff; /* light purple background */
   padding: 12px 15px;
-  margin-bottom: 15px;
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+
+  position: fixed;  /* pin under header */
+  top: 65px;        /* just below header */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 700px;
+  z-index: 999;
 }
 
 .current-user-rank-card h4 {
@@ -81,6 +76,26 @@
   color: #333;
 }
 
+/* --- Container --- */
+.leaderboard-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 130px auto 20px;   /* push down to avoid header + rank card overlap */
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+  max-height: calc(100vh - 160px); /* fill screen minus header & card */
+  overflow-y: auto;                /* scroll inside container */
+}
+
+.leaderboard-container ol {
+  padding-left: 0;
+  list-style: none;
+  margin: 0;
+}
+
 /* --- Shared Avatar Styling --- */
 .leaderboard-avatar,
 .profile img,
@@ -89,7 +104,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #fff; /* optional */
+  border: 2px solid #fff;
 }
 
 /* --- Items --- */
@@ -164,7 +179,7 @@
   background-color: #f0f8ff;
   font-weight: bold;
   border-left: 4px solid #6a0dad;
-  box-shadow: 0 0 6px rgba(106, 13, 173, 0.3); /* glow effect */
+  box-shadow: 0 0 6px rgba(106, 13, 173, 0.3);
   transition: all 0.25s ease;
 }
 
@@ -176,32 +191,27 @@
     align-items: flex-start;
   }
 
+  .current-user-rank-card {
+    top: 95px; /* adjust for taller mobile header */
+    width: 95%;
+  }
+
   .leaderboard-container {
     width: 95%;
+    margin-top: 180px; /* extra spacing for header + card */
+    max-height: calc(100vh - 200px);
     padding: 12px;
   }
 
   .leaderboard-item {
-    gap: 8px;
-    padding: 8px 6px;
+    flex-direction: row; /* keep horizontal */
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
 
-  .leaderboard-rank {
-    width: 35px;
-    font-size: 0.9rem;
-  }
-
-  .leaderboard-avatar {
-    width: 36px;
-    height: 36px;
-  }
-
-  .leaderboard-name {
-    font-size: 0.9rem;
-  }
-
+  .leaderboard-rank,
   .leaderboard-score {
-    font-size: 0.9rem;
-    min-width: 50px;
+    text-align: left;
   }
 }
