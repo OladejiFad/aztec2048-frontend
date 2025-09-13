@@ -6,6 +6,8 @@
   flex-direction: column;
   align-items: center;
   padding: 0;
+
+  overflow: hidden;   /* ✅ prevent whole page scroll */
 }
 
 /* --- Header --- */
@@ -86,8 +88,22 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 
-  max-height: calc(100vh - 160px); /* fill screen minus header & card */
-  overflow-y: auto;                /* scroll inside container */
+  max-height: calc(100vh - 160px); /* ✅ only this area scrolls */
+  overflow-y: scroll;              /* ✅ always show scrollbar */
+}
+
+/* --- Scrollbar Styling --- */
+.leaderboard-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.leaderboard-container::-webkit-scrollbar-thumb {
+  background: #6a0dad;
+  border-radius: 6px;
+}
+
+.leaderboard-container::-webkit-scrollbar-track {
+  background: #f5f3f9;
 }
 
 .leaderboard-container ol {
