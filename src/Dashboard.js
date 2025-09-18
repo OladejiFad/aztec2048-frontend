@@ -14,6 +14,7 @@ const AZTEC_MILESTONES = [
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const SIZE = 4;
+const PUZZLE_WORD = "AZTEC PUZZLE".split('');
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
@@ -38,22 +39,23 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const gamesLeft = Number(user?.gamesLeft ?? 0);
 
   // --- AZTEC Sliding Puzzle ---
-  const PUZZLE_WORD = "AZTEC PUZZLE".split('');
+  
   const PUZZLE_SIZE = 4;
   const [tiles, setTiles] = useState([]);
   const [emptyIndex, setEmptyIndex] = useState(PUZZLE_WORD.length);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
 
-  const initPuzzle = useCallback(() => {
-    let t = [...PUZZLE_WORD, ''];
-    for (let i = t.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [t[i], t[j]] = [t[j], t[i]];
-    }
-    setTiles(t);
-    setEmptyIndex(t.indexOf(''));
-    setPuzzleSolved(false);
-  }, [PUZZLE_WORD]);
+const initPuzzle = useCallback(() => {
+  let t = [...PUZZLE_WORD, ''];
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]];
+  }
+  setTiles(t);
+  setEmptyIndex(t.indexOf(''));
+  setPuzzleSolved(false);
+}, []); // empty array
+
 
   const canMoveTile = (index) => {
     const row = Math.floor(index / PUZZLE_SIZE);
@@ -77,7 +79,11 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     }
   };
 
-  useEffect(() => { initPuzzle(); }, [initPuzzle]);
+ useEffect(() => {
+  initPuzzle();  // call the puzzle initializer
+}, [initPuzzle]); // ✅ include initPuzzle here
+
+
 
   // --- Responsive ---
   useEffect(() => {
