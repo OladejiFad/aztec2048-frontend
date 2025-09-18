@@ -17,16 +17,14 @@ const SIZE = 4;
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
-  // eslint-disable-next-line no-unused-vars
-  const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line no-unused-vars
-  const [aztecLetters, setAztecLetters] = useState([]);
+ 
   const [highlightLetters, setHighlightLetters] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showDropdown, setShowDropdown] = useState(false);
   const [board, setBoard] = useState([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [activeGame, setActiveGame] = useState('2048'); // '2048' or 'puzzle'
 
   const triggeredLettersRef = useRef([]);
   const boardRef = useRef([]);
@@ -39,24 +37,23 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const gamesLeft = Number(user?.gamesLeft ?? 0);
 
-  // --- AZTEC Sliding Puzzle (NEW) ---
+  // --- AZTEC Sliding Puzzle ---
   const PUZZLE_WORD = "AZTEC PUZZLE".split('');
   const PUZZLE_SIZE = 4;
   const [tiles, setTiles] = useState([]);
   const [emptyIndex, setEmptyIndex] = useState(PUZZLE_WORD.length);
   const [puzzleSolved, setPuzzleSolved] = useState(false);
 
- const initPuzzle = useCallback(() => {
-  let t = [...PUZZLE_WORD, ''];
-  for (let i = t.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [t[i], t[j]] = [t[j], t[i]];
-  }
-  setTiles(t);
-  setEmptyIndex(t.indexOf(''));
-  setPuzzleSolved(false);
-}, [PUZZLE_WORD]);
-
+  const initPuzzle = useCallback(() => {
+    let t = [...PUZZLE_WORD, ''];
+    for (let i = t.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [t[i], t[j]] = [t[j], t[i]];
+    }
+    setTiles(t);
+    setEmptyIndex(t.indexOf(''));
+    setPuzzleSolved(false);
+  }, [PUZZLE_WORD]);
 
   const canMoveTile = (index) => {
     const row = Math.floor(index / PUZZLE_SIZE);
@@ -91,7 +88,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- Fetch User ---
   const fetchUser = useCallback(async () => {
-    setLoading(true);
+    
     const token = localStorage.getItem('token');
     if (!token) {
       navigate('/login', { replace: true });
@@ -116,7 +113,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       setAppUser(null);
       navigate('/login', { replace: true });
     } finally {
-      setLoading(false);
+      
     }
   }, [navigate, setAppUser]);
 
@@ -135,7 +132,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // --- Save score to backend ---
+  // --- Save score ---
   const saveScore = useCallback(async () => {
     if (!user?._id || score <= 0) return;
     const token = localStorage.getItem('token');
@@ -185,7 +182,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     return () => clearTimeout(timeout);
   }, [highlightLetters]);
 
-  // --- Board logic ---
+  // --- 2048 Board logic ---
   const emptyBoard = useCallback(() => Array(SIZE).fill().map(() => Array(SIZE).fill(null)), []);
   const addRandomTile = useCallback((b) => {
     const empty = [];
@@ -267,7 +264,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     scoreRef.current = 0;
     setGameOver(false);
     triggeredLettersRef.current = [];
-    setAztecLetters([]);
   }, [addRandomTile, emptyBoard]);
 
   useEffect(() => { initGame(); }, [initGame]);
@@ -340,8 +336,8 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 <span
                   key={l}
                   className={`dashboard-aztec-letter-badge
-    ${triggeredLettersRef.current.includes(l) ? `dashboard-aztec-letter-${l}` : ''}
-    ${highlightLetters.includes(l) ? 'flash' : ''}`}
+                  ${triggeredLettersRef.current.includes(l) ? `dashboard-aztec-letter-${l}` : ''}
+                  ${highlightLetters.includes(l) ? 'flash' : ''}`}
                 >
                   {l}
                 </span>
@@ -391,46 +387,66 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
           ))}
         </div>
 
-        {/* --- Game 2048 Container --- */}
+        {/* --- Game Selector Tabs --- */}
         {gamesLeft > 0 ? (
-          <div className="game-2048-container">
-            <div className="score">Score: {score}</div>
-            <div className="game-board">
-              {board.map((row, i) =>
-                row.map((cell, j) => (
-                  <div key={`${i}-${j}`} className={`board-cell tile-${cell || 0}`}>
-                    {cell && <div>{cell}</div>}
-                    <div className="tile-watermark">AZTEC</div>
-                  </div>
-                ))
-              )}
+          <div className="game-selector-container">
+            <div className="game-selector-tabs">
+              <button
+                className={activeGame === '2048' ? 'active' : ''}
+                onClick={() => setActiveGame('2048')}
+              >
+                2048 Game
+              </button>
+              <button
+                className={activeGame === 'puzzle' ? 'active' : ''}
+                onClick={() => setActiveGame('puzzle')}
+              >
+                Sliding Puzzle
+              </button>
             </div>
-            {gameOver && (
-              <div className="game-over-overlay">
-                <h2>Game Over</h2>
-                <h4>Score: {score}</h4>
-                <button onClick={initGame}>Restart</button>
+
+            {activeGame === '2048' && (
+              <div className="game-2048-container">
+                <div className="score">Score: {score}</div>
+                <div className="game-board">
+                  {board.map((row, i) =>
+                    row.map((cell, j) => (
+                      <div key={`${i}-${j}`} className={`board-cell tile-${cell || 0}`}>
+                        {cell && <div>{cell}</div>}
+                        <div className="tile-watermark">AZTEC</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {gameOver && (
+                  <div className="game-over-overlay">
+                    <h2>Game Over</h2>
+                    <h4>Score: {score}</h4>
+                    <button onClick={initGame}>Restart</button>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* --- AZTEC Sliding Puzzle --- NEW */}
-            <div className="puzzle-container">
-              <h3>AZTEC Sliding Puzzle</h3>
-              <div className="puzzle-grid">
-                {tiles.map((tile, idx) => (
-                  <div
-                    key={idx}
-                    className={`tile ${tile === '' ? 'empty' : ''}`}
-                    onClick={() => moveTile(idx)}
-                  >
-                    {tile}
-                  </div>
-                ))}
+            {activeGame === 'puzzle' && (
+              <div className="puzzle-container">
+                <h3>AZTEC Sliding Puzzle</h3>
+                <div className="puzzle-grid">
+                  {tiles.map((tile, idx) => (
+                    <div
+                      key={idx}
+                      className={`tile ${tile === '' ? 'empty' : ''}`}
+                      onClick={() => moveTile(idx)}
+                    >
+                      {tile}
+                    </div>
+                  ))}
+                </div>
+                {puzzleSolved && (
+                  <button onClick={initPuzzle}>Restart Puzzle</button>
+                )}
               </div>
-              {puzzleSolved && (
-                <button onClick={initPuzzle}>Restart Puzzle</button>
-              )}
-            </div>
+            )}
           </div>
         ) : (
           <div className="no-games-left-message">
