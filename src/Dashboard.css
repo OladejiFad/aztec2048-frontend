@@ -43,9 +43,17 @@
 }
 .dashboard-sidebar-title {
   text-align: center;
-  font-size: 1.6rem;
-  font-weight: bold;
-  margin-bottom: 15px;
+  font-size: 2.4rem;       /* Make it large */
+  font-weight: 900;         /* Extra bold */
+  margin-bottom: 30px;      /* Space below title */
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.dashboard-sidebar-title span {
+  font-size: 1.8rem;
+  margin-left: 8px;        /* Space between Aztec and 2048 */
+  font-weight: 700;
 }
 
 /* --- Profile --- */
@@ -248,15 +256,15 @@
 /* --- 2048 Container & Board --- */
 .game-2048-container {
   width: 100%;
-  max-width: 600px;   /* Keep it nice on mobile */
-  margin: 0 auto;
-  padding: 10px;
+  max-width: 800px;        /* Increase overall board width */
+  margin: 30px auto 0 auto; /* Space from title */
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  background: #6b46c1;  /* Purple background for gaps */
-  border-radius: 12px;   /* Rounded corners for a cleaner look */
+  background: #6b46c1;  
+  border-radius: 12px;
 }
 
 
