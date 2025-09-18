@@ -14,7 +14,7 @@ const AZTEC_MILESTONES = [
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const SIZE = 4;
-const PUZZLE_WORD = "AZTEC PUZZLE".split('');
+const PUZZLE_WORD = "AZTECPUZZLE".split('');
 
 function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const [user, setUser] = useState(initialUser);
@@ -40,10 +40,13 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   // --- AZTEC Sliding Puzzle ---
   
-  const PUZZLE_SIZE = 4;
-  const [tiles, setTiles] = useState([]);
-  const [emptyIndex, setEmptyIndex] = useState(PUZZLE_WORD.length);
-  const [puzzleSolved, setPuzzleSolved] = useState(false);
+const PUZZLE_COLS = 3; // used for grid calculations
+const [tiles, setTiles] = useState([]);
+const [emptyIndex, setEmptyIndex] = useState(PUZZLE_WORD.length);
+const [puzzleSolved, setPuzzleSolved] = useState(false);
+
+const [puzzlePointsEarned, setPuzzlePointsEarned] = useState(0);
+
 
 const initPuzzle = useCallback(() => {
   let t = [...PUZZLE_WORD, ''];
@@ -58,30 +61,36 @@ const initPuzzle = useCallback(() => {
 
 
   const canMoveTile = (index) => {
-    const row = Math.floor(index / PUZZLE_SIZE);
-    const col = index % PUZZLE_SIZE;
-    const emptyRow = Math.floor(emptyIndex / PUZZLE_SIZE);
-    const emptyCol = emptyIndex % PUZZLE_SIZE;
+    const row = Math.floor(index / PUZZLE_COLS);
+    const col = index % PUZZLE_COLS;
+    const emptyRow = Math.floor(emptyIndex / PUZZLE_COLS);
+    const emptyCol = emptyIndex % PUZZLE_COLS;
     return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
            (Math.abs(col - emptyCol) === 1 && row === emptyRow);
   };
 
-  const moveTile = (index) => {
-    if (!canMoveTile(index) || puzzleSolved) return;
-    const newTiles = [...tiles];
-    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
-    setTiles(newTiles);
-    setEmptyIndex(index);
+const moveTile = (index) => {
+  if (!canMoveTile(index) || puzzleSolved) return;
 
-    if (newTiles.slice(0, PUZZLE_WORD.length).join('') === PUZZLE_WORD.join('')) {
-      setPuzzleSolved(true);
-      alert('🎉 Puzzle Solved!');
-    }
-  };
+  const newTiles = [...tiles];
+  [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
+  setTiles(newTiles);
+  setEmptyIndex(index);
 
- useEffect(() => {
-  initPuzzle();  // call the puzzle initializer
-}, [initPuzzle]); // ✅ include initPuzzle here
+  if (newTiles.slice(0, PUZZLE_WORD.length).join('') === PUZZLE_WORD.join('')) {
+    setPuzzleSolved(true);
+
+    const points = 35000;
+    setPuzzlePointsEarned(points);
+
+    // Add points to score
+    handleScoreChange(scoreRef.current + points);
+  }
+};
+
+
+ useEffect(() => { initPuzzle(); }, [initPuzzle]);
+
 
 
 
@@ -275,43 +284,48 @@ const initPuzzle = useCallback(() => {
   useEffect(() => { initGame(); }, [initGame]);
 
   // --- Touch & Arrow Keys ---
-  useEffect(() => {
-    const container = document.querySelector('.game-2048-container');
-    if (!container) return;
+useEffect(() => {
+  const containerSelector = activeGame === '2048' 
+    ? '.game-2048-container' 
+    : '.puzzle-container';
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
 
-    const handleTouchStart = e => touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    const handleTouchMove = e => touchEndRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    const handleTouchEnd = () => {
-      const dx = touchEndRef.current.x - touchStartRef.current.x;
-      const dy = touchEndRef.current.y - touchStartRef.current.y;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 20) move('right');
-        else if (dx < -20) move('left');
-      } else {
-        if (dy > 20) move('down');
-        else if (dy < -20) move('up');
-      }
-    };
+  // Touch handlers
+  const handleTouchStart = e => touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  const handleTouchMove = e => touchEndRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  const handleTouchEnd = () => {
+    const dx = touchEndRef.current.x - touchStartRef.current.x;
+    const dy = touchEndRef.current.y - touchStartRef.current.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 20) move('right');
+      else if (dx < -20) move('left');
+    } else {
+      if (dy > 20) move('down');
+      else if (dy < -20) move('up');
+    }
+  };
 
-    container.addEventListener('touchstart', handleTouchStart);
-    container.addEventListener('touchmove', handleTouchMove);
-    container.addEventListener('touchend', handleTouchEnd);
+  container.addEventListener('touchstart', handleTouchStart);
+  container.addEventListener('touchmove', handleTouchMove);
+  container.addEventListener('touchend', handleTouchEnd);
 
-    const handleKey = e => {
-      if (e.key === 'ArrowUp') move('up');
-      else if (e.key === 'ArrowDown') move('down');
-      else if (e.key === 'ArrowLeft') move('left');
-      else if (e.key === 'ArrowRight') move('right');
-    };
-    window.addEventListener('keydown', handleKey);
+  const handleKey = e => {
+    if (e.key === 'ArrowUp') move('up');
+    else if (e.key === 'ArrowDown') move('down');
+    else if (e.key === 'ArrowLeft') move('left');
+    else if (e.key === 'ArrowRight') move('right');
+  };
+  window.addEventListener('keydown', handleKey);
 
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('keydown', handleKey);
-    };
-  }, [move]);
+  return () => {
+    container.removeEventListener('touchstart', handleTouchStart);
+    container.removeEventListener('touchmove', handleTouchMove);
+    container.removeEventListener('touchend', handleTouchEnd);
+    window.removeEventListener('keydown', handleKey);
+  };
+}, [activeGame, move]);
+
 
   // --- Logout ---
   const logout = () => {
@@ -434,25 +448,43 @@ const initPuzzle = useCallback(() => {
               </div>
             )}
 
-            {activeGame === 'puzzle' && (
-              <div className="puzzle-container">
-                <h3>AZTEC Sliding Puzzle</h3>
-                <div className="puzzle-grid">
-                  {tiles.map((tile, idx) => (
-                    <div
-                      key={idx}
-                      className={`tile ${tile === '' ? 'empty' : ''}`}
-                      onClick={() => moveTile(idx)}
-                    >
-                      {tile}
-                    </div>
-                  ))}
-                </div>
-                {puzzleSolved && (
-                  <button onClick={initPuzzle}>Restart Puzzle</button>
-                )}
-              </div>
-            )}
+           {activeGame === 'puzzle' && (
+  <div className="puzzle-container">
+    <h3>AZTEC Sliding Puzzle</h3>
+    
+    <div
+      className="puzzle-grid"
+      style={{ gridTemplateColumns: `repeat(${PUZZLE_COLS}, 1fr)` }}
+    >
+     {tiles.map((tile, idx) => {
+  const tileClass = tile ? `tile tile-${tile}` : 'tile empty';
+  return (
+    <div
+      key={idx}
+      className={tileClass}
+      onClick={() => moveTile(idx)}
+    >
+      {tile}
+    </div>
+  );
+})}
+
+    </div>
+
+        {/* ✅ Puzzle Solved Overlay */}
+       {puzzleSolved && (
+  <div className="puzzle-solved-overlay">
+    <h2>🎉 Puzzle Solved!</h2>
+    <p>Points Earned: {puzzlePointsEarned}</p>
+    <button onClick={() => { initPuzzle(); setPuzzlePointsEarned(0); }}>
+      Restart Puzzle
+    </button>
+  </div>
+)}
+
+      </div>
+    )}
+
           </div>
         ) : (
           <div className="no-games-left-message">
