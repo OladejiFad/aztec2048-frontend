@@ -43,17 +43,9 @@
 }
 .dashboard-sidebar-title {
   text-align: center;
-  font-size: 2.4rem;       /* Make it large */
-  font-weight: 900;         /* Extra bold */
-  margin-bottom: 30px;      /* Space below title */
-  color: #fff;
-  letter-spacing: 1px;
-}
-
-.dashboard-sidebar-title span {
-  font-size: 1.8rem;
-  margin-left: 8px;        /* Space between Aztec and 2048 */
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 /* --- Profile --- */
@@ -69,6 +61,11 @@
   border-radius: 50%;
   object-fit: cover;
 }
+.dashboard-profile span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #f9fafb;
+}
 
 /* --- Stat Cards --- */
 .dashboard-stat-card {
@@ -81,6 +78,12 @@
   flex-direction: column;
   gap: 6px;
 }
+.dashboard-stat-card span {
+  display: block;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  margin-bottom: 4px;
+}
 .dashboard-stat-card button {
   padding: 6px 12px;
   font-size: 0.9rem;
@@ -89,7 +92,7 @@
   background: #9f7aea;
   color: white;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 .dashboard-stat-card button:hover:not(:disabled) {
   background: #805ad5;
@@ -108,14 +111,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed;   /* <-- Make it fixed */
-  top: 0;            /* Stick to top */
+  position: fixed;
+  top: 0;
   left: 0;
-  z-index: 1000;     /* Stay above the board */
-  height: 60px;      /* Give it a consistent height */
+  z-index: 1000;
+  height: 60px;
   box-sizing: border-box;
 }
-
 .dashboard-topbar-left {
   display: flex;
   align-items: center;
@@ -128,45 +130,12 @@
   border-radius: 50%;
   object-fit: cover;
 }
+.dashboard-topbar-left span,
 .game-left {
   font-size: 0.9rem;
   font-weight: bold;
-}
-
-/* --- Extra fields in sidebar profile/stat cards --- */
-.dashboard-profile span {
-  font-size: 0.95rem;
-  font-weight: 500;
   color: #f9fafb;
 }
-
-/* Ensure stat values display nicely */
-.dashboard-stat-card span {
-  display: block;
-  font-size: 0.9rem;
-  color: #e5e7eb;
-  margin-bottom: 4px;
-}
-
-/* --- Extra fields in mobile topbar --- */
-.dashboard-topbar-left span {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #f9fafb;
-}
-
-/* Dropdown spans (Games Left, Position) */
-.dashboard-dropdown span {
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  color: #f3f4f6;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.dashboard-dropdown span:last-child {
-  border-bottom: none;
-}
-
 
 /* --- Topbar Right --- */
 .dashboard-topbar-right button {
@@ -190,6 +159,15 @@
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
+.dashboard-dropdown span {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #f3f4f6;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.dashboard-dropdown span:last-child {
+  border-bottom: none;
+}
 .dashboard-dropdown button {
   padding: 10px 15px;
   font-size: 1rem;
@@ -198,7 +176,7 @@
   color: #fff;
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s;
+  transition: background 0.2s ease;
 }
 .dashboard-dropdown button:hover {
   background: #9f7aea;
@@ -209,7 +187,7 @@
   display: flex;
   gap: 4px;
   justify-content: center;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
   max-width: 100%;
   overflow-x: auto;
 }
@@ -234,63 +212,69 @@
   animation: flashAnim 0.8s ease-out;
 }
 @keyframes flashAnim {
-  0%,100%{transform:scale(1);} 
-  50%{transform:scale(1.5);}
+  0%,100% { transform: scale(1); } 
+  50% { transform: scale(1.5); }
 }
 .five-letters { border: 2px solid #fff; }
 
-
-/* Make sure the main content pushes down below the topbar */
+/* --- Main Content --- */
 .dashboard-main-content {
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 15px;
-  margin-top: 60px;  /* <-- Add top margin equal to topbar height */
-  overflow-x: hidden; /* Prevent horizontal scrollbar */
-  overflow-y: auto;   /* Only scroll if absolutely needed */
+  margin-top: 60px;
+  overflow-x: hidden;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
 /* --- 2048 Container & Board --- */
 .game-2048-container {
-  width: 100%;
-  max-width: 800px;        /* Increase overall board width */
-  margin: 30px auto 0 auto; /* Space from title */
-  padding: 20px;
+  width: 90vw;
+  max-width: 90vh;
+  margin: 0 auto;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  background: #6b46c1;  
+  background: #6b46c1;
   border-radius: 12px;
 }
-
-
 .game-board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-gap: 12px;
+  gap: clamp(8px, 1.5vw, 20px);
   width: 100%;
 }
 
+/* --- Board Cells --- */
 .board-cell {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1; 
-  border-radius: 10px;
+  height: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: clamp(1.5rem, 6vw, 3rem);
+  font-size: clamp(1rem, 5vw, 3rem);
   transition: all 0.25s ease;
   color: #000;
   background: #ccc;
+  padding-bottom: 100%;
 }
-.board-cell > div:first-child { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.board-cell > div:first-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
+/* --- Tile Watermark --- */
 .tile-watermark {
   position: absolute;
   top: 2px;
@@ -298,7 +282,9 @@
   font-size: 8px;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
-  -webkit-user-select: none;
+  -webkit-user-select: none; /* Chrome, Safari, Opera */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
   user-select: none;
   font-weight: bold;
   transform: rotate(-20deg);
@@ -321,8 +307,10 @@
 /* --- Game Over Overlay --- */
 .game-over-overlay {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.75);
   display: flex;
   flex-direction: column;
@@ -335,7 +323,7 @@
   z-index: 1000;
   animation: fadeIn 0.3s forwards;
 }
-@keyframes fadeIn { from{opacity:0;transform:scale(0.9);} to{opacity:1;transform:scale(1);} }
+@keyframes fadeIn { from {opacity:0; transform:scale(0.9);} to {opacity:1; transform:scale(1);} }
 .game-over-overlay h2 { font-size: 24px; color: #FFD700; margin:0; }
 .game-over-overlay h4 { font-size: 18px; color: #fff; margin:0; }
 .game-over-overlay p { font-size: 14px; color: #e0e0e0; margin:0; }
@@ -356,48 +344,35 @@
 .tile-4096 { background-color: #ff6f61; }
 .tile-8192 { background-color: #ffd700; }
 
-.no-games-left-message {
-  text-align: center;
-  padding: 40px 20px;
-  font-size: 1.1rem;
-  color: #374151;
-}
-
-/* --- Puzzle Grid --- */
+/* --- Puzzle Grid & Tiles --- */
 .puzzle-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* adjust based on PUZZLE_COLS */
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   justify-items: center;
   margin-bottom: 10px;
 }
-
-/* --- Individual Tiles --- */
 .tile {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.25s ease;
   color: #fff;
-  background: #d1d5db; /* base neutral color */
+  background: #d1d5db;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
-
-/* Empty tile */
 .tile.empty {
   background: transparent;
   cursor: default;
   box-shadow: none;
 }
-
-/* AZTEC watermark inside tiles */
 .tile::after {
   content: "AZTEC";
   position: absolute;
@@ -405,40 +380,37 @@
   left: 4px;
   font-size: 0.6rem;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.15);
+  color: rgba(0,0,0,0.15);
   transform: rotate(-20deg);
   pointer-events: none;
-  -webkit-user-select: none;
+  -webkit-user-select: none; /* Chrome, Safari, Opera */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;  
   user-select: none;
   z-index: 0;
 }
 
-/* --- Letter Colors for AZTECPUZZLE --- */
-.tile-A { background-color: #f87171; } /* Red */
-.tile-Z { background-color: #fbbf24; } /* Yellow */
-.tile-T { background-color: #34d399; } /* Green */
-.tile-E { background-color: #60a5fa; } /* Blue */
-.tile-C { background-color: #a78bfa; } /* Purple */
-.tile-P { background-color: #f59e0b; } /* Orange */
-.tile-U { background-color: #f472b6; } /* Pink */
-.tile-L { background-color: #8b5cf6; } /* Indigo */
+/* --- Letter Tiles --- */
+.tile-A { background-color: #f87171; }
+.tile-Z { background-color: #fbbf24; }
+.tile-T { background-color: #34d399; }
+.tile-E { background-color: #60a5fa; }
+.tile-C { background-color: #a78bfa; }
+.tile-P { background-color: #f59e0b; }
+.tile-U { background-color: #f472b6; }
+.tile-L { background-color: #8b5cf6; }
 
-/* --- Hover & Click Effects --- */
-.tile:not(.empty):hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
-}
-
-.tile:active:not(.empty) {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-}
+/* --- Hover & Active Effects --- */
+.tile:not(.empty):hover { transform: scale(1.08); box-shadow: 0 6px 10px rgba(0,0,0,0.2); }
+.tile:active:not(.empty) { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
 
 /* --- Puzzle Solved Overlay --- */
 .puzzle-solved-overlay {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0,0,0,0.75);
   display: flex;
   flex-direction: column;
@@ -463,92 +435,57 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-.puzzle-solved-overlay button:hover {
-  background-color: #805ad5;
+.puzzle-solved-overlay button:hover { background-color: #805ad5; }
+
+/* --- No Games Left Message --- */
+.no-games-left-message {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 1.1rem;
+  color: #374151;
 }
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 414px) {
+/* Consolidated small phone breakpoints */
+@media (max-width: 480px) {
   .tile { width: 55px; height: 55px; font-size: 1.1rem; }
   .tile::after { font-size: 0.5rem; }
+  .board-cell { font-size: clamp(0.9rem, 8vw, 1.4rem); }
+  .dashboard-aztec-letter-badge { padding: 4px 6px; font-size: 0.9rem; }
+  .game-board { grid-gap: 6px; }
+  .game-2048-container { padding: 5px; }
 }
-@media (max-width: 320px) {
-  .tile { width: 45px; height: 45px; font-size: 1rem; }
-  .tile::after { font-size: 0.45rem; }
-}
-
-
-
-
-/* --- Responsive Adjustments --- */
-@media (max-width: 414px) {
-  .tile { width: 55px; height: 55px; font-size: 1.1rem; }
-  .tile::after { font-size: 0.5rem; }
-}
-@media (max-width: 320px) {
-  .tile { width: 45px; height: 45px; font-size: 1rem; }
-  .tile::after { font-size: 0.45rem; }
-}
-
-
-/* Extra small phones: iPhone 5/SE */
-@media (max-width: 320px) {
-  .board-cell { font-size: clamp(0.7rem, 10vw, 1.2rem); }
-  .dashboard-aztec-letter-badge { padding: 3px 5px; font-size: 0.8rem; }
-}
-
-/* Small phones: iPhone 6/7/8 */
 @media (max-width: 375px) {
   .board-cell { font-size: clamp(0.8rem, 9vw, 1.3rem); }
   .dashboard-aztec-letter-badge { padding: 3px 6px; font-size: 0.85rem; }
 }
-
-/* Medium phones: iPhone X/11/12/13 mini */
-@media (max-width: 414px) {
-  .board-cell { font-size: clamp(0.9rem, 8vw, 1.4rem); }
-  .dashboard-aztec-letter-badge { padding: 4px 6px; font-size: 0.9rem; }
+@media (max-width: 320px) {
+  .tile { width: 45px; height: 45px; font-size: 1rem; }
+  .tile::after { font-size: 0.45rem; }
+  .board-cell { font-size: clamp(0.7rem, 10vw, 1.2rem); }
+  .dashboard-aztec-letter-badge { padding: 3px 5px; font-size: 0.8rem; }
+  .game-board { grid-gap: 4px; }
 }
 
-/* Large phones: iPhone 12/13/14/15 Pro Max */
-@media (max-width: 480px) {
-  .board-cell { font-size: clamp(1rem, 7vw, 1.5rem); }
-  .dashboard-aztec-letter-badge { padding: 4px 7px; font-size: 0.95rem; }
-}
-
-/* Tablets */
+/* Tablets & Medium Screens */
 @media (max-width: 768px) {
   .dashboard { flex-direction: column; }
   .dashboard-main-content { padding: 10px; }
   .dashboard-sidebar { display: none; }
-  .game-board { grid-gap: 6px; }
   .board-cell { font-size: clamp(1rem, 6vw, 1.6rem); }
   .dashboard-aztec-letters-container { gap: 3px; }
 }
 
-/* Small tablets */
+/* Small Tablets / Larger Phones */
 @media (max-width: 1024px) {
   .dashboard-main-content { padding: 12px; }
   .game-board { grid-gap: 7px; }
+  .game-2048-container { max-width: 80vw; }
+  .board-cell { font-size: clamp(1.5rem, 3vw, 4rem); }
 }
 
-/* Large desktops */
+/* Large Desktops */
 @media (min-width: 1200px) {
-  .tile {
-    width: 110px;
-    height: 110px;
-    font-size: 2rem;
-  }
-  .board-cell {
-    font-size: clamp(2rem, 3vw, 3rem);
-  }
-  .game-board {
-    grid-gap: 16px;
-  }
+  .game-board { grid-gap: 10px; }
+  .board-cell { font-size: clamp(1.2rem, 2vw, 2rem); }
 }
-
-
-@media (max-width: 320px) {
-  .game-board { grid-gap: 4px; }
-  .game-2048-container { padding: 5px; }
-}
-
