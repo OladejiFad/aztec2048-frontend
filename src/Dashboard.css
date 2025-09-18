@@ -290,7 +290,8 @@
   font-size: 8px;
   color: rgba(0,0,0,0.2);
   pointer-events: none;
-  user-select: none;
+   -webkit-user-select: none;  /* Safari */
+  user-select: none;  
   font-weight: bold;
   transform: rotate(-20deg);
   z-index: 1;
@@ -401,3 +402,22 @@
   .game-board { grid-gap: 10px; }
   .board-cell { font-size: clamp(1.2rem, 2vw, 2rem); }
 }
+
+.puzzle-grid .tile {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #d1d5db;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  color: #111827;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-user-select: none;  /* Safari */
+  user-select: none;          /* Standard */
+}
+

@@ -39,6 +39,49 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const gamesLeft = Number(user?.gamesLeft ?? 0);
 
+  // --- AZTEC Sliding Puzzle (NEW) ---
+  const PUZZLE_WORD = "AZTEC PUZZLE".split('');
+  const PUZZLE_SIZE = 4;
+  const [tiles, setTiles] = useState([]);
+  const [emptyIndex, setEmptyIndex] = useState(PUZZLE_WORD.length);
+  const [puzzleSolved, setPuzzleSolved] = useState(false);
+
+ const initPuzzle = useCallback(() => {
+  let t = [...PUZZLE_WORD, ''];
+  for (let i = t.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]];
+  }
+  setTiles(t);
+  setEmptyIndex(t.indexOf(''));
+  setPuzzleSolved(false);
+}, [PUZZLE_WORD]);
+
+
+  const canMoveTile = (index) => {
+    const row = Math.floor(index / PUZZLE_SIZE);
+    const col = index % PUZZLE_SIZE;
+    const emptyRow = Math.floor(emptyIndex / PUZZLE_SIZE);
+    const emptyCol = emptyIndex % PUZZLE_SIZE;
+    return (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+           (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+  };
+
+  const moveTile = (index) => {
+    if (!canMoveTile(index) || puzzleSolved) return;
+    const newTiles = [...tiles];
+    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
+    setTiles(newTiles);
+    setEmptyIndex(index);
+
+    if (newTiles.slice(0, PUZZLE_WORD.length).join('') === PUZZLE_WORD.join('')) {
+      setPuzzleSolved(true);
+      alert('🎉 Puzzle Solved!');
+    }
+  };
+
+  useEffect(() => { initPuzzle(); }, [initPuzzle]);
+
   // --- Responsive ---
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -107,7 +150,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
       });
       const data = await res.json();
       if (res.ok) {
-        // Refresh user data (gamesLeft, totalScore)
         await fetchUser();
       } else {
         console.error("Failed to save score:", data.error);
@@ -121,32 +163,21 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
   const handleScoreChange = useCallback((newScore) => {
     setScore(newScore);
     scoreRef.current = newScore;
-
-    // Letters that should now be active
     const earnedLetters = AZTEC_MILESTONES
       .filter((m) => newScore >= m.score)
       .map((m) => m.letter);
-
-    // Letters that are newly earned for flashing
     const newLetters = earnedLetters.filter(l => !triggeredLettersRef.current.includes(l));
-
-    // Flash and play sound only for new letters
     if (newLetters.length) {
       newLetters.forEach(playLetterSound);
       setHighlightLetters(newLetters);
     }
-
-    // Update triggered letters (so they stay colored)
     triggeredLettersRef.current.push(...newLetters);
-
-    // Check for full AZTEC completion
     if (triggeredLettersRef.current.length === 5) {
       alert("🎉 Congratulations! You completed AZTEC. Game Over!");
       setGameOver(true);
       saveScore();
     }
   }, [saveScore]);
-
 
   useEffect(() => {
     if (!highlightLetters.length) return;
@@ -205,32 +236,26 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
 
   const move = useCallback((dir) => {
     if (gameOver) return;
-
     let newBoard = boardRef.current.map(r => r.slice());
     let moved = false, scoreGain = 0;
     const rotateTimes = { up: 3, right: 2, down: 1, left: 0 }[dir];
-
     newBoard = rotateBoard(newBoard, rotateTimes);
-
     const newRows = newBoard.map(row => {
       const [merged, gain] = slideAndMerge(row);
       if (merged.some((v, i) => v !== row[i])) moved = true;
       scoreGain += gain;
       return merged;
     });
-
     newBoard = rotateBoard(newRows, (4 - rotateTimes) % 4);
-
     if (moved) {
       newBoard = addRandomTile(newBoard);
       setBoard(newBoard);
       boardRef.current = newBoard;
       handleScoreChange(scoreRef.current + scoreGain);
     }
-
     if (!canMove(newBoard)) {
       setGameOver(true);
-      saveScore();   // 🔥 Save score on normal game over
+      saveScore();
     }
   }, [addRandomTile, canMove, handleScoreChange, gameOver, rotateBoard, slideAndMerge, saveScore]);
 
@@ -257,13 +282,12 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
     const handleTouchEnd = () => {
       const dx = touchEndRef.current.x - touchStartRef.current.x;
       const dy = touchEndRef.current.y - touchStartRef.current.y;
-
       if (Math.abs(dx) > Math.abs(dy)) {
         if (dx > 20) move('right');
         else if (dx < -20) move('left');
       } else {
-        if (dy > 20) move('down');       // ✅ fixed (swipe down moves tiles down)
-        else if (dy < -20) move('up'); // ✅ fixed (swipe up moves tiles up)
+        if (dy > 20) move('down');
+        else if (dy < -20) move('up');
       }
     };
 
@@ -321,11 +345,7 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 >
                   {l}
                 </span>
-
               ))}
-
-
-
             </div>
             <button onClick={() => navigate('/leaderboard')}>Leaderboard</button>
             <button onClick={initGame}>Restart</button>
@@ -368,10 +388,9 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             >
               {l}
             </span>
-
           ))}
-
         </div>
+
         {/* --- Game 2048 Container --- */}
         {gamesLeft > 0 ? (
           <div className="game-2048-container">
@@ -386,7 +405,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 ))
               )}
             </div>
-
             {gameOver && (
               <div className="game-over-overlay">
                 <h2>Game Over</h2>
@@ -394,6 +412,25 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
                 <button onClick={initGame}>Restart</button>
               </div>
             )}
+
+            {/* --- AZTEC Sliding Puzzle --- NEW */}
+            <div className="puzzle-container">
+              <h3>AZTEC Sliding Puzzle</h3>
+              <div className="puzzle-grid">
+                {tiles.map((tile, idx) => (
+                  <div
+                    key={idx}
+                    className={`tile ${tile === '' ? 'empty' : ''}`}
+                    onClick={() => moveTile(idx)}
+                  >
+                    {tile}
+                  </div>
+                ))}
+              </div>
+              {puzzleSolved && (
+                <button onClick={initPuzzle}>Restart Puzzle</button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="no-games-left-message">
@@ -401,8 +438,6 @@ function Dashboard({ user: initialUser, setUser: setAppUser }) {
             <p>Please wait for weekly reset or check your progress!</p>
           </div>
         )}
-
-
       </div>
     </div>
   );
